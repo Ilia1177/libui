@@ -2,7 +2,7 @@
 NAME		=	libui.a
 
 SRC_DIR		= src/
-OBJS_DIR	=	obj/
+OBJS_DIR	= obj/
 INC_DIR		= inc/
 BREW_PREFIX = /opt/homebrew
 
@@ -20,7 +20,24 @@ LDFLAGS  =	$(SDL2_LIBS) \
 			-L$(HOME)/.local/lib \
     		-lSDL2_image \
 
-SRC		= ui_winCreate.c
+SRC		= window/ui_win_create.c\
+		  window/ui_win_destroy.c\
+		  window/ui_win_add.c\
+		  window/ui_win_scale.c\
+		  window/ui_win_render.c\
+		  window/ui_win_pos.c\
+		  window/ui_win_size.c\
+		  window/ui_win_update.c\
+		  window/ui_win_event.c\
+		  global/ui_globalApp.c\
+		  ui_init.c\
+		  ui_quit.c\
+		  ui_is_mouse_in.c\
+		  box/ui_box_add.c\
+		  box/ui_box_create.c\
+		  box/ui_box_event.c\
+		  box/ui_box_menu.c\
+		  box/ui_box_update.c\
 
 SRC := $(addprefix $(SRC_DIR),$(SRC) )
 
@@ -30,7 +47,7 @@ AR 			=	ar -rcs
 
 CC			=	cc 
 
-CFLAGS		=	-Wall -Wextra -Werror
+CFLAGS		=	-Wall -Wextra -Werror -g
 
 RM			=	rm -f
 
