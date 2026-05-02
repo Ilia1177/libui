@@ -17,7 +17,10 @@ void	ui_win_render(ui_win_t* win) {
 		}
 		ui_box_t *current = win->menu;
 		while(current) {
+			int i = 0;
+			fflush(stdout);
 			if (current->render) {
+				printf("render box %d\n", i);
 				current->render(current);
 			}
 			current = current->next;

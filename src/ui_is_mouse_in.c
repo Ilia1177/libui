@@ -1,4 +1,4 @@
-#include "libui.h"
+#include "ui_box.h"
 
 bool ui_is_mouse_in(ui_box_t *box) {
     int gx, gy;

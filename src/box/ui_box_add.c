@@ -1,4 +1,4 @@
-#include "libui.h"
+#include "ui_box.h"
 
 void ui_box_add(ui_box_t **list, ui_box_t *new) {
 	if (!*list) {
@@ -11,4 +11,3 @@ void ui_box_add(ui_box_t **list, ui_box_t *new) {
 	}
 	curr->next = new;
 }
-

@@ -38,6 +38,8 @@ SRC		= window/ui_win_create.c\
 		  box/ui_box_event.c\
 		  box/ui_box_menu.c\
 		  box/ui_box_update.c\
+		  box/ui_box_iter.c\
+		  box/ui_box_render.c\
 
 SRC := $(addprefix $(SRC_DIR),$(SRC) )
 

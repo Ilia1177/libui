@@ -5,6 +5,9 @@
 # include <SDL2/SDL_image.h>
 # include <SDL2/SDL.h>
 
+typedef struct ui_box_s ui_box_t;
+typedef struct ui_win_s ui_win_t;
+
 typedef struct ui_scale_s {
     float x;
     float y;
@@ -22,10 +25,10 @@ typedef struct ui_rgba_s {
 	int a;
 } ui_rgba_t;
 
-# include "ui_box.h"
 bool ui_is_mouse_in(ui_box_t*);
 int ui_init();
 int ui_quit();
+
 # include "ui_win.h"
 # include "ui_global.h"
 #endif

@@ -1,4 +1,85 @@
-#include "libui.h"
+#include "ui_box.h"
+
+void ui_box_flags(ui_box_t *b, short flag, bool add) {
+    while (b) {
+        if (add)
+            b->flags |= flag;
+        else
+            b->flags &= ~flag;
+        b = b->next;
+    }
+}
+
+int ui_box_count(ui_box_t *boxes) {
+	int n = 0;
+	while(boxes) {
+		n++;
+		boxes = boxes->next;
+	}
+	return n;
+}
+
+static void ui_box_menu_on_mouse_motion_handler(ui_box_t *box, SDL_Event* e) {
+	SDL_MouseMotionEvent *btn = &e->motion;
+	// static int height = box->area.h;
+	ui_win_t *win = box->parent_window;
+    int px = (int)(btn->x * win->scale.x);
+    int py = (int)(btn->y * win->scale.y);
+    SDL_Point p = {px, py};
+    if (SDL_PointInRect(&p, &box->area)) {
+		// mouse inside
+		if (!(box->flags & BOX_HOVERED)) {
+			int boxnb = ui_box_count(box->child_boxes);
+			box->area.h += boxnb * BOX_MENU_H;
+		}
+		box->flags |= BOX_HOVERED;
+		ui_box_flags(box->child_boxes, BOX_HIDDEN, false);
+	} else {
+		box->area.h = BOX_MENU_H;
+		// mouse outside
+        box->flags &= ~BOX_PRESSED;  // release even if mouse moved off
+		box->flags &= ~BOX_HOVERED;
+		ui_box_flags(box->child_boxes, BOX_HIDDEN, true);
+	}
+    // convert global mouse to window-relative
+	ui_box_t *curr = box->child_boxes;
+	while(curr) {
+		if (curr->on_mouse_motion) 
+			curr->on_mouse_motion(curr, e);
+		curr = curr->next;
+	}
+}
+
+static void	ui_box_menu_on_click_up_handler(ui_box_t *b, SDL_Event* e)
+{
+    b->flags &= ~BOX_PRESSED;
+	ui_box_t *curr = b->child_boxes;
+	while(curr) {
+		if(curr->on_click_up)
+			curr->on_click_up(curr, e);
+		curr = curr->next;
+	}
+}
+
+static void	ui_box_menu_on_click_down_handler(ui_box_t *b, SDL_Event* e) {
+	SDL_MouseButtonEvent *btn = &e->button;
+	ui_win_t *win = b->parent_window;
+    int px = (int)(btn->x * win->scale.x);
+    int py = (int)(btn->y * win->scale.y);
+    SDL_Point p = {px, py};
+    if (SDL_PointInRect(&p, &b->area) && (!b->child_boxes)) {
+        b->flags |= BOX_PRESSED;
+    } else {
+        b->flags &= ~BOX_PRESSED;  // release even if mouse moved off
+    }
+	// update children
+	ui_box_t *curr = b->child_boxes;
+	while(curr) {
+		if(curr->on_click_down)
+			curr->on_click_down(curr, e);
+		curr = curr->next;
+	}
+}
 
 static void	ui_box_menu_update(ui_box_t* box) {
 	box->area.w = box->parent_window->area.w;
@@ -9,38 +90,67 @@ static void	ui_box_menu_update(ui_box_t* box) {
 		current = current->next;
 	}
 }
+
+ui_box_t* ui_box_create_list(ui_win_t *win, SDL_Rect r, ui_rgba_t color, int n) {
+    SDL_Rect area = {r.x, r.y, r.w, r.h};  // start below parent button
+	
+	ui_box_t *boxes = NULL;;
+    for (int i = 0; i < n; i++) {
+        area.y += r.h;  // shift DOWN for next submenu item, not right
+        ui_box_t *box = ui_box_create(area, color, win);
+        box->flags |= BOX_HIDDEN;
+        box->on_click_down = ui_box_menu_on_click_down_handler;
+        box->on_mouse_motion = ui_box_menu_on_mouse_motion_handler;
+        box->on_click_up = ui_box_menu_on_click_up_handler;
+        ui_box_add(&boxes, box);
+    }
+	return boxes;
+}
+
+// void ui_box_create_list(ui_box_t **list, ui_win_t *win, SDL_Rect r, ui_rgba_t color, int n) {
+// 	SDL_Rect area = (SDL_Rect) {r.x, r.y + r.h, r.w, r.h};
+//     for (int i = 0; i < n; i++) {
+// 		area.h += r.h;
+//         ui_box_t *box = ui_box_create(area, color, win);
+// 		box->flags |= BOX_HIDDEN;
+// 		box->on_click_down = ui_box_menu_on_click_down_handler;
+// 		box->on_mouse_motion = ui_box_menu_on_mouse_motion_handler;
+// 		box->on_click_up = ui_box_menu_on_click_up_handler;
+//         ui_box_add(list, box);
+//         r.x += r.w;  // shift right for next box
+//     }
+// }
+
+ui_box_t *ui_box_menu_list_create(char* label, ui_win_t *win, int subnb) {
+		ui_globalApp_t *ref = win->global;
+		SDL_Rect area = ref->button_area;
+		ui_rgba_t color = ref->menu_color_2;
+		ui_box_t* head_box;
+		head_box = ui_box_create(area, color, win);
+		head_box->border = 2;
+		head_box->label = label;
+		head_box->on_click_down = ui_box_menu_on_click_down_handler;
+		head_box->on_mouse_motion = ui_box_menu_on_mouse_motion_handler;
+		head_box->on_click_up = ui_box_menu_on_click_up_handler;
+		head_box->child_boxes = ui_box_create_list(win, area, color, subnb);
+		ref->button_area.x += BOX_MENU_W + 10;
+		ui_box_add(&win->menu->child_boxes, head_box);
+		return head_box;
+}
+
 // create a menu list horizontal style
-ui_box_t *ui_box_menu_create(ui_win_t *win, char** list)
+ui_box_t *ui_box_menu_create(ui_win_t *win, char** labels)
 { 
-	int height = 50;
-	int width = win->area.w;
-    ui_rgba_t color = {124, 56, 210, 255};
+	(void)labels;
+	ui_globalApp_t *app = win->global;
 	// create main box of full width
+	int height = BOX_MENU_H + 10;
+	int width = win->area.w;
+    ui_rgba_t color = app->menu_color_1;
     ui_box_t *box_menu = ui_box_create((SDL_Rect){0, 0, width, height}, color, win);
 	box_menu->update = ui_box_menu_update;
-	box_menu->on_click_up = ui_box_on_click_up_handler;
-	box_menu->on_click_up = ui_box_on_click_down_handler;
-	box_menu->on_mouse_motion = ui_box_on_mouse_motion_handler;
 	box_menu->border = 2;
-    color = (ui_rgba_t){138, 46, 2, 255};
 	
-	if (!list) return NULL;
-	char *label = *list;
-	SDL_Rect button_area = (SDL_Rect){50, 4, 100, height - 8};
-	while(label) {
-		ui_box_t *b	= ui_box_create(button_area, color, win);
-		b->border = 2;
-		b->on_mouse_motion = ui_box_on_mouse_motion_handler;
-		b->on_click_up = ui_box_on_click_up_handler;
-		b->on_click_down = ui_box_on_click_down_handler;
-		b->update = ui_box_update_default;
-		b->label = label;
-		button_area.x += 100 + 10;
-    	ui_box_add(&box_menu->child_boxes, b);
-		label = *(++list);
-	}
-	ui_box_add(&win->boxes, box_menu);
-
     return box_menu;
 }
 

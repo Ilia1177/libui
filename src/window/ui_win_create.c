@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 // create window type in drawable sixel (real pixels)
-ui_win_t* ui_win_create(int w, int h, char* title)
+ui_win_t* ui_win_create(int w, int h, ui_globalApp_t* app, char* title)
 {
 	ui_win_t *window = (ui_win_t*)malloc(sizeof(ui_win_t));
 
@@ -38,19 +38,21 @@ ui_win_t* ui_win_create(int w, int h, char* title)
 	window->destroy = ui_win_destroy;
 	window->render = ui_win_render;
 
+
+	window->on_mouse_down = ui_win_on_click_down_handler;
+	window->on_click_up = ui_win_on_click_up_handler;
+	window->on_mouse_motion = ui_win_on_mouse_motion_handler;
+	window->on_mouse_wheel = NULL;
+	window->on_windows_event = NULL;
 	window->on_key_down = NULL;
 	window->on_key_up = NULL;
-	window->on_mouse_down = NULL;
-	window->on_click_up = ui_win_on_click_up_handler;
-	window->on_mouse_wheel = NULL;
-	window->on_mouse_motion = ui_win_on_mouse_motion_handler;
-	window->on_windows_event = NULL;
 
 	window->background_color.r = 128;
 	window->background_color.g = 128;
 	window->background_color.b = 128;
 	window->background_color.a = 128;
 
+	window->global = app;
     // Initialize event handler pointers to NULL
     // window->on_key_down = NULL;
     // window->on_key_up = NULL;

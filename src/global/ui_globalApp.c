@@ -6,7 +6,7 @@
 
 // Helper to find ui_win_t from SDL_WindowID
 ui_win_t* find_window_by_id(ui_globalApp_t* app, uint32_t window_id) {
-    ui_win_t* current_win = app->windows_list; 
+    ui_win_t* current_win = app->windows; 
     while (current_win) {
         if (current_win->id == window_id) {
             return current_win;
@@ -30,13 +30,15 @@ ui_globalApp_t* ui_global_init() {
         return NULL;
     }
 
-    app->windows_list = NULL; // Initialize list of windows_list
-	app->windows_list = ui_win_create(400, 400, "main");
+    app->windows = NULL; // Initialize list of windows_list
+	app->windows = ui_win_create(400, 400, app, "main");
 	SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
-	app->selected_window = app->windows_list;
+	app->selected_window = app->windows;
     app->flags = 0;
     app->start = ui_start; // Set the start function pointer
-
+ 	app->menu_color_1 = (ui_rgba_t){124, 56, 210, 255};
+ 	app->menu_color_2 = (ui_rgba_t){138, 46, 2, 255};
+	app->button_area = (SDL_Rect){50, 4, BOX_MENU_W, BOX_MENU_H};
     // // Call SDL_Init if libui is responsible for it
     // if (ui_init() != 0) {
     //     fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
@@ -51,7 +53,7 @@ ui_globalApp_t* ui_global_init() {
 void ui_global_free(ui_globalApp_t* app) {
     if (app) {
         // Free all windows managed by the app
-        ui_win_t* current = app->windows_list;
+        ui_win_t* current = app->windows;
         while (current) {
             ui_win_t* next = current->next;
             ui_win_destroy(current); // Call window destroy function
@@ -79,34 +81,35 @@ void ui_start(ui_globalApp_t *app) {
 					SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
 					win_id = e.button.windowID;
 					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_down)
-						win->on_mouse_down(win, &e.button);
+						win->on_mouse_down(win, &e);
 					break;
 				case SDL_MOUSEBUTTONUP:
 					win_id = e.button.windowID;
+					SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
 					if ((win = find_window_by_id(app, win_id)) && win->on_click_up)
-						win->on_click_up(win, &e.button);
+						win->on_click_up(win, &e);
 					break;
 				case SDL_MOUSEMOTION:
 					win_id = e.motion.windowID;
 					printf("App: on mouse motion\n");
 					fflush(stdout);
 					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_motion)
-						win->on_mouse_motion(win, &e.motion);
+						win->on_mouse_motion(win, &e);
 					break;
 				case SDL_MOUSEWHEEL:
 					win_id = e.wheel.windowID;
 					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_wheel)
-						win->on_mouse_wheel(win, &e.wheel);
+						win->on_mouse_wheel(win, &e);
 					break;
 				case SDL_KEYDOWN:
 					win_id = e.key.windowID;
 					if((win = find_window_by_id(app, win_id)) && win->on_key_down)
-						win->on_key_down(win, &e.key);
+						win->on_key_down(win, &e);
 					break;
 				case SDL_KEYUP:
 					win_id = e.key.windowID;
 					if((win = find_window_by_id(app, win_id)) && win->on_key_up)
-						win->on_key_up(win, &e.key);
+						win->on_key_up(win, &e);
 					break;
 
 				case SDL_WINDOWEVENT:
@@ -123,7 +126,7 @@ void ui_start(ui_globalApp_t *app) {
 							SDL_GetWindowPosition(win->win, &win->area.x, &win->area.y);
 						}
 						if (win->on_windows_event)          // optional user reaction
-							win->on_windows_event(win, &e.window);
+							win->on_windows_event(win, &e);
 					}
 					break;
 				}
