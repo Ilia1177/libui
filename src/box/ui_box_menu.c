@@ -19,7 +19,9 @@ int ui_box_count(ui_box_t *boxes) {
 	return n;
 }
 
-static void ui_box_menu_on_mouse_motion_handler(ui_box_t *box, SDL_Event* e) {
+static void ui_box_menu_on_mouse_motion_handler(ui_box_t *box, SDL_Event* e, void* data) {
+
+	(void)data;
 	SDL_MouseMotionEvent *btn = &e->motion;
 	// static int height = box->area.h;
 	ui_win_t *win = box->parent_window;
@@ -42,26 +44,29 @@ static void ui_box_menu_on_mouse_motion_handler(ui_box_t *box, SDL_Event* e) {
 		ui_box_flags(box->child_boxes, BOX_HIDDEN, true);
 	}
     // convert global mouse to window-relative
-	ui_box_t *curr = box->child_boxes;
-	while(curr) {
-		if (curr->on_mouse_motion) 
-			curr->on_mouse_motion(curr, e);
-		curr = curr->next;
-	}
+	// ui_box_t *curr = box->child_boxes;
+	// while(curr) {
+	// 	if (curr->on_mouse_motion) 
+	// 		ui_box_event_fire(curr->on_mouse_motion, curr, e);
+	// 	curr = curr->next;
+	// }
 }
 
-static void	ui_box_menu_on_click_up_handler(ui_box_t *b, SDL_Event* e)
+static void	ui_box_menu_on_click_up_handler(ui_box_t *b, SDL_Event* e, void* data)
 {
+	(void)data;
+	(void)e;
     b->flags &= ~BOX_PRESSED;
-	ui_box_t *curr = b->child_boxes;
-	while(curr) {
-		if(curr->on_click_up)
-			curr->on_click_up(curr, e);
-		curr = curr->next;
-	}
+	// ui_box_t *curr = b->child_boxes;
+	// while(curr) {
+	// 	if(curr->on_click_up)
+	// 		ui_box_event_fire(curr->on_click_up, curr, e);
+	// 	curr = curr->next;
+	// }
 }
 
-static void	ui_box_menu_on_click_down_handler(ui_box_t *b, SDL_Event* e) {
+static void	ui_box_menu_on_click_down_handler(ui_box_t *b, SDL_Event* e, void* data) {
+	(void)data;
 	SDL_MouseButtonEvent *btn = &e->button;
 	ui_win_t *win = b->parent_window;
     int px = (int)(btn->x * win->scale.x);
@@ -72,23 +77,26 @@ static void	ui_box_menu_on_click_down_handler(ui_box_t *b, SDL_Event* e) {
     } else {
         b->flags &= ~BOX_PRESSED;  // release even if mouse moved off
     }
-	// update children
-	ui_box_t *curr = b->child_boxes;
-	while(curr) {
-		if(curr->on_click_down)
-			curr->on_click_down(curr, e);
-		curr = curr->next;
-	}
+	// // update children
+	// ui_box_t *curr = b->child_boxes;
+	// while(curr) {
+	// 	if(curr->on_click_down)
+	// 		ui_box_event_fire(curr->on_click_down, curr, e);
+	// 	curr = curr->next;
+	// }
 }
 
-static void	ui_box_menu_update(ui_box_t* box) {
+void	ui_box_menu_update(ui_box_t* box, SDL_Event* e, void* data) {
+	(void)e;
+	(void)data;
+
 	box->area.w = box->parent_window->area.w;
-	ui_box_t *current = box->child_boxes;
-	while(current) {
-		if (current->update)
-			current->update(current);
-		current = current->next;
-	}
+	// ui_box_t *current = box->child_boxes;
+	// while(current) {
+	// 	if (current->update)
+	// 		ui_box_event_fire(current->update, curr, e);
+	// 	current = current->next;
+	// }
 }
 
 ui_box_t* ui_box_create_list(ui_win_t *win, SDL_Rect r, ui_rgba_t color, int n) {
@@ -99,27 +107,13 @@ ui_box_t* ui_box_create_list(ui_win_t *win, SDL_Rect r, ui_rgba_t color, int n) 
         area.y += r.h;  // shift DOWN for next submenu item, not right
         ui_box_t *box = ui_box_create(area, color, win);
         box->flags |= BOX_HIDDEN;
-        box->on_click_down = ui_box_menu_on_click_down_handler;
-        box->on_mouse_motion = ui_box_menu_on_mouse_motion_handler;
-        box->on_click_up = ui_box_menu_on_click_up_handler;
+        ui_box_handler_add(&box->on_click_down, ui_box_menu_on_click_down_handler);
+        ui_box_handler_add(&box->on_mouse_motion, ui_box_menu_on_mouse_motion_handler);
+        ui_box_handler_add(&box->on_click_up, ui_box_menu_on_click_up_handler);
         ui_box_add(&boxes, box);
     }
 	return boxes;
 }
-
-// void ui_box_create_list(ui_box_t **list, ui_win_t *win, SDL_Rect r, ui_rgba_t color, int n) {
-// 	SDL_Rect area = (SDL_Rect) {r.x, r.y + r.h, r.w, r.h};
-//     for (int i = 0; i < n; i++) {
-// 		area.h += r.h;
-//         ui_box_t *box = ui_box_create(area, color, win);
-// 		box->flags |= BOX_HIDDEN;
-// 		box->on_click_down = ui_box_menu_on_click_down_handler;
-// 		box->on_mouse_motion = ui_box_menu_on_mouse_motion_handler;
-// 		box->on_click_up = ui_box_menu_on_click_up_handler;
-//         ui_box_add(list, box);
-//         r.x += r.w;  // shift right for next box
-//     }
-// }
 
 ui_box_t *ui_box_menu_list_create(char* label, ui_win_t *win, int subnb) {
 		ui_globalApp_t *ref = win->global;
@@ -129,9 +123,9 @@ ui_box_t *ui_box_menu_list_create(char* label, ui_win_t *win, int subnb) {
 		head_box = ui_box_create(area, color, win);
 		head_box->border = 2;
 		head_box->label = label;
-		head_box->on_click_down = ui_box_menu_on_click_down_handler;
-		head_box->on_mouse_motion = ui_box_menu_on_mouse_motion_handler;
-		head_box->on_click_up = ui_box_menu_on_click_up_handler;
+		ui_box_handler_add(&head_box->on_click_down, ui_box_menu_on_click_down_handler);
+		ui_box_handler_add(&head_box->on_mouse_motion, ui_box_menu_on_mouse_motion_handler);
+		ui_box_handler_add(&head_box->on_click_up, ui_box_menu_on_click_up_handler);
 		head_box->child_boxes = ui_box_create_list(win, area, color, subnb);
 		ref->button_area.x += BOX_MENU_W + 10;
 		ui_box_add(&win->menu->child_boxes, head_box);
@@ -148,7 +142,7 @@ ui_box_t *ui_box_menu_create(ui_win_t *win, char** labels)
 	int width = win->area.w;
     ui_rgba_t color = app->menu_color_1;
     ui_box_t *box_menu = ui_box_create((SDL_Rect){0, 0, width, height}, color, win);
-	box_menu->update = ui_box_menu_update;
+	ui_box_handler_add(&box_menu->update, ui_box_menu_update);
 	box_menu->border = 2;
 	
     return box_menu;

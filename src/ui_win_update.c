@@ -1,6 +1,6 @@
 #include "ui_win.h"
 
-void ui_win_update(ui_win_t* win)
+void ui_win_update_default(ui_win_t* win)
 {
 	printf("window %d update\n", win->id);
 	fflush(stdout);

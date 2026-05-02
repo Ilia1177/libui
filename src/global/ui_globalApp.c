@@ -51,12 +51,14 @@ ui_globalApp_t* ui_global_init() {
 
 // ui_global_free implementation
 void ui_global_free(ui_globalApp_t* app) {
+	printf("Quitting guimp...\n");
+	fflush(stdout);
     if (app) {
         // Free all windows managed by the app
         ui_win_t* current = app->windows;
         while (current) {
             ui_win_t* next = current->next;
-            ui_win_destroy(current); // Call window destroy function
+            ui_win_destroy_default(current, NULL, NULL); // Call window destroy function
             current = next;
         }
         ui_quit(); // Quit SDL
@@ -80,36 +82,36 @@ void ui_start(ui_globalApp_t *app) {
 				case SDL_MOUSEBUTTONDOWN:
 					SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
 					win_id = e.button.windowID;
-					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_down)
-						win->on_mouse_down(win, &e);
+					if ((win = find_window_by_id(app, win_id)) && win->on_click_down)
+						ui_win_event_fire(win->on_click_down, win, &e, NULL);
 					break;
 				case SDL_MOUSEBUTTONUP:
 					win_id = e.button.windowID;
 					SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
 					if ((win = find_window_by_id(app, win_id)) && win->on_click_up)
-						win->on_click_up(win, &e);
+						ui_win_event_fire(win->on_click_up, win, &e, NULL);
 					break;
 				case SDL_MOUSEMOTION:
 					win_id = e.motion.windowID;
 					printf("App: on mouse motion\n");
 					fflush(stdout);
 					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_motion)
-						win->on_mouse_motion(win, &e);
+						ui_win_event_fire(win->on_mouse_motion, win, &e, NULL);
 					break;
 				case SDL_MOUSEWHEEL:
 					win_id = e.wheel.windowID;
 					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_wheel)
-						win->on_mouse_wheel(win, &e);
+						ui_win_event_fire(win->on_mouse_wheel, win, &e, NULL);
 					break;
 				case SDL_KEYDOWN:
 					win_id = e.key.windowID;
 					if((win = find_window_by_id(app, win_id)) && win->on_key_down)
-						win->on_key_down(win, &e);
+						ui_win_event_fire(win->on_key_down, win, &e, NULL);
 					break;
 				case SDL_KEYUP:
 					win_id = e.key.windowID;
 					if((win = find_window_by_id(app, win_id)) && win->on_key_up)
-						win->on_key_up(win, &e);
+						ui_win_event_fire(win->on_key_up, win, &e, NULL);
 					break;
 
 				case SDL_WINDOWEVENT:
@@ -126,7 +128,7 @@ void ui_start(ui_globalApp_t *app) {
 							SDL_GetWindowPosition(win->win, &win->area.x, &win->area.y);
 						}
 						if (win->on_windows_event)          // optional user reaction
-							win->on_windows_event(win, &e);
+							ui_win_event_fire(win->on_windows_event, win, &e, NULL);
 					}
 					break;
 				}
@@ -135,9 +137,9 @@ void ui_start(ui_globalApp_t *app) {
 				}
 				win->flags |= WIN_DIRTY;
 				if (win->update)
-					win->update(win);
+					ui_win_event_fire(win->update, win, NULL, NULL);
 				if (win->render)
-					win->render(win);
+					ui_win_event_fire(win->render, win, NULL, NULL);
 			}
 			// ui_win_t* current_win = app->windows_list;
 			// while (current_win) {

@@ -1,7 +1,9 @@
-#include "ui_win.h"
+#include "libui.h"
 
-void	ui_win_render(ui_win_t* win) {
+void	ui_win_render_default(ui_win_t* win, SDL_Event* e, void* data) {
 	        // Render
+	(void)data;
+	(void)e;
 	if (!win || !win->renderer || !(win->flags & WIN_DIRTY))
 		return;
 
@@ -15,14 +17,18 @@ void	ui_win_render(ui_win_t* win) {
 			SDL_RenderCopy(win->renderer, win->texture, NULL, &dest);
 			printf("render texture\n");
 		}
+		fflush(stdout);
 		ui_box_t *current = win->menu;
 		while(current) {
 			if (current->render) {
-				current->render(current);
+				printf("rendering box (menu)\n");
+				ui_box_event_fire(current->render, current, e, data);
 			}
 			current = current->next;
 		}
         SDL_RenderPresent(win->renderer);
 		win->flags &= ~WIN_DIRTY;
+		printf("window: finish render\n");
+		fflush(stdout);
 }
 

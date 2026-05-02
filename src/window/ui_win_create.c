@@ -9,9 +9,7 @@ ui_win_t* ui_win_create(int w, int h, ui_globalApp_t* app, char* title)
 	if (!window) {
 		return NULL;
 	}
-	// window->w = w;
-	// window->h = h;
-	window->flags = 0; // Initialize all flags to 0
+	window->flags = WIN_DIRTY; // Initialize all flags to dirty rendering first
 	window->win = SDL_CreateWindow(
         title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -32,16 +30,15 @@ ui_win_t* ui_win_create(int w, int h, ui_globalApp_t* app, char* title)
         return NULL;
     }
 
-	window->flags |= WIN_DIRTY;
 	ui_win_get_scale(window);
-	window->update = ui_win_update;
-	window->destroy = ui_win_destroy;
-	window->render = ui_win_render;
+	ui_win_handler_add(&window->update, ui_win_update_default);
+	ui_win_handler_add(&window->destroy ,ui_win_destroy_default);
+	ui_win_handler_add(&window->render ,ui_win_render_default);
 
 
-	window->on_mouse_down = ui_win_on_click_down_handler;
-	window->on_click_up = ui_win_on_click_up_handler;
-	window->on_mouse_motion = ui_win_on_mouse_motion_handler;
+	ui_win_handler_add(&window->on_click_down, ui_win_on_click_down_handler);
+	ui_win_handler_add(&window->on_click_up, ui_win_on_click_up_handler);
+	ui_win_handler_add(&window->on_mouse_motion, ui_win_on_mouse_motion_handler);
 	window->on_mouse_wheel = NULL;
 	window->on_windows_event = NULL;
 	window->on_key_down = NULL;

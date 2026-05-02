@@ -40,7 +40,7 @@
 // 		current = current->next;
 // 	}
 // }
-void ui_box_render_default(ui_box_t *box) {
+void ui_box_render_default(ui_box_t *box, SDL_Event*e, void* data) {
     if (!box || (box->flags & BOX_HIDDEN) || !box->parent_window)
         return;
     SDL_Renderer *renderer = box->parent_window->renderer;
@@ -75,7 +75,7 @@ void ui_box_render_default(ui_box_t *box) {
     ui_box_t *current = box->child_boxes;
     while (current) {
         if (current->render)
-            current->render(current);
+            ui_box_event_fire(current->render, current, e, data);
         current = current->next;
     }
 }

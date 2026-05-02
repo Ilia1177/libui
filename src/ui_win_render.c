@@ -1,6 +1,6 @@
 #include "ui_win.h"
 
-void	ui_win_render(ui_win_t* win) {
+void	ui_win_render_default(ui_win_t* win) {
 	        // Render
 	if (!win || !win->renderer || !(win->flags & WIN_DIRTY))
 		return;
