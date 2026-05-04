@@ -40,42 +40,4 @@
 // 		current = current->next;
 // 	}
 // }
-void ui_box_render_default(ui_box_t *box, SDL_Event*e, void* data) {
-    if (!box || (box->flags & BOX_HIDDEN) || !box->parent_window)
-        return;
-    SDL_Renderer *renderer = box->parent_window->renderer;
-    if (!renderer) return;
 
-    // border
-    int m = box->border;
-    SDL_Rect area = box->area;
-    if (m > 0) {
-        SDL_Rect border = {area.x - m, area.y - m, area.w + 2 * m, area.h + 2 * m};
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &border);
-    }
-
-    // fill
-    SDL_SetRenderDrawColor(renderer, box->color.r, box->color.g, box->color.b, box->color.a);
-    SDL_RenderFillRect(renderer, &area);
-
-    // hover / press overlay
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    if (box->flags & BOX_HOVERED) {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
-        SDL_RenderFillRect(renderer, &area);
-    }
-    if (box->flags & BOX_PRESSED) {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
-        SDL_RenderFillRect(renderer, &area);
-    }
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-
-    // children
-    ui_box_t *current = box->child_boxes;
-    while (current) {
-        if (current->render)
-            ui_box_event_fire(current->render, current, e, data);
-        current = current->next;
-    }
-}

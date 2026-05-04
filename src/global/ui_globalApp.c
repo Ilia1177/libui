@@ -36,8 +36,8 @@ ui_globalApp_t* ui_global_init() {
 	app->selected_window = app->windows;
     app->flags = 0;
     app->start = ui_start; // Set the start function pointer
- 	app->menu_color_1 = (ui_rgba_t){124, 56, 210, 255};
- 	app->menu_color_2 = (ui_rgba_t){138, 46, 2, 255};
+ 	app->menu_color_1 = (SDL_Color){124, 56, 210, 255};
+ 	app->menu_color_2 = (SDL_Color){138, 46, 2, 255};
 	app->button_area = (SDL_Rect){50, 4, BOX_MENU_W, BOX_MENU_H};
     // // Call SDL_Init if libui is responsible for it
     // if (ui_init() != 0) {
@@ -58,7 +58,7 @@ void ui_global_free(ui_globalApp_t* app) {
         ui_win_t* current = app->windows;
         while (current) {
             ui_win_t* next = current->next;
-            ui_win_destroy_default(current, NULL, NULL); // Call window destroy function
+            ui_whook_destroy_default(current, NULL, NULL); // Call window destroy function
             current = next;
         }
         ui_quit(); // Quit SDL
@@ -66,89 +66,144 @@ void ui_global_free(ui_globalApp_t* app) {
     }
 }
 
+void remove_window(ui_globalApp_t *app, uint32_t win_id) {
+    ui_win_t *curr = app->windows;
+    ui_win_t *prev = NULL;
+    while (curr) {
+        if (curr->id == win_id) {
+            // unlink first
+            if (prev)
+                prev->next = curr->next;
+            else
+                app->windows = curr->next;
+            // then destroy
+            ui_whook_destroy_default(curr, NULL, NULL);
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+}
+
+ui_win_t* ui_global_keyboard(ui_globalApp_t *app, SDL_Event* e) 
+{
+	ui_win_t* win = find_window_by_id(app, e->key.windowID);
+	if (!win || win->flags & WIN_QUIT)
+		return NULL;
+	switch(e->type) {
+		case SDL_KEYDOWN:
+			if (win->on_key_down)
+				ui_whook_fire(win->on_key_down, win, e, NULL);
+			break;
+		case SDL_KEYUP:
+			if (win->on_key_up)
+				ui_whook_fire(win->on_key_up, win, e, NULL);
+	}
+	return win;
+}
+
+ui_win_t* ui_global_mousewheel(ui_globalApp_t *app, SDL_Event* e)
+{
+	ui_win_t *win = find_window_by_id(app, e->wheel.windowID);
+	if (!win || win->flags & WIN_QUIT)
+		return NULL;
+	else if (win->on_mouse_wheel)
+		ui_whook_fire(win->on_mouse_wheel, win, e, NULL);
+	return win;
+}
+
+ui_win_t *ui_global_mousemotion(ui_globalApp_t* app, SDL_Event *e) {
+	ui_win_t *win = find_window_by_id(app, e->motion.windowID);
+	if (!win || win->flags & WIN_QUIT)
+		return NULL;
+	else if (win->on_mouse_motion)
+		ui_whook_fire(win->on_mouse_motion, win, e, NULL);
+	return win;
+}
+
+ui_win_t *ui_global_mouseclick(ui_globalApp_t* app, SDL_Event *e) {
+	ui_win_t *win = find_window_by_id(app, e->button.windowID);
+	if (!win || win->flags & WIN_QUIT)
+		return NULL;
+	switch (e->type) {
+		case SDL_MOUSEBUTTONDOWN:
+			SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
+			if (win->on_click_down)
+				ui_whook_fire(win->on_click_down, win, e, NULL);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
+			if (win->on_click_up)
+				ui_whook_fire(win->on_click_up, win, e, NULL);
+			break;
+	}
+	return win;
+}
+
+ui_win_t* ui_gloval_windowevent(ui_globalApp_t* app, SDL_Event* e)
+{
+	uint32_t win_id = e->window.windowID;
+	ui_win_t *win = find_window_by_id(app, win_id);
+	if(e->window.event == SDL_WINDOWEVENT_CLOSE && win_id == 1) {
+		app->flags |= WIN_QUIT;
+	} else if (e->window.event == SDL_WINDOWEVENT_RESIZED && win) {
+		SDL_GL_GetDrawableSize(win->win, &win->area.w, &win->area.h);
+		ui_win_get_scale(win);
+	} else if(e->window.event == SDL_WINDOWEVENT_MOVED && win) {
+		SDL_GetWindowPosition(win->win, &win->area.x, &win->area.y);
+	}
+	return win;
+}
+
 // ui_run implementation (main event loop)
 void ui_start(ui_globalApp_t *app) {
     SDL_Event e;
     while (!(app->flags & WIN_QUIT)) {
+		ui_win_t *curr = app->windows;
         while (SDL_PollEvent(&e)) {
-			    printf("event type=%u\n", e.type);
-				fflush(stdout);
-			uint32_t win_id = 0;
+			// ← cleanup BEFORE polling events, safe moment
+			while (curr) {
+				ui_win_t *next = curr->next;
+				if (curr->flags & WIN_QUIT) {
+					if (curr->id == 1)
+						return;
+					else
+						remove_window(app, curr->id);
+				}
+				curr = next;
+			}
+
+			printf("event type=%u\n", e.type);
+			fflush(stdout);
 			ui_win_t *win = NULL;
 			switch (e.type) {
 				case SDL_QUIT:
-					app->flags |= WIN_QUIT;
-					return;
-				case SDL_MOUSEBUTTONDOWN:
-					SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
-					win_id = e.button.windowID;
-					if ((win = find_window_by_id(app, win_id)) && win->on_click_down)
-						ui_win_event_fire(win->on_click_down, win, &e, NULL);
-					break;
-				case SDL_MOUSEBUTTONUP:
-					win_id = e.button.windowID;
-					SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
-					if ((win = find_window_by_id(app, win_id)) && win->on_click_up)
-						ui_win_event_fire(win->on_click_up, win, &e, NULL);
-					break;
+					app->flags |= WIN_QUIT; return;
+				case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP:
+					win = ui_global_mouseclick(app, &e); break;
 				case SDL_MOUSEMOTION:
-					win_id = e.motion.windowID;
-					printf("App: on mouse motion\n");
-					fflush(stdout);
-					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_motion)
-						ui_win_event_fire(win->on_mouse_motion, win, &e, NULL);
-					break;
+					win = ui_global_mousemotion(app, &e); break;
 				case SDL_MOUSEWHEEL:
-					win_id = e.wheel.windowID;
-					if ((win = find_window_by_id(app, win_id)) && win->on_mouse_wheel)
-						ui_win_event_fire(win->on_mouse_wheel, win, &e, NULL);
-					break;
-				case SDL_KEYDOWN:
-					win_id = e.key.windowID;
-					if((win = find_window_by_id(app, win_id)) && win->on_key_down)
-						ui_win_event_fire(win->on_key_down, win, &e, NULL);
-					break;
-				case SDL_KEYUP:
-					win_id = e.key.windowID;
-					if((win = find_window_by_id(app, win_id)) && win->on_key_up)
-						ui_win_event_fire(win->on_key_up, win, &e, NULL);
-					break;
-
+					win = ui_global_mousewheel(app, &e); break;
+				case SDL_KEYUP: case SDL_KEYDOWN:
+					win = ui_global_keyboard(app, &e); break;
 				case SDL_WINDOWEVENT:
-					if (e.window.event == SDL_WINDOWEVENT_CLOSE) {
-						app->flags |= WIN_QUIT;
-						// remove_window(app, win_id);
-					}
-					win_id = e.window.windowID;
-					if((win = find_window_by_id(app, win_id))) {
-						if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-							SDL_GL_GetDrawableSize(win->win, &win->area.w, &win->area.h);
-							ui_win_get_scale(win);
-						} else if(e.window.event == SDL_WINDOWEVENT_MOVED) {
-							SDL_GetWindowPosition(win->win, &win->area.x, &win->area.y);
-						}
-						if (win->on_windows_event)          // optional user reaction
-							ui_win_event_fire(win->on_windows_event, win, &e, NULL);
-					}
-					break;
-				}
-				if (!win) {
-					break;
-				}
-				win->flags |= WIN_DIRTY;
-				if (win->update)
-					ui_win_event_fire(win->update, win, NULL, NULL);
-				if (win->render)
-					ui_win_event_fire(win->render, win, NULL, NULL);
+					win = ui_gloval_windowevent(app, &e); break;
 			}
-			// ui_win_t* current_win = app->windows_list;
-			// while (current_win) {
-			// 	if (current_win->update)
-			// 		current_win->update(current_win);
-			// 	if (current_win->render)
-			// 		current_win->render(current_win);
-			// 	current_win = current_win->next;
-			// }
+			if (win)
+				win->flags |= WIN_DIRTY;
+		}
+		curr = app->windows;
+		while(curr) {
+			ui_win_t* next = curr->next;
+			if (!(curr->flags & WIN_QUIT)) {
+				printf("win %d: update && render\n", curr->id);
+				fflush(stdout);
+				ui_whook_fire(curr->update, curr, NULL, NULL);
+				ui_whook_fire(curr->render, curr, NULL, NULL);
+			}
+			curr = next;
+		}
 	}
 	SDL_Delay(1);
 }

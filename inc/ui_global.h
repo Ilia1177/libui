@@ -6,14 +6,14 @@
 typedef struct ui_win_s ui_win_t;
 
 typedef struct ui_globalApp_s {
-	ui_pos_t 	mouse;
+	SDL_Point 	mouse;
 	ui_win_t 	*windows; // Renamed for clarity
 	ui_win_t 	*selected_window;
 	short 		flags;
 
 	SDL_Rect  button_area;
-	ui_rgba_t menu_color_1;
-	ui_rgba_t menu_color_2;
+	SDL_Color menu_color_1;
+	SDL_Color menu_color_2;
     // Global Event Handlers (now taking SDL_Event*)
     void(*on_key_down)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_key_up)(struct ui_globalApp_s*, SDL_Event*);

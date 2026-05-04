@@ -6,15 +6,17 @@ OBJS_DIR	= obj/
 INC_DIR		= inc/
 BREW_PREFIX = /opt/homebrew
 
-SDL2_CFLAGS  = $(shell sdl2-config --cflags)
+# SDL2_CFLAGS  = $(shell sdl2-config --cflags)
+# SDL2_CFLAGS += $(shell pkg-config --cflags SDL2_ttf)
 SDL2_LIBS    = $(shell sdl2-config --libs)
+SDL2_LIBS   += $(shell pkg-config --libs SDL2_ttf)
 
 INCS =	-I$(BREW_PREFIX)/include \
+		-I$(BREW_PREFIX)/include/SDL2 \
 		-I$(INC_DIR) \
 		-I$(SRC_DIR) \
 		-I/usr/local/include \
 		-I$(HOME)/.local/include
-
 LDFLAGS  =	$(SDL2_LIBS) \
     		-L$(BREW_PREFIX)/lib \
 			-L$(HOME)/.local/lib \
@@ -24,23 +26,26 @@ SRC		= window/ui_win_create.c\
 		  window/ui_win_destroy.c\
 		  window/ui_win_add.c\
 		  window/ui_win_scale.c\
-		  window/ui_win_render.c\
 		  window/ui_win_pos.c\
 		  window/ui_win_size.c\
-		  window/ui_win_update.c\
-		  window/ui_win_event.c\
+		  window/ui_text.c\
+		  window/ui_elem.c\
 		  global/ui_globalApp.c\
+		  hook/ui_bhook.c\
+		  hook/ui_bhook_utils.c\
+		  hook/ui_bhook_default.c\
+		  hook/ui_whook_utils.c\
+		  hook/ui_whook_default.c\
 		  ui_init.c\
 		  ui_quit.c\
+		  ui_get_time.c\
 		  ui_is_mouse_in.c\
 		  box/ui_box_add.c\
 		  box/ui_box_create.c\
-		  box/ui_box_event.c\
 		  box/ui_box_menu.c\
-		  box/ui_box_update.c\
 		  box/ui_box_iter.c\
-		  box/ui_box_render.c\
 		  box/ui_box_destroy.c\
+		  layer/ui_layer.c\
 
 SRC := $(addprefix $(SRC_DIR),$(SRC) )
 

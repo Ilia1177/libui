@@ -1,6 +1,7 @@
 #include "ui_win.h"
 #include <unistd.h>
 
+
 // create window type in drawable sixel (real pixels)
 ui_win_t* ui_win_create(int w, int h, ui_globalApp_t* app, char* title)
 {
@@ -30,15 +31,23 @@ ui_win_t* ui_win_create(int w, int h, ui_globalApp_t* app, char* title)
         return NULL;
     }
 
+	window->font = TTF_OpenFont("CharcoalFirst.ttf", 22);
+	TTF_SetFontStyle(window->font, TTF_STYLE_BOLD);
+
+	if (!window->font)
+		fprintf(stderr, "TTF_OpenFont error: %s\n", TTF_GetError());
+
 	ui_win_get_scale(window);
-	ui_win_handler_add(&window->update, ui_win_update_default);
-	ui_win_handler_add(&window->destroy ,ui_win_destroy_default);
-	ui_win_handler_add(&window->render ,ui_win_render_default);
+	ui_whook_add(&window->update, ui_whook_update_default);
+	ui_whook_add(&window->destroy ,ui_whook_destroy_default);
+	ui_whook_add(&window->render ,ui_whook_render_default);
 
 
-	ui_win_handler_add(&window->on_click_down, ui_win_on_click_down_handler);
-	ui_win_handler_add(&window->on_click_up, ui_win_on_click_up_handler);
-	ui_win_handler_add(&window->on_mouse_motion, ui_win_on_mouse_motion_handler);
+	window->on_mouse_motion = NULL;
+	ui_whook_add(&window->on_click_down, ui_whook_clickdown_default);
+	ui_whook_add(&window->on_click_up, ui_whook_clickup_default);
+	ui_whook_add(&window->on_mouse_motion, ui_whook_mousemotion_default);
+
 	window->on_mouse_wheel = NULL;
 	window->on_windows_event = NULL;
 	window->on_key_down = NULL;
@@ -47,18 +56,17 @@ ui_win_t* ui_win_create(int w, int h, ui_globalApp_t* app, char* title)
 	window->background_color.r = 128;
 	window->background_color.g = 128;
 	window->background_color.b = 128;
-	window->background_color.a = 128;
+	window->background_color.a = 255;
 
+	window->canvas = ui_box_create((SDL_Rect){0, 0, window->area.w, window->area.h}, (SDL_Color){255, 0, 0,255}, window);
+	ui_bhook_add(&window->canvas->update, ui_bhook_maxsize);
+	ui_bhook_add(&window->canvas->update, ui_bhook_movelayer);
 	window->global = app;
     // Initialize event handler pointers to NULL
-    // window->on_key_down = NULL;
-    // window->on_key_up = NULL;
-    // window->on_mouse_button_down = NULL;
-    // window->on_mouse_button_up = NULL;
-    // window->on_mouse_motion = NULL;
-    // window->on_mouse_wheel = NULL;
-    // window->on_window_resized = NULL; // Initialize window resized handler
-
+    window->on_key_down = NULL;
+    window->on_key_up = NULL;
+    window->on_mouse_wheel = NULL;
+    // window->on_window_event = NULL;
 	return window;
 }
 
