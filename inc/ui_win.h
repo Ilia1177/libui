@@ -7,41 +7,43 @@
 #define WIN_SELECTED (1 << 1) //0010
 #define WIN_MAIN (1 << 2) //0100
 #define WIN_DIRTY (1 << 3) //1000
-
+typedef int (*ui_whook_fn_t)(ui_win_t*, SDL_Event*, void*);
 typedef struct ui_winhandler_s {
-    void (*fn)(ui_win_t*, SDL_Event*, void*);
+	ui_whook_fn_t fn;
     struct ui_winhandler_s *next;
 } ui_winhandler_t;
 // Forward declaration
 typedef struct ui_globalApp_s ui_globalApp_t;
 typedef struct ui_box_s ui_box_t;
-typedef struct ui_win_s {
-	SDL_Renderer* renderer;
-	SDL_Window* win;
-	SDL_Texture* texture;
-	SDL_Rect area;
-	ui_scale_t scale;
-	char* title;
-    uint32_t id; // New: Unique ID for the SDL Window
-	short flags;
+typedef struct ui_win_s
+{
+	SDL_Renderer*	renderer;
+	SDL_Window*		ptr;
+	SDL_Texture*	texture;
+	SDL_Rect		area;
+	ui_scale_t		scale;
+	// char* title;
+	SDL_Color		*colors;
+    uint32_t		id; // New: Unique ID for the SDL Window
+	short			flags;
  
-	SDL_Rect button_area;
-	ui_globalApp_t *global;
-	ui_box_t *menu;
-	ui_box_t *canvas;
+	SDL_Rect		button_area;
+	ui_globalApp_t	*global;
+	ui_box_t		*menu;
+	ui_box_t		*canvas;
 
-	SDL_Color background_color;
+	SDL_Color		background_color;
 
 
-	TTF_Font *font;
+	TTF_Font		*font;
     // Updated: Event handler function pointers now take SDL_Event*
+	ui_winhandler_t *on_mouse_wheel;
 	ui_winhandler_t *on_key_down;
 	ui_winhandler_t *on_key_up;
 	ui_winhandler_t *on_click_down;
 	ui_winhandler_t *on_click_up;
-	ui_winhandler_t *on_mouse_wheel;
 	ui_winhandler_t *on_mouse_motion;
-	ui_winhandler_t *on_windows_event;
+	ui_winhandler_t *on_window_event;
 	ui_winhandler_t *destroy;
 	ui_winhandler_t *update;
 	ui_winhandler_t *render;
@@ -56,20 +58,20 @@ void ui_win_add_box(ui_win_t *win, ui_box_t *box);
 void ui_win_add(ui_win_t **list, ui_win_t *win);
 
 ui_scale_t ui_win_get_scale(ui_win_t *win);
-ui_win_t* ui_win_create(int w, int h, ui_globalApp_t * app, char* title);
+ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, char* title);
  
+int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *pathraw);
 // principales Hooks de la fenetre. happen each frame
-void	ui_whook_render_default(ui_win_t*, SDL_Event*, void*);
-void	ui_whook_destroy_default(ui_win_t*, SDL_Event*, void*);
-void 	ui_whook_update_default(ui_win_t*, SDL_Event*, void*);
- 
-void	ui_whook_clickup_default(ui_win_t*, SDL_Event*, void *);
-void	ui_whook_clickdown_default(ui_win_t*, SDL_Event*, void *);
-void	ui_whook_mousemotion_default(ui_win_t*, SDL_Event*, void *);
-
-void ui_whook_fire(ui_winhandler_t *list, ui_win_t *win, SDL_Event *e, void* data);
-void ui_whook_add(ui_winhandler_t **list, void (*fn)(ui_win_t*, SDL_Event*, void*));
-void ui_whook_clean(ui_winhandler_t **list);
+int ui_whook_render_default(ui_win_t*, SDL_Event*, void*);
+int ui_whook_destroy_default(ui_win_t*, SDL_Event*, void*);
+int ui_whook_update_default(ui_win_t*, SDL_Event*, void*);
+int ui_whook_clickup_default(ui_win_t*, SDL_Event*, void *);
+int ui_whook_clickdown_default(ui_win_t*, SDL_Event*, void *);
+int ui_whook_mousemotion_default(ui_win_t*, SDL_Event*, void *);
+int ui_whook_windowevent_default(ui_win_t*, SDL_Event*, void *);
+int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void* data);
+int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn); 
+int ui_whook_clean(ui_winhandler_t **list);
 // New: Event registration functions (using SDL_Event*)
 // void ui_win_set_on_resize(ui_win_t* win, void(*handler)(ui_win_t*, SDL_Event*));
 // void ui_win_set_on_mousewheel(ui_win_t* win, void(*handler)(ui_win_t*, SDL_Event*));

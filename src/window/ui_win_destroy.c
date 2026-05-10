@@ -1,6 +1,6 @@
 #include "ui_win.h"
 
-void	ui_whook_destroy_default(ui_win_t* win, SDL_Event*e, void*data)
+int	ui_whook_destroy_default(ui_win_t* win, SDL_Event*e, void*data)
 {
 	printf("freeing window %d\n", win->id);
 	ui_box_t *curr = win->menu;
@@ -26,6 +26,7 @@ void	ui_whook_destroy_default(ui_win_t* win, SDL_Event*e, void*data)
 	TTF_CloseFont(win->font);
 	win->font = NULL;
     SDL_DestroyRenderer(win->renderer);
-    SDL_DestroyWindow(win->win);
+    SDL_DestroyWindow(win->ptr);
 	free(win);
+	return 0;
 }

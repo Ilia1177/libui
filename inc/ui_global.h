@@ -3,14 +3,19 @@
 #include "libui.h"   // gets ui_pos_t fully defined, forward decl handles ui_win_t
 #include "ui_box.h"  // New: Include ui_box.h
 
+typedef struct ui_winhandler_s ui_winhandler_t;
 typedef struct ui_win_s ui_win_t;
 
-typedef struct ui_globalApp_s {
+typedef struct ui_globalApp_s 
+{
 	SDL_Point 	mouse;
-	ui_win_t 	*windows; // Renamed for clarity
-	ui_win_t 	*selected_window;
+	ui_win_t*	windows;
+	// ui_win_t*	selected_window;
+	ui_box_t*	focused_box;
 	short 		flags;
+	char*		input;
 
+	bool loading;
 	SDL_Rect  button_area;
 	SDL_Color menu_color_1;
 	SDL_Color menu_color_2;
@@ -23,10 +28,11 @@ typedef struct ui_globalApp_s {
     void(*on_mouse_wheel)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_window_resized)(struct ui_globalApp_s*, ui_win_t*, int w, int h); // Keep this signature
 
+	ui_winhandler_t *actions;
 	void(*start)(struct ui_globalApp_s*);
 } ui_globalApp_t;
  
-ui_globalApp_t* ui_global_init();
+ui_globalApp_t* ui_global_init(char* name);
 void			ui_global_free(ui_globalApp_t*);
 void 			ui_start(ui_globalApp_t *app); // This is ui_run
 void            ui_global_add_window(ui_globalApp_t* app, ui_win_t* win); // New: Function to add window to list

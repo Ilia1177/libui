@@ -1,73 +1,80 @@
 #include "ui_win.h"
 #include <unistd.h>
 
-
-// create window type in drawable sixel (real pixels)
-ui_win_t* ui_win_create(int w, int h, ui_globalApp_t* app, char* title)
+int ui_win_init_handlers(ui_win_t* win)
 {
-	ui_win_t *window = (ui_win_t*)malloc(sizeof(ui_win_t));
+	ui_whook_add(&win->update, ui_whook_update_default);
+	ui_whook_add(&win->destroy ,ui_whook_destroy_default);
+	ui_whook_add(&win->render ,ui_whook_render_default);
+	ui_whook_add(&win->on_click_down, ui_whook_clickdown_default);
+	ui_whook_add(&win->on_click_up, ui_whook_clickup_default);
+	ui_whook_add(&win->on_mouse_motion, ui_whook_mousemotion_default);
+	ui_whook_add(&win->on_window_event, ui_whook_windowevent_default);
 
-	if (!window) {
-		return NULL;
-	}
-	window->flags = WIN_DIRTY; // Initialize all flags to dirty rendering first
-	window->win = SDL_CreateWindow(
-        title,
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        w, h,
-        SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE
-    );
-    if (!window->win) {
-        return NULL;
-    }
-	SDL_GetWindowPosition(window->win, &window->area.x, &window->area.y);
-	SDL_GL_GetDrawableSize(window->win, &window->area.w, &window->area.h);  // 1600 x 1200
-    window->id = SDL_GetWindowID(window->win); // Initialize SDL_WindowID
-	window->renderer = SDL_CreateRenderer(
-        window->win, -1,
+	return 0;
+}
+
+int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
+{
+	win->renderer = SDL_CreateRenderer(
+        win->ptr, -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
     );
-    if (!window->renderer) {
-        return NULL;
+    if (!win->renderer) {
+        return -1;
     }
-
-	window->font = TTF_OpenFont("CharcoalFirst.ttf", 22);
-	TTF_SetFontStyle(window->font, TTF_STYLE_BOLD);
-
-	if (!window->font)
+	SDL_GetWindowPosition(win->ptr, &win->area.x, &win->area.y);
+	SDL_GL_GetDrawableSize(win->ptr, &win->area.w, &win->area.h);
+	ui_win_get_scale(win);
+    win->id = SDL_GetWindowID(win->ptr);
+	win->font = TTF_OpenFont("Abell Extended.ttf", 38);
+	TTF_SetFontStyle(win->font, TTF_STYLE_BOLD);
+	if (!win->font)
 		fprintf(stderr, "TTF_OpenFont error: %s\n", TTF_GetError());
-
-	ui_win_get_scale(window);
-	ui_whook_add(&window->update, ui_whook_update_default);
-	ui_whook_add(&window->destroy ,ui_whook_destroy_default);
-	ui_whook_add(&window->render ,ui_whook_render_default);
-
-
-	window->on_mouse_motion = NULL;
-	ui_whook_add(&window->on_click_down, ui_whook_clickdown_default);
-	ui_whook_add(&window->on_click_up, ui_whook_clickup_default);
-	ui_whook_add(&window->on_mouse_motion, ui_whook_mousemotion_default);
-
-	window->on_mouse_wheel = NULL;
-	window->on_windows_event = NULL;
-	window->on_key_down = NULL;
-	window->on_key_up = NULL;
-
-	window->background_color.r = 128;
-	window->background_color.g = 128;
-	window->background_color.b = 128;
-	window->background_color.a = 255;
-
-	window->canvas = ui_box_create((SDL_Rect){0, 0, window->area.w, window->area.h}, (SDL_Color){255, 0, 0,255}, window);
-	ui_bhook_add(&window->canvas->update, ui_bhook_maxsize);
-	ui_bhook_add(&window->canvas->update, ui_bhook_movelayer);
-	window->global = app;
+	ui_win_init_handlers(win);
+	win->background_color = (SDL_Color){128, 128, 128, 255};
+	win->global = app;
+	win->colors = calloc(sizeof(SDL_Color), 5);
+	win->colors[1] = PURPLE;
+	win->colors[2] = ORANGE;
+	win->colors[3] = TEAL;
+	win->colors[4] = COLOR_BG;
     // Initialize event handler pointers to NULL
-    window->on_key_down = NULL;
-    window->on_key_up = NULL;
-    window->on_mouse_wheel = NULL;
-    // window->on_window_event = NULL;
-	return window;
+	return 0;
+ 
+}
+// create window type in drawable sixel (real pixels)
+// area.x <= 0 makes the window centered on the x axe
+// area.y <= 0 makes the window centered on the y axe
+// area.<w|h> <= 0 makes the window resizable with w=400 h=200
+ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, char* title)
+{
+	ui_win_t *win;
+	Uint32 flags;
+
+	win = (ui_win_t*)calloc(sizeof(ui_win_t), 1);
+
+	flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP;
+	if (!win)
+		return NULL;
+	if (area.x <= 0 || area.w <= 0 || area.h <= 0)
+		area.x = SDL_WINDOWPOS_CENTERED;
+	if (area.y <= 0 || area.w <= 0 || area.h <= 0)
+		area.y = SDL_WINDOWPOS_CENTERED;
+	if (area.w <= 0 || area.h <= 0) {
+		flags |= SDL_WINDOW_RESIZABLE;
+		area.w = 400;
+		area.h = 200;
+	}
+	win->ptr = SDL_CreateWindow(title, area.x, area.y, area.w, area.h, flags);
+	if (!win->ptr) {
+        return NULL;
+	}
+
+	if (ui_win_init(app, win) != 0) {
+		return NULL;
+	}
+	return win;
 }
 
 

@@ -1,21 +1,29 @@
 #ifndef LIBUI_H
 # define LIBUI_H
 
-# include <stdbool.h> // New: Include stdbool.h for 'bool' type
+# define PURPLE (SDL_Color){118, 91, 167, 255}
+# define ORANGE (SDL_Color){255, 108, 47, 255}
+# define TEAL (SDL_Color){0, 131, 138, 255}
+# define COLOR_BG (SDL_Color){20, 20, 20, 255}
+# define COLOR_WHITE (SDL_Color){255, 255, 255, 255}
+# define COLOR_TRANSPARENT (SDL_Color){0, 0, 0, 0}
+
+# include <stdbool.h>
 # include <SDL2/SDL_image.h>
 # include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-
-
+# include <SDL2/SDL_ttf.h>
 
 
 
 typedef struct ui_box_s ui_box_t;
 typedef struct ui_win_s ui_win_t;
+typedef void (*ui_bhook_fn_t)(ui_box_t*, SDL_Event*, void*);
+
 
 typedef struct ui_layer_s {
+	short			state;
 	SDL_Texture* texture;
-	ui_box_t*	 box;
+	ui_box_t*	 parent_box;
 	SDL_Rect	 dimension;
 	struct ui_layer_s *next;
 } ui_layer_t;
@@ -32,17 +40,19 @@ int ui_init();
 int ui_quit();
 char *ui_get_time(void);
 
-ui_box_t*	ui_elem_button(ui_win_t* win);
-ui_win_t*	ui_win_popup(ui_win_t* win);
+SDL_Rect ui_area(int, int, int, int);
+ui_box_t*	ui_belem_button(ui_win_t* win, SDL_Rect area, char* label);
+ui_win_t*	ui_elem_win_input(ui_win_t* win);
 // LAYERS
 
 void	ui_layer_destroy(ui_layer_t** list);
 int ui_layer_count(ui_layer_t* layers);
-void	ui_layer_loadimage(ui_box_t* cnv, char *path);
 void ui_layer_add(ui_layer_t** layers, ui_layer_t* new);
 ui_layer_t *ui_layer_create(ui_box_t* cnv, SDL_Texture* texture);
 
 SDL_Rect ui_tool_rectcenter(SDL_Rect, SDL_Rect);
 # include "ui_win.h"
+# include "ui_box.h"
 # include "ui_global.h"
+# include "ui_elem.h"
 #endif

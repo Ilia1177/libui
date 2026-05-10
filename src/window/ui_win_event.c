@@ -8,13 +8,13 @@ void ui_whook_add(ui_winhandler_t **list, void (*fn)(ui_win_t*, SDL_Event*, void
     *list = handler;
 }
 
-void ui_whook_fire(ui_winhandler_t *list, ui_win_t *win, SDL_Event *e, void* data) {
-    while (list) {
-        if (list->fn)
-            list->fn(win, e, data);
-        list = list->next;
-    }
-}
+// void ui_whook_fire(ui_winhandler_t *list, ui_win_t *win, SDL_Event *e, void* data) {
+//     while (list) {
+//         if (list->fn)
+//             list->fn(win, e, data);
+//         list = list->next;
+//     }
+// }
 
 void ui_whook_clean(ui_winhandler_t **list) {
 	if (!list || !*list) return;

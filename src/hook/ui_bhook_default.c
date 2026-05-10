@@ -11,6 +11,17 @@ void	ui_bhook_clickup_default(ui_box_t *b, SDL_Event* e, void* data)
 	}
 }
 
+void	ui_bhook_windowevent_default(ui_box_t *b, SDL_Event* e, void* data)
+{
+
+	ui_box_t *curr = b->list;
+	while(curr) {
+		if(curr->on_window_event)
+            ui_bhook_fire(curr->on_window_event, curr, e, data);
+		curr = curr->next;
+	}
+
+}
 void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
 	(void)data;
 	SDL_MouseButtonEvent *btn = &e->button;
@@ -18,8 +29,10 @@ void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
     int px = (int)(btn->x * win->scale.x);
     int py = (int)(btn->y * win->scale.y);
     SDL_Point p = {px, py};
-    if (SDL_PointInRect(&p, &b->area) && (!b->list)) {
+    if (SDL_PointInRect(&p, &b->area) && (!b->list) && b->flags & BOX_HOVERED) {
+        b->flags |= BOX_CLICKED;
         b->flags |= BOX_PRESSED;
+		printf("box clicked\n");
     } else {
         b->flags &= ~BOX_PRESSED;  // release even if mouse moved off
     }
@@ -31,19 +44,40 @@ void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
 	}
 }
 
+ui_box_t* hovered_box(ui_box_t* boxes, SDL_Point *p)
+{
+	if ( !boxes || (boxes->flags & BOX_HIDDEN))
+		return NULL;
+	ui_box_t* selected = NULL;
+	ui_box_t* curr = boxes;
+	while(curr) {
+		if(SDL_PointInRect(p, &curr->area)) {
+			selected = curr;
+		}
+		ui_box_t *child = hovered_box(curr->list, p);
+		if (child) {
+			selected = child;
+		}
+		curr = curr->next;
+	}
+	return selected;
+	
+}
+
 void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 {
-	printf("mouse motion on box\n");
-		fflush(stdout);
 	SDL_MouseMotionEvent *btn = &e->motion;
 	ui_win_t *win = box->parent_window;
     int px = (int)(btn->x * win->scale.x);
     int py = (int)(btn->y * win->scale.y);
     SDL_Point p = {px, py};
-    if (SDL_PointInRect(&p, &box->area)) {
+
+	ui_box_t *top_hovered_menubox = hovered_box(win->menu, &p);
+	ui_box_t *cnv_hovered = hovered_box(win->canvas, &p);
+	if(top_hovered_menubox == box) {
 		box->flags |= BOX_HOVERED;
-		printf("Hovered box\n");
-		fflush(stdout);
+	} else if (cnv_hovered == box && !top_hovered_menubox) {
+		box->flags |= BOX_HOVERED;
 	} else {
 		box->flags &= ~BOX_HOVERED;
         box->flags &= ~BOX_PRESSED;
@@ -59,6 +93,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 void ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *data)
 {
 	ui_box_t *current = box->list;
+	box->flags &= ~BOX_CLICKED;
 	while(current) {
 		if (current->update) {
 			ui_bhook_fire(current->update, current, e, data);
@@ -67,62 +102,3 @@ void ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *data)
 	}
 }
 
-void ui_bhook_render_default(ui_box_t *box, SDL_Event*e, void* data) {
-    if (!box || (box->flags & BOX_HIDDEN) || !box->parent_window)
-        return;
-    SDL_Renderer *renderer = box->parent_window->renderer;
-    if (!renderer) return;
-
-	fflush(stdout);
-    int m = box->border;
-    SDL_Rect area = box->area;
-    if (m > 0) {
-		// draw border
-        SDL_Rect border = {area.x - m, area.y - m, area.w + 2 * m, area.h + 2 * m};
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &border);
-    }
-
-    // fill
-    SDL_SetRenderDrawColor(renderer, box->color.r, box->color.g, box->color.b, box->color.a);
-    SDL_RenderFillRect(renderer, &area);
-
-    // hover / press overlay
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    if (box->flags & BOX_HOVERED) {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
-        SDL_RenderFillRect(renderer, &area);
-    }
-    if (box->flags & BOX_PRESSED) {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
-        SDL_RenderFillRect(renderer, &area);
-    }
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-	if (box->layers && box->layers->texture && box->label) {
-
-		int w, h;
-		SDL_QueryTexture(box->layers->texture, NULL, NULL, &w, &h);
-
-		SDL_Rect dest = {
-			box->area.x + (BOX_MENU_W - box->layers->dimension.w) / 2,
-			box->area.y + (BOX_MENU_H - box->layers->dimension.h) / 2,
-			box->layers->dimension.w,
-			box->layers->dimension.h
-		};
-		SDL_RenderCopy(renderer, box->layers->texture, NULL, &dest);
-	} else if (box->layers) {
-		ui_layer_t *curr = box->layers;
-		while (curr) {
-			if (curr->texture)
-				SDL_RenderCopy(renderer, curr->texture, NULL, &curr->dimension);
-			curr = curr->next;
-		}
-	}
-    // children
-    ui_box_t *current = box->list;
-    while (current) {
-        if (current->render)
-            ui_bhook_fire(current->render, current, e, data);
-        current = current->next;
-    }
-}

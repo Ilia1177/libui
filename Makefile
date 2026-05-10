@@ -6,8 +6,8 @@ OBJS_DIR	= obj/
 INC_DIR		= inc/
 BREW_PREFIX = /opt/homebrew
 
-# SDL2_CFLAGS  = $(shell sdl2-config --cflags)
-# SDL2_CFLAGS += $(shell pkg-config --cflags SDL2_ttf)
+SDL2_CFLAGS  = $(shell sdl2-config --cflags)
+SDL2_CFLAGS += $(shell pkg-config --cflags SDL2_ttf)
 SDL2_LIBS    = $(shell sdl2-config --libs)
 SDL2_LIBS   += $(shell pkg-config --libs SDL2_ttf)
 
@@ -17,10 +17,14 @@ INCS =	-I$(BREW_PREFIX)/include \
 		-I$(SRC_DIR) \
 		-I/usr/local/include \
 		-I$(HOME)/.local/include
+
 LDFLAGS  =	$(SDL2_LIBS) \
     		-L$(BREW_PREFIX)/lib \
 			-L$(HOME)/.local/lib \
     		-lSDL2_image \
+
+CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+LDFLAGS += -fsanitize=address
 
 SRC		= window/ui_win_create.c\
 		  window/ui_win_destroy.c\
@@ -32,14 +36,17 @@ SRC		= window/ui_win_create.c\
 		  window/ui_elem.c\
 		  global/ui_globalApp.c\
 		  hook/ui_bhook.c\
+		  hook/ui_bhook_render.c\
 		  hook/ui_bhook_utils.c\
 		  hook/ui_bhook_default.c\
+		  hook/ui_whook.c\
 		  hook/ui_whook_utils.c\
 		  hook/ui_whook_default.c\
 		  ui_init.c\
 		  ui_quit.c\
 		  ui_get_time.c\
 		  ui_is_mouse_in.c\
+		  box/ui_box_utils.c\
 		  box/ui_box_add.c\
 		  box/ui_box_create.c\
 		  box/ui_box_menu.c\
@@ -77,4 +84,8 @@ fclean	:	clean
 
 re		:	fclean all
 
-.PHONY	:	all clean fclean re
+test	: re
+	$(CC) $(CFLAGS) $(SDL2_CFLAG) $(INCS) src/test.c -o test -L. -lui $(LDFLAGS)
+	./test
+
+.PHONY	:	all clean fclean re test
