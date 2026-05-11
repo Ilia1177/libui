@@ -12,7 +12,13 @@ ui_box_t* ui_box_create(SDL_Rect rect, SDL_Color color, ui_win_t* parent_window)
     box->parent_window = parent_window;
 	box->parent_window->flags |= WIN_DIRTY;
 
-    ui_bhook_add(&box->render, ui_bhook_render_default); // Set default rendere)r
+    ui_bhook_add(&box->render, ui_bhook_render_default);
+    ui_bhook_add(&box->render, ui_bhook_drawfocused);
+    ui_bhook_add(&box->render, ui_bhook_drawlayers);
+    ui_bhook_add(&box->render, ui_bhook_drawhovered);
+    ui_bhook_add(&box->render, ui_bhook_drawpressed);
+    ui_bhook_add(&box->render, ui_bhook_drawbox);
+
 	ui_bhook_add(&box->update, ui_bhook_update_default);
     ui_bhook_add(&box->destroy, ui_bhook_destroy_default);
 

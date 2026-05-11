@@ -16,6 +16,7 @@ int	ui_whook_destroy_default(ui_win_t* win, SDL_Event*e, void*data)
 		ui_bhook_fire(curr->destroy, curr, e, data);
 		curr = next;
 	}
+	free(win->colors);
     // free handler lists
     ui_whook_clean(&win->render);
     ui_whook_clean(&win->update);

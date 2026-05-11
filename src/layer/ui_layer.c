@@ -1,5 +1,17 @@
 #include "libui.h"
 
+ui_layer_t* ui_layer_selected(ui_layer_t* layers, SDL_Point* p) {
+	ui_layer_t *selected = NULL;
+	ui_layer_t *layer = layers;
+	while(layer) {
+		if(SDL_PointInRect(p, &layer->dimension)) {
+			selected = layer;
+		}
+		layer = layer->next;
+	}
+	return selected;
+}
+
 int ui_layer_count(ui_layer_t* layers) {
 	int n = 0;
 

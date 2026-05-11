@@ -60,6 +60,7 @@ void ui_win_add(ui_win_t **list, ui_win_t *win);
 ui_scale_t ui_win_get_scale(ui_win_t *win);
 ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, char* title);
  
+int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data);
 int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *pathraw);
 // principales Hooks de la fenetre. happen each frame
 int ui_whook_render_default(ui_win_t*, SDL_Event*, void*);

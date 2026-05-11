@@ -6,28 +6,31 @@
 typedef struct ui_winhandler_s ui_winhandler_t;
 typedef struct ui_win_s ui_win_t;
 
+# define GLOBAL_LOADING (1 << 0)
+# define GLOBAL_QUIT (1 << 1)
+
 typedef struct ui_globalApp_s 
 {
 	SDL_Point 	mouse;
 	ui_win_t*	windows;
-	// ui_win_t*	selected_window;
 	ui_box_t*	focused_box;
-	short 		flags;
+	uint32_t 	state;
 	char*		input;
 
 	bool loading;
-	SDL_Rect  button_area;
+	// SDL_Rect  button_area;
 	SDL_Color menu_color_1;
 	SDL_Color menu_color_2;
-    // Global Event Handlers (now taking SDL_Event*)
+    // Global Event Handlers
     void(*on_key_down)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_key_up)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_mouse_button_down)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_mouse_button_up)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_mouse_motion)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_mouse_wheel)(struct ui_globalApp_s*, SDL_Event*);
-    void(*on_window_resized)(struct ui_globalApp_s*, ui_win_t*, int w, int h); // Keep this signature
+    void(*on_window_resized)(struct ui_globalApp_s*, ui_win_t*, int w, int h);
 
+	ui_winhandler_t *tool;
 	ui_winhandler_t *actions;
 	void(*start)(struct ui_globalApp_s*);
 } ui_globalApp_t;

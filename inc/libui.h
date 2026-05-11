@@ -45,6 +45,7 @@ ui_box_t*	ui_belem_button(ui_win_t* win, SDL_Rect area, char* label);
 ui_win_t*	ui_elem_win_input(ui_win_t* win);
 // LAYERS
 
+ui_layer_t* ui_layer_selected(ui_layer_t* layers, SDL_Point* p);
 void	ui_layer_destroy(ui_layer_t** list);
 int ui_layer_count(ui_layer_t* layers);
 void ui_layer_add(ui_layer_t** layers, ui_layer_t* new);

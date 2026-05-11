@@ -15,9 +15,13 @@ int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *data)
 		global->loading = true;
 		printf("image load running\n");
 		running = true;
-	}
-	if (!global->loading && running) {
+	} 
+	if ((!global->loading && running)) {
 		running = false;
+		global->loading = false;
+		if (global->input)
+			free(global->input);
+		global->input = NULL;
 		printf("image load cancel\n");
 		return 0;
 	}
@@ -43,3 +47,22 @@ int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *data)
 	ui_layer_add(&cnv->layers, ui_layer_create(cnv, texture));
 	return 0;
 }
+
+int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data)
+{
+	(void)data;
+
+	if (!e || !win) {
+		return 1;
+	} else if (e->type == SDL_KEYDOWN) {
+		switch (e->key.keysym.sym) {
+			case SDLK_RETURN: case SDLK_ESCAPE:
+				win->flags |= WIN_QUIT;
+				return 0;
+			default:
+				break;
+		}
+	}
+	return 1;
+} 
+

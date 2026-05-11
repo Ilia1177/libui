@@ -36,22 +36,13 @@ int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void *dat
             int ret = curr->fn(win, e, data);
             if (ret <= 0) {
                 ui_whook_remove(list, curr->fn);  // remove from real list
+				printf("win hook removed\n");
 			}
         }
         curr = next;
     }
     return 0;
 }
-// int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void* data) {
-//     while (list) {
-// 		ui_winhandler_t *next = list->next;
-//         if (list->fn && list->fn(win, e, data) == 0)
-// 			ui_whook_remove(&list, list->fn);
-//
-//         list = next;
-//     }
-// 	return 0;
-// }
 
 int ui_whook_clean(ui_winhandler_t **list) {
 	if (!list || !*list) return -1;

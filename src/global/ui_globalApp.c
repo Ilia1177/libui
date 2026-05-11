@@ -32,7 +32,7 @@ ui_globalApp_t* ui_global_init(char* name)
         return NULL;
     }
 	app->loading = false;
-    app->flags = 0;
+    app->state = 0;
 	app->actions = NULL;
 	app->focused_box = NULL;
     app->windows = NULL; // Initialize list of windows_list
@@ -162,7 +162,7 @@ void	ui_check4dead_window(ui_globalApp_t *app)
 		ui_win_t *next = curr->next;
 		if (curr->flags & WIN_QUIT) {
 			if (curr->id == 1) {
-				app->flags |= WIN_QUIT;
+				app->state |= WIN_QUIT;
 				return;
 			} else {
 				ui_win_remove(&app->windows, curr);
@@ -189,8 +189,9 @@ ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 	ui_win_t* win = NULL;
 	while (SDL_PollEvent(e)) {
 		switch (e->type) {
+			printf("event is: %d\n", e->type);
 			case SDL_QUIT:
-				app->flags |= WIN_QUIT; return NULL;
+				app->state |= GLOBAL_QUIT; return NULL;
 			case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP:
 				win = ui_global_mouseclick(app, e); break;
 			case SDL_MOUSEMOTION:
@@ -203,7 +204,6 @@ ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 				win = ui_global_windowevent(app, e); break;
 			case SDL_TEXTINPUT:
 				break;
-			printf("event was: %d\n", e->type);
 				// win = app->focused_box->parent_window; break;
 		}
 		ui_action_update_and_render(app, win, e);
@@ -219,15 +219,15 @@ void ui_start(ui_globalApp_t *app)
 	ui_win_t *curr;
 	SDL_Event e;
 
-	// printf("1. start\n");
-    while (!(app->flags & WIN_QUIT)) {
-		// printf("2. check dead win\n");
+	printf("1. start\n");
+    while (!(app->state & GLOBAL_QUIT)) {
+		// printf("%s - 2. check dead win\n", ui_get_time());
 		ui_check4dead_window(app);
-		// printf("3. dispatch events\n");
+		// printf("%s - 3. dispatch events\n", ui_get_time());
 		ui_dispatch_event(app, &e);
 		curr = app->windows;
 		while(curr) {
-			// printf("4. update & render\n");
+			// printf("%s - 4. update & render\n", ui_get_time());
 			ui_win_t* next = curr->next;
 			if (!(curr->flags & WIN_QUIT)) {
 				ui_whook_fire(&curr->update, curr, &e, NULL);

@@ -57,13 +57,13 @@ void new_window(ui_box_t* box, SDL_Event *e, void* data)
 	}
 }
 
-ui_win_t* make_simple_window(ui_globalApp_t* app, char* name)
+ui_win_t* main_window(ui_globalApp_t* app, char* name)
 {
 	ui_win_t* win;
 
-	win = ui_win_create(app, (SDL_Rect){0, 0, 0, 0}, name);
+	win = ui_win_create(app, (SDL_Rect){0, 0, 1200, 800}, name);
 	ui_win_add(&app->windows, win);
-	ui_box_t* menu = ui_belem_menu_navbar(win, UI_VERTICAL_MENU);
+	ui_box_t* menu = ui_belem_menu_area(win, UI_VERTICAL_MENU);
 	ui_box_t* file_menu = 	ui_belem_menu_list(menu, "file");
 	ui_box_t* image_menu = 	ui_belem_menu_list(menu, "image");
 							ui_belem_menu_list(menu, "about");
@@ -81,6 +81,20 @@ ui_win_t* make_simple_window(ui_globalApp_t* app, char* name)
 	return win;
 }
 
+ui_win_t* palette_window(ui_globalApp_t* app, char* name)
+{
+	ui_win_t* win;
+
+	win = ui_win_create(app, (SDL_Rect){0, 0, 0, 0}, name);
+	ui_win_add(&app->windows, win);
+	ui_box_t* menu = ui_belem_menu_area(win, UI_FULLWINDOW_MENU);
+	ui_belem_menu_item(menu, "A", handler);
+	ui_belem_menu_item(menu, "B", load_image_handler);
+	ui_belem_menu_item(menu, "C", new_window);
+	ui_belem_menu_item(menu, "D", ui_bhook_winclose);
+	return win;
+}
+
 int main(int argc, char* argv[]) {
 	(void)argc;
 	(void)argv;
@@ -89,34 +103,8 @@ int main(int argc, char* argv[]) {
 	if (!app)
 		return -1;
 
-	make_simple_window(app, "GuImP");
-	
-	// creation of window 2
-	ui_win_t *win2 = ui_win_create(app, (SDL_Rect){10, 20, 0, 0}, "window 2: horizontal menu");
-	win2->menu = ui_belem_menu_navbar(win2, UI_HORIZONTAL_MENU);
-	ui_box_t* menu1win2 = 	ui_belem_menu_list(win2->menu, "option 1");
-	ui_box_t* menu2win2 = 	ui_belem_menu_list(win2->menu, "option 2");
-	ui_box_t* menu3win2 = 	ui_belem_menu_list(win2->menu, "option 3");
-	ui_box_t* menu4win2 = 	ui_belem_menu_list(win2->menu, "option 4");
-	ui_box_t* menu5win2 = 	ui_belem_menu_list(win2->menu, "option 5");
-	for (int i = 0; i < 5; i++) {
-		ui_belem_menu_item(menu1win2, "click me", handler);
-		ui_belem_menu_item(menu2win2, "click me", handler);
-		ui_belem_menu_item(menu3win2, "click me", handler);
-		ui_belem_menu_item(menu4win2, "click me", handler);
-		ui_belem_menu_item(menu5win2, "click me", handler);
-	}
-	ui_win_add(&app->windows, win2);
-
-	// Third window
-	ui_win_t *win3 = ui_win_create(app, (SDL_Rect){200, 400, 0, 0}, "window 3: full window menu");
-	win3->menu = ui_belem_menu_navbar(win3, UI_FULLWINDOW_MENU);
-	for (int i = 0; i < 6; i++) {
-		ui_box_t* btn = ui_belem_menu_item(win3->menu, "click this", handler);
-		btn->flags &= ~BOX_HIDDEN;
-	}
-	ui_win_add(&app->windows, win3);
-
+	main_window(app, "GuImP");
+	palette_window(app, "tools");
 	app->start(app);
 	ui_global_free(app);
 	return 0;

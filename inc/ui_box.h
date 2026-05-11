@@ -91,6 +91,13 @@ void      	ui_bhook_destroy_default(ui_box_t* box, SDL_Event* e, void* data);
 void 		ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *data);
 void      	ui_bhook_render_default(ui_box_t* box, SDL_Event *e, void *data);
 
+// render hook
+void ui_bhook_drawbox(ui_box_t* box, SDL_Event* e, void* data);
+void ui_bhook_drawpressed(ui_box_t* box, SDL_Event* e, void* data);
+void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data);
+void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data);
+void ui_bhook_drawlayers(ui_box_t* box, SDL_Event* e, void* data);
+void ui_bhook_drawfocused(ui_box_t* box, SDL_Event* e, void* data);
 // Event hooks added by default to the box obj;
 void		ui_bhook_windowevent_default(ui_box_t *b, SDL_Event* e, void* data);
 void		ui_bhook_clickup_default(ui_box_t *, SDL_Event* e, void* data);
@@ -98,6 +105,10 @@ void		ui_bhook_clickdown_default(ui_box_t *,  SDL_Event* e, void* data);
 void 		ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data);
 
 // Custom hooks;
+//
+void ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data);
+void ui_bhook_inputvalid(ui_box_t *box, SDL_Event *e, void *data);
+void	ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data);
 void	ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data);
 void	ui_bhook_fullheight(ui_box_t*, SDL_Event*, void*);

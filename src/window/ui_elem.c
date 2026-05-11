@@ -88,7 +88,7 @@ SDL_Rect ui_area(int x, int y, int w, int h)
 }
 
 // create a menu list horizontal style
-ui_box_t *ui_belem_menu_navbar(ui_win_t *win, menutype_e type)
+ui_box_t *ui_belem_menu_area(ui_win_t *win, menutype_e type)
 {
 	SDL_Rect area;
 	ui_box_t *navbar;
@@ -131,6 +131,13 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
     input->input_size = 0;
     ui_bhook_add(&input->update, ui_bhook_inputfocus);
     ui_bhook_add(&input->update, ui_bhook_inputcatch);
+	ui_boxhandler_t * curr = input->render;
+	while(curr) {
+		ui_boxhandler_t *next = curr->next;
+		if (curr->fn == ui_bhook_drawlayers)
+			curr->fn = ui_bhook_drawcliplayers;
+		curr = next;
+	}
     return input;
 }
 
@@ -154,11 +161,8 @@ ui_win_t *ui_welem_message(ui_win_t *win, char *message)
     ui_globalApp_t *ref = win->global;
 	SDL_Rect area = {-1, -1, 200, 100};
     ui_win_t *popup = ui_win_create(ref, area, "pop up");
-
-	popup->menu = ui_belem_menu_navbar(popup, UI_FULLWINDOW_MENU);
-			//  popup->menu = ui_box_create(
-			// (SDL_Rect){0, 0, popup->area.w, popup->area.h},
-			// popup->colors[1], popup);
+	ui_whook_add(&popup->on_key_down, ui_whook_quitkey);
+	popup->menu = ui_belem_menu_area(popup, UI_FULLWINDOW_MENU);
     ui_bhook_add(&popup->menu->update, ui_bhook_maxsize);
     ui_bhook_add(&popup->menu->update, ui_bhook_nopressed);
     ui_bhook_add(&popup->menu->update, ui_bhook_nohovered);
@@ -191,6 +195,7 @@ static int	ui_whook_reset_loading(ui_win_t* win, SDL_Event *e, void* data)
 	if(closing) {
 		printf("closing input window\n");
 		app->loading = false;
+		app->state &= ~GLOBAL_LOADING;
 		if (app->input) {
 			free(app->input);
 			app->input = NULL;
@@ -203,13 +208,13 @@ static int	ui_whook_reset_loading(ui_win_t* win, SDL_Event *e, void* data)
 ui_win_t *ui_welem_input(ui_win_t *win)//, char *message)
 {
     ui_globalApp_t *ref = win->global;
-	SDL_Rect area = {-1, -1, 200, 100};
+	SDL_Rect area = {-1, -1, 300, 200};
     ui_win_t *popup;
 
 	popup = ui_win_create(ref, area, "pop up");
-	ui_whook_add(&popup->on_window_event, ui_whook_reset_loading);
-	popup->menu = ui_belem_menu_navbar(popup, UI_FULLWINDOW_MENU);
-    ui_bhook_add(&popup->menu->update, ui_bhook_maxsize);
+	ui_whook_add(&popup->update, ui_whook_reset_loading);
+	popup->menu = ui_belem_menu_area(popup, UI_FULLWINDOW_MENU);
+    // ui_bhook_add(&popup->menu->update, ui_bhook_maxsize);
     ui_bhook_add(&popup->menu->update, ui_bhook_nopressed);
     ui_bhook_add(&popup->menu->update, ui_bhook_nohovered);
 
@@ -217,7 +222,6 @@ ui_win_t *ui_welem_input(ui_win_t *win)//, char *message)
 			popup, 
 			ui_area(0, 0, BOX_MENU_W, BOX_MENU_H),
 			"choose image path");
-
 	msg->color = (SDL_Color) {255,255,255,0};
     ui_bhook_wincenter(msg, NULL, NULL);
 	msg->layers->dimension.y -= 40;
@@ -227,8 +231,24 @@ ui_win_t *ui_welem_input(ui_win_t *win)//, char *message)
 
     ui_box_t *input = ui_belem_input(popup, 64);
     ui_bhook_wincenter(input, NULL, NULL);
-	input->area.y += 40;
     ui_box_add_child(popup->menu, input);
+	input->area.y += 40;
+
+	// ui_box_t *cancel = ui_belem_button(popup, ui_area(
+	// 			input->area.x - 110,
+	// 			input->area.y + 60,
+	// 			BOX_MENU_W,
+	// 			BOX_MENU_H), "cancel");
+	// ui_box_t *load = ui_belem_button(popup, ui_area(
+	// 			input->area.x + 110,
+	// 			input->area.y + 60,
+	// 			BOX_MENU_W,
+	// 			BOX_MENU_H), "load");
+	// ui_bhook_add(&load->update, ui_bhook_inputvalid);
+	// ui_bhook_add(&load->update, ui_bhook_inputcancel);
+	// ui_box_add_child(popup->menu, load);
+	// ui_box_add_child(popup->menu, cancel);
+	
     ui_win_add(&ref->windows, popup);
     return popup;
 }
