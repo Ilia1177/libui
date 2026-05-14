@@ -1,6 +1,6 @@
 #include "libui.h"
 
-SDL_Rect ui_tool_rectcenter(SDL_Rect boxarea, SDL_Rect tocenter) {
+SDL_Rect ui_area_center(SDL_Rect boxarea, SDL_Rect tocenter) {
     return (SDL_Rect){
         boxarea.x + (boxarea.w - tocenter.w) / 2,
         boxarea.y + (boxarea.h - tocenter.h) / 2,
@@ -11,7 +11,8 @@ SDL_Rect ui_tool_rectcenter(SDL_Rect boxarea, SDL_Rect tocenter) {
 
 SDL_Texture *ui_tool_text2texture(ui_win_t* win, const char *text, SDL_Color color)
 {
-    SDL_Surface *surface = TTF_RenderText_Blended(win->font, text, color);
+	SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(win->font, text, color, win->area.w);
+    // SDL_Surface *surface = TTF_RenderText_Blended(win->font, text, color);
     if (!surface) 
 		return NULL;
     SDL_Texture *texture = SDL_CreateTextureFromSurface(win->renderer, surface);

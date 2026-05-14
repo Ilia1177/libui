@@ -1,20 +1,20 @@
 #include "ui_box.h"
 
-ui_box_t* ui_box_create(SDL_Rect rect, SDL_Color color, ui_win_t* parent_window) {
+ui_box_t* ui_box_create(ui_win_t* win, SDL_Rect rect, SDL_Color color) {
     ui_box_t* box = (ui_box_t*)calloc(1, sizeof(ui_box_t));
     if (!box) {
-        fprintf(stderr, "Failed to allocate ui_box_t\n");
         return NULL;
     }
 
 	box->area = rect;
     box->color = color;
-    box->parent_window = parent_window;
-	box->parent_window->flags |= WIN_DIRTY;
+    box->parent_window = win;
+	box->parent_window->state |= WIN_DIRTY;
 
     ui_bhook_add(&box->render, ui_bhook_render_default);
-    ui_bhook_add(&box->render, ui_bhook_drawfocused);
+    // ui_bhook_add(&box->render, ui_bhook_drawtextfocused);
     ui_bhook_add(&box->render, ui_bhook_drawlayers);
+    ui_bhook_add(&box->render, ui_bhook_drawfocused);
     ui_bhook_add(&box->render, ui_bhook_drawhovered);
     ui_bhook_add(&box->render, ui_bhook_drawpressed);
     ui_bhook_add(&box->render, ui_bhook_drawbox);

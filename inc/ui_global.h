@@ -4,10 +4,11 @@
 #include "ui_box.h"  // New: Include ui_box.h
 
 typedef struct ui_winhandler_s ui_winhandler_t;
+typedef struct ui_boxhandler_s ui_boxhandler_t;
 typedef struct ui_win_s ui_win_t;
 
-# define GLOBAL_LOADING (1 << 0)
-# define GLOBAL_QUIT (1 << 1)
+# define APP_LOADING (1 << 0)
+# define APP_QUIT (1 << 1)
 
 typedef struct ui_globalApp_s 
 {
@@ -15,7 +16,8 @@ typedef struct ui_globalApp_s
 	ui_win_t*	windows;
 	ui_box_t*	focused_box;
 	uint32_t 	state;
-	char*		input;
+	void		**inputs;
+	int			input_nb;
 
 	bool loading;
 	// SDL_Rect  button_area;
@@ -30,7 +32,8 @@ typedef struct ui_globalApp_s
     void(*on_mouse_wheel)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_window_resized)(struct ui_globalApp_s*, ui_win_t*, int w, int h);
 
-	ui_winhandler_t *tool;
+	void(*rawtool)(ui_box_t*, SDL_Event*, void*);
+	ui_boxhandler_t *tool;
 	ui_winhandler_t *actions;
 	void(*start)(struct ui_globalApp_s*);
 } ui_globalApp_t;

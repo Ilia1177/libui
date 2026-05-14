@@ -9,7 +9,7 @@ void	ui_bhook_destroy_default(ui_box_t*box, SDL_Event*e, void* data) {
 		ui_bhook_destroy_default(current_child, e, data);
 		current_child = next;
 	}
-	ui_layer_destroy(&box->layers);
+	ui_layer_clean(&box->layers);
     ui_bhook_clean(&box->render);
     ui_bhook_clean(&box->update);
     ui_bhook_clean(&box->destroy);

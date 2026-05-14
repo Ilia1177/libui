@@ -38,10 +38,11 @@ typedef struct ui_box_s {
 	int				padding;
 	int 			border;
 	int 			margin;
+	float			value;
 
 	menutype_e		type;
     uint32_t        flags;
-	char*			label;
+	const char*		label;
 	char*			input;
 	int				input_size;
 	int      		input_sizemax;
@@ -71,7 +72,7 @@ typedef struct ui_box_s {
 // ui_box_t*	ui_box_menu_list_option_add(ui_win_t *win, ui_box_t **list, void(*fn)(ui_box_t*, SDL_Event*, void*));
 
 ui_box_t*	ui_box_last(ui_box_t* boxes);
-ui_box_t*	ui_box_create(SDL_Rect rect, SDL_Color color, ui_win_t* parent_window);
+ui_box_t*	ui_box_create(ui_win_t* parent_window, SDL_Rect rect, SDL_Color color);
 ui_box_t*	ui_box_iter(ui_box_t *b, int n);
 void		ui_box_add_root(ui_box_t **parent, ui_box_t *new);
 void		ui_box_add_child(ui_box_t *parent, ui_box_t *new);
@@ -94,10 +95,11 @@ void      	ui_bhook_render_default(ui_box_t* box, SDL_Event *e, void *data);
 // render hook
 void ui_bhook_drawbox(ui_box_t* box, SDL_Event* e, void* data);
 void ui_bhook_drawpressed(ui_box_t* box, SDL_Event* e, void* data);
+void ui_bhook_drawfocused(ui_box_t* box, SDL_Event* e, void* data);
 void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data);
 void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data);
 void ui_bhook_drawlayers(ui_box_t* box, SDL_Event* e, void* data);
-void ui_bhook_drawfocused(ui_box_t* box, SDL_Event* e, void* data);
+void ui_bhook_drawtextfocused(ui_box_t* box, SDL_Event* e, void* data);
 // Event hooks added by default to the box obj;
 void		ui_bhook_windowevent_default(ui_box_t *b, SDL_Event* e, void* data);
 void		ui_bhook_clickup_default(ui_box_t *, SDL_Event* e, void* data);
@@ -106,8 +108,10 @@ void 		ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data);
 
 // Custom hooks;
 //
-void ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data);
-void ui_bhook_inputvalid(ui_box_t *box, SDL_Event *e, void *data);
+void	ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data);
+void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data);
+void	ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data);
+void	ui_bhook_inputvalid(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data);
 void	ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data);
@@ -115,6 +119,7 @@ void	ui_bhook_fullheight(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_fullwidth(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_inputfocus(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data);
+void	ui_bhook_nofocused(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_nohovered(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_nopressed(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_winclose(ui_box_t*, SDL_Event*, void*);

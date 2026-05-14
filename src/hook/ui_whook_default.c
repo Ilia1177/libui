@@ -4,9 +4,9 @@
 
 int ui_whook_clickdown_default(ui_win_t *win, SDL_Event *e, void* data)
 {
-	if (!win || win->flags & WIN_QUIT)
+	if (!win || win->state & WIN_QUIT)
 		return 1;
-	ui_box_t *curr = win->menu;
+	ui_box_t *curr = win->boxes;
 	while(curr) {
 		if(curr->on_click_down)
 			ui_bhook_fire(curr->on_click_down, curr, e, data);
@@ -23,10 +23,10 @@ int ui_whook_clickdown_default(ui_win_t *win, SDL_Event *e, void* data)
 
 int ui_whook_clickup_default(ui_win_t *win, SDL_Event* e, void *data)
 {
-	if (!win || win->flags & WIN_QUIT)
+	if (!win || win->state & WIN_QUIT)
 		return 1;
 
-	ui_box_t *curr = win->menu;
+	ui_box_t *curr = win->boxes;
 	while(curr) {
 		if (curr->on_click_up) {
 			ui_bhook_fire(curr->on_click_up, curr, e, data);
@@ -45,11 +45,11 @@ int ui_whook_clickup_default(ui_win_t *win, SDL_Event* e, void *data)
 
 int ui_whook_mousemotion_default(ui_win_t *win, SDL_Event* e, void* data)
 {
-	if (win->flags & WIN_QUIT)
+	if (win->state & WIN_QUIT)
 		return 1;
 
 	(void)data;
-	ui_box_t *curr = win->menu;
+	ui_box_t *curr = win->boxes;
 	while(curr) {
 		if (curr->on_mouse_motion) {
 			ui_bhook_fire(curr->on_mouse_motion, curr, e, data);
@@ -66,7 +66,7 @@ int ui_whook_mousemotion_default(ui_win_t *win, SDL_Event* e, void* data)
 int ui_whook_windowevent_default(ui_win_t* win, SDL_Event*e, void* data)
 {
 	if(e->window.event == SDL_WINDOWEVENT_CLOSE) {// && win_id == 1) {
-		win->flags |= WIN_QUIT;
+		win->state |= WIN_QUIT;
 	} else if (e->window.event == SDL_WINDOWEVENT_RESIZED && win) {
 		SDL_GL_GetDrawableSize(win->ptr, &win->area.w, &win->area.h);
 		ui_win_get_scale(win);
@@ -74,7 +74,7 @@ int ui_whook_windowevent_default(ui_win_t* win, SDL_Event*e, void* data)
 	} else if(e->window.event == SDL_WINDOWEVENT_MOVED && win) {
 		SDL_GetWindowPosition(win->ptr, &win->area.x, &win->area.y);
 	}
-	ui_box_t *current = win->menu;
+	ui_box_t *current = win->boxes;
 	while (current) {
 		if (current->on_window_event) {
 			ui_bhook_fire(current->on_window_event, current, e, data);
@@ -90,10 +90,10 @@ int ui_whook_windowevent_default(ui_win_t* win, SDL_Event*e, void* data)
 
 int ui_whook_update_default(ui_win_t* win, SDL_Event*e, void* data)
 {
-	if (win->flags & WIN_QUIT)
+	if (win->state & WIN_QUIT)
 		return 1;
 
-	ui_box_t *current = win->menu;
+	ui_box_t *current = win->boxes;
 	while (current) {
 		if (current->update) {
 			ui_bhook_fire(current->update, current, e, data);
@@ -109,7 +109,7 @@ int ui_whook_update_default(ui_win_t* win, SDL_Event*e, void* data)
 
 int	ui_whook_render_default(ui_win_t* win, SDL_Event* e, void* data) 
 {
-	if (!win || !win->renderer || win->flags & WIN_QUIT)
+	if (!win || !win->renderer || win->state & WIN_QUIT)
 		return 1;
 
 	// char *time = ui_get_time();
@@ -119,14 +119,14 @@ int	ui_whook_render_default(ui_win_t* win, SDL_Event* e, void* data)
 	if (win->canvas && win->canvas->render) {
 		ui_bhook_fire(win->canvas->render, win->canvas, e, data);
 	}
-	ui_box_t *current = win->menu;
+	ui_box_t *current = win->boxes;
 	while(current) {
 		if (current->render) {
 			ui_bhook_fire(current->render, current, e, data);
 		}
 		current = current->next;
 	}
-	win->flags &= ~WIN_DIRTY;
+	win->state &= ~WIN_DIRTY;
 
 	SDL_RenderPresent(win->renderer);
 	return 1;

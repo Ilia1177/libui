@@ -29,10 +29,8 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
     win->id = SDL_GetWindowID(win->ptr);
 	win->font = TTF_OpenFont("Abell Extended.ttf", 38);
 	TTF_SetFontStyle(win->font, TTF_STYLE_BOLD);
-	if (!win->font)
-		fprintf(stderr, "TTF_OpenFont error: %s\n", TTF_GetError());
 	ui_win_init_handlers(win);
-	win->background_color = (SDL_Color){128, 128, 128, 255};
+	win->background_color = COLOR_BG;
 	win->global = app;
 	win->colors = calloc(sizeof(SDL_Color), 5);
 	win->colors[1] = PURPLE;
@@ -41,40 +39,35 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 	win->colors[4] = COLOR_BG;
     // Initialize event handler pointers to NULL
 	return 0;
- 
 }
+
 // create window type in drawable sixel (real pixels)
 // area.x <= 0 makes the window centered on the x axe
 // area.y <= 0 makes the window centered on the y axe
 // area.<w|h> <= 0 makes the window resizable with w=400 h=200
-ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, char* title)
+ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, char* title, uint32_t flags)
 {
 	ui_win_t *win;
-	Uint32 flags;
 
 	win = (ui_win_t*)calloc(sizeof(ui_win_t), 1);
-
-	flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP;
 	if (!win)
 		return NULL;
-	if (area.x <= 0 || area.w <= 0 || area.h <= 0)
+	if (area.x <= 0)
 		area.x = SDL_WINDOWPOS_CENTERED;
-	if (area.y <= 0 || area.w <= 0 || area.h <= 0)
+	if (area.y <= 0)
 		area.y = SDL_WINDOWPOS_CENTERED;
 	if (area.w <= 0 || area.h <= 0) {
-		flags |= SDL_WINDOW_RESIZABLE;
 		area.w = 400;
 		area.h = 200;
 	}
+	flags |= SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP;
 	win->ptr = SDL_CreateWindow(title, area.x, area.y, area.w, area.h, flags);
 	if (!win->ptr) {
         return NULL;
 	}
-
 	if (ui_win_init(app, win) != 0) {
 		return NULL;
 	}
+	ui_win_add(&app->windows, win);
 	return win;
 }
-
-

@@ -19,5 +19,5 @@ void ui_box_add_child(ui_box_t *parent, ui_box_t *child) {
     if (!parent || !child) 
 		return;
     child->parent = parent;
-    ui_box_add_root(&parent->list, child);  // list always matches parent
+    ui_box_add_root(&parent->list, child);
 }

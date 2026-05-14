@@ -23,8 +23,8 @@ LDFLAGS  =	$(SDL2_LIBS) \
 			-L$(HOME)/.local/lib \
     		-lSDL2_image \
 
-CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-LDFLAGS += -fsanitize=address
+# CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+# LDFLAGS += -fsanitize=address
 
 SRC		= window/ui_win_create.c\
 		  window/ui_win_destroy.c\
@@ -44,6 +44,7 @@ SRC		= window/ui_win_create.c\
 		  hook/ui_whook_default.c\
 		  ui_init.c\
 		  ui_quit.c\
+		  utils.c\
 		  ui_get_time.c\
 		  ui_is_mouse_in.c\
 		  box/ui_box_utils.c\

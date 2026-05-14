@@ -9,7 +9,7 @@ int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn) {
 	return 0;
 }
 
-int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn) {
+int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn) { //could be winhandler instead of ui_whook_fn_t
     if (!list || !*list || !fn) return -1;
     ui_winhandler_t *curr = *list;
     ui_winhandler_t *prev = NULL;
@@ -28,15 +28,18 @@ int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn) {
 	return 0;
 }
 
-int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void *data) {
+int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void *data)
+{
     ui_winhandler_t *curr = *list;
     while (curr) {
         ui_winhandler_t *next = curr->next;
         if (curr->fn) {
             int ret = curr->fn(win, e, data);
-            if (ret <= 0) {
-                ui_whook_remove(list, curr->fn);  // remove from real list
-				printf("win hook removed\n");
+            if (ret <= 0)
+                ui_whook_remove(list, curr->fn);
+			if (ret < 0) {
+				ui_welem_message(win->global, SDL_GetError());
+				SDL_ClearError();
 			}
         }
         curr = next;

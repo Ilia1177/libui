@@ -19,24 +19,19 @@ typedef struct ui_win_s
 {
 	SDL_Renderer*	renderer;
 	SDL_Window*		ptr;
-	SDL_Texture*	texture;
 	SDL_Rect		area;
 	ui_scale_t		scale;
-	// char* title;
 	SDL_Color		*colors;
-    uint32_t		id; // New: Unique ID for the SDL Window
-	short			flags;
+    uint32_t		id;
+	short			state;
  
-	SDL_Rect		button_area;
+	// SDL_Rect		button_area;
 	ui_globalApp_t	*global;
-	ui_box_t		*menu;
+	ui_box_t		*boxes;
 	ui_box_t		*canvas;
 
 	SDL_Color		background_color;
-
-
 	TTF_Font		*font;
-    // Updated: Event handler function pointers now take SDL_Event*
 	ui_winhandler_t *on_mouse_wheel;
 	ui_winhandler_t *on_key_down;
 	ui_winhandler_t *on_key_up;
@@ -47,8 +42,6 @@ typedef struct ui_win_s
 	ui_winhandler_t *destroy;
 	ui_winhandler_t *update;
 	ui_winhandler_t *render;
-	
-	bool editable;
 	struct ui_win_s *next;
 } ui_win_t;
 
@@ -58,8 +51,10 @@ void ui_win_add_box(ui_win_t *win, ui_box_t *box);
 void ui_win_add(ui_win_t **list, ui_win_t *win);
 
 ui_scale_t ui_win_get_scale(ui_win_t *win);
-ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, char* title);
+ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, char* title, uint32_t flags);
  
+int ui_whook_next_focus(ui_win_t* win, SDL_Event* e, void* data);
+int ui_whook_reset_global_state(ui_win_t* win, SDL_Event *e, void* data);
 int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data);
 int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *pathraw);
 // principales Hooks de la fenetre. happen each frame

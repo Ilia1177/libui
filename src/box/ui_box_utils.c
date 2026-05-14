@@ -7,6 +7,8 @@ void ui_box_flags(ui_box_t *b, short flag, bool add)
             b->flags |= flag;
         else
             b->flags &= ~flag;
+		if (b->list)
+			ui_box_flags(b->list, flag, add);
         b = b->next;
     }
 }

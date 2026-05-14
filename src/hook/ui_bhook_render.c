@@ -34,13 +34,11 @@ void ui_bhook_drawpressed(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	ui_win_t *win;
 
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_PRESSED))
         return;
 	win = box->parent_window;
-    if (box->flags & BOX_PRESSED) {
-        SDL_SetRenderDrawColor(win->renderer, 0, 0, 0, 80);
-        SDL_RenderFillRect(win->renderer, &box->area);
-    }
+	SDL_SetRenderDrawColor(win->renderer, 0, 0, 0, 80);
+	SDL_RenderFillRect(win->renderer, &box->area);
 }
 
 void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data)
@@ -49,14 +47,12 @@ void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	ui_win_t *win;
 
-	if (!box || (box->flags & BOX_HIDDEN))
+	if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_HOVERED))
         return;
 	win = box->parent_window;
     SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
-    if (box->flags & BOX_HOVERED) {
-        SDL_SetRenderDrawColor(win->renderer, 255, 255, 255, 50);
-        SDL_RenderFillRect(win->renderer, &box->area);
-    }
+	SDL_SetRenderDrawColor(win->renderer, 255, 255, 255, 50);
+	SDL_RenderFillRect(win->renderer, &box->area);
 }
 
 void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
@@ -74,7 +70,7 @@ void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
 		ui_layer_t *curr = box->layers;
 		while (curr) {
 			if (curr->texture)
-				SDL_RenderCopy(win->renderer, curr->texture, NULL, &curr->dimension);
+				SDL_RenderCopy(win->renderer, curr->texture, NULL, &curr->area);
 			curr = curr->next;
 		}
 	}
@@ -96,20 +92,32 @@ void ui_bhook_drawlayers(ui_box_t* box, SDL_Event* e, void* data)
 		ui_layer_t *curr = box->layers;
 		while (curr) {
 			if (curr->texture)
-				SDL_RenderCopy(win->renderer, curr->texture, NULL, &curr->dimension);
+				SDL_RenderCopy(win->renderer, curr->texture, NULL, &curr->area);
 			curr = curr->next;
 		}
 	}
 }
 
-void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data) {
+void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data)
+{
+	(void)e;
+	(void)data;
+	ui_win_t *win;
+
+	if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_FOCUSED))
+		return;
+	win = box->parent_window;
+	SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(win->renderer, 12, 23, 23, 50);
+	SDL_RenderFillRect(win->renderer, &box->area);
+}
+
+void ui_bhook_drawtextfocused(ui_box_t *box, SDL_Event *e, void *data) {
     (void)e;
     (void)data;
     if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_FOCUSED))
         return;
-
     ui_win_t *win = box->parent_window;
-    
     static Uint32 last_blink = 0;
     static bool   visible    = true;
     Uint32 now = SDL_GetTicks();
@@ -119,6 +127,7 @@ void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data) {
     }
     if (!visible) 
 		return;
+
     int tw = 0;
     if (box->layers && box->layers->texture)
         SDL_QueryTexture(box->layers->texture, NULL, NULL, &tw, NULL);

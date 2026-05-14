@@ -13,15 +13,14 @@ void	ui_bhook_clickup_default(ui_box_t *b, SDL_Event* e, void* data)
 
 void	ui_bhook_windowevent_default(ui_box_t *b, SDL_Event* e, void* data)
 {
-
 	ui_box_t *curr = b->list;
 	while(curr) {
 		if(curr->on_window_event)
             ui_bhook_fire(curr->on_window_event, curr, e, data);
 		curr = curr->next;
 	}
-
 }
+
 void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
 	(void)data;
 	SDL_MouseButtonEvent *btn = &e->button;
@@ -29,10 +28,17 @@ void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
     int px = (int)(btn->x * win->scale.x);
     int py = (int)(btn->y * win->scale.y);
     SDL_Point p = {px, py};
+	bool focused = b->flags & BOX_FOCUSED;
+
     if (SDL_PointInRect(&p, &b->area) && (!b->list) && b->flags & BOX_HOVERED) {
         b->flags |= BOX_CLICKED;
         b->flags |= BOX_PRESSED;
-		printf("box clicked\n");
+		ui_box_flags(win->boxes, BOX_FOCUSED, false);
+		ui_box_flags(win->canvas, BOX_FOCUSED, false);
+		if (!focused) {
+			b->flags |= BOX_FOCUSED;
+			printf("box focused\n");
+		}
     } else {
         b->flags &= ~BOX_PRESSED;  // release even if mouse moved off
     }
@@ -72,7 +78,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
     int py = (int)(btn->y * win->scale.y);
     SDL_Point p = {px, py};
 
-	ui_box_t *top_hovered_menubox = hovered_box(win->menu, &p);
+	ui_box_t *top_hovered_menubox = hovered_box(win->boxes, &p);
 	ui_box_t *cnv_hovered = hovered_box(win->canvas, &p);
 	if(top_hovered_menubox == box) {
 		box->flags |= BOX_HOVERED;
