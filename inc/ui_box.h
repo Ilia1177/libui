@@ -27,6 +27,12 @@
 #define BOX_DISABLE 	(1 << 5)
 
 #define INPUT_SIZE_MAX 64
+typedef struct s_ui_input_data {
+    char* buffer;
+    int size;
+    int sizemax;
+} ui_input_data_t;
+
 typedef void (*ui_bhook_fn_t)(ui_box_t*, SDL_Event*, void*);
 
 typedef struct ui_boxhandler_s
@@ -35,22 +41,20 @@ typedef struct ui_boxhandler_s
 	struct ui_boxhandler_s *next;
 } ui_boxhandler_t;
 
-typedef struct ui_box_s {
+typedef struct ui_box_s 
+{
 	SDL_Rect		area;
     SDL_Color       color;
 	int				padding;
 	int 			border;
 	int 			margin;
-	float			value;
-
-	menutype_e		type;
+	boxtype_e		type;
     uint32_t        flags;
 	const char*		label;
 	void*			data;
-	// int				input_size;
-	// int      		input_sizemax;
 	ui_layer_t*		layers;
 	ui_layer_t*		selection;
+    ui_win_t*		parent_window;
 
 	ui_boxhandler_t *on_window_event;
 	ui_boxhandler_t *on_key_down;
@@ -63,10 +67,9 @@ typedef struct ui_box_s {
     ui_boxhandler_t *render;
 
 	struct ui_box_s *parent;
-	struct ui_box_s *list;
+	struct ui_box_s *childs;
     struct ui_box_s *next;
     struct ui_box_s *prev;
-    ui_win_t*      parent_window; // To know which window it belongs to
 } ui_box_t;
 
 // ui_box_t*	ui_elem_menu_list(ui_box_t* menu, char*);
@@ -86,9 +89,9 @@ void		ui_box_flags(ui_box_t *b, short flag, bool add);
 
 // Hook tools
 void	ui_bhook_clean(ui_boxhandler_t **list);
-void	ui_bhook_add(ui_boxhandler_t**, void(*fn)(ui_box_t*, SDL_Event*, void*));
+void	ui_bhook_add(ui_boxhandler_t **list, ui_bhook_fn_t fn);
+void	ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn);
 void	ui_bhook_fire(ui_boxhandler_t*, ui_box_t*, SDL_Event*, void*);
-void	ui_bhook_add(ui_boxhandler_t **list, void (*fn)(ui_box_t*, SDL_Event*, void*));
 
 // Loop hooks added by default to the box obj;
 void      	ui_bhook_destroy_default(ui_box_t* box, SDL_Event* e, void* data);
@@ -111,6 +114,7 @@ void 		ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data);
 
 // Custom hooks;
 //
+void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data);
 void	ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data);
 void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data);
 void	ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data);

@@ -1,11 +1,13 @@
 #include "ui_win.h"
 #include "ui_box.h"
+#include "libft.h"
 
 ui_box_t *ui_belem_menu_list(ui_box_t *menu, const char* label) 
 {
 	ui_box_t *new_list;
-    int list_nb = ui_box_count_next(menu->list);
+    int list_nb;
 
+	list_nb = ui_box_count_next(menu->childs);
     new_list = ui_belem_button(menu->parent_window, label);
 	if (menu->type == UI_HORIZONTAL_MENU) {
     	new_list->area.x = MENU_OFFSET_X + (list_nb * (BOX_MENU_W + MENU_GAP_X));
@@ -25,26 +27,11 @@ ui_box_t *ui_belem_menu_list(ui_box_t *menu, const char* label)
     return new_list;
 }
 
-static void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) {
-	ui_win_t* win = btn->parent_window;
 
-	(void)e;
-	(void)data;
-
-	ui_layer_t* layer = btn->layers;
-	int count = ui_box_count_prev(btn);
-	btn->area.w = (win->area.w - 3 * MENU_GAP_X) / 2;
-	if (count % 2 == 1 || count % 2 == 2) {
-		btn->area.x = MENU_GAP_X;
-	} else {
-		btn->area.x = MENU_GAP_X * 2 + btn->area.w;
-	}
-	layer->area.x = btn->area.x + (BOX_MENU_W - layer->area.w) / 2;
-}
 
 ui_box_t* ui_belem_menu_item(ui_box_t *list, const char* label, ui_bhook_fn_t fn)
 {
-	int btn_nb = ui_box_count_next(list->list);
+	int btn_nb = ui_box_count_next(list->childs);
 	// SDL_Rect pos = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 	ui_bhook_fn_t hook;
 
@@ -81,12 +68,13 @@ SDL_Rect ui_area(int x, int y, int w, int h)
 }
 
 // create a menu list horizontal style
-ui_box_t *ui_belem_menu_make(ui_win_t *win, menutype_e type)
+ui_box_t *ui_belem_menu_make(ui_win_t *win, boxtype_e type)
 {
 	SDL_Rect area;
 	ui_box_t *navbar;
-	void (*widthhandler)(ui_box_t*, SDL_Event*, void*) = NULL;;
-	void (*heighthandler)(ui_box_t*, SDL_Event*, void*) = NULL;
+
+	ui_bhook_fn_t widthhandler = NULL;
+	ui_bhook_fn_t heighthandler = NULL;
 
 	switch(type) {
 		case UI_HORIZONTAL_MENU:
@@ -127,8 +115,7 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 
 	SDL_Rect area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 	input = ui_box_create(win, area, COLOR_WHITE);
-    input->data = calloc(INPUT_SIZE_MAX + 1, sizeof(char));
-    // input->input_size = 0;
+    input->data = ft_calloc(INPUT_SIZE_MAX + 1, sizeof(char));
     ui_bhook_add(&input->update, ui_bhook_inputfocus);
     ui_bhook_add(&input->update, ui_bhook_inputcatch);
 	ui_boxhandler_t * curr = input->render;
@@ -143,19 +130,7 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
     return input;
 }
 
-ui_box_t*	ui_belem_slider(ui_win_t* win, const char* label)
-{
-		ui_box_t		*btn;
-		SDL_Texture* texture; 
 
-		SDL_Rect area;
-
-		area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
-		btn = ui_box_create(win, area, win->colors[2]);
-		texture = ui_tool_text2texture(btn->parent_window, label, COLOR_WHITE);
-		ui_layer_make(btn, texture);
-		return btn;
-}
 
 ui_box_t*	ui_belem_button(ui_win_t* win, const char* label)
 {

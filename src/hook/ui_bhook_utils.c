@@ -6,21 +6,6 @@ void ui_bhook_add(ui_boxhandler_t **list, ui_bhook_fn_t fn) {
     handler->next = *list;  // point to current head
     *list = handler;        // become new head
 }
-// void ui_bhook_add(ui_boxhandler_t **list, void (*fn)(ui_box_t*, SDL_Event*, void*)) {
-//     if (!fn) return;
-//     ui_boxhandler_t *handler = calloc(1, sizeof(ui_boxhandler_t));
-//     handler->fn = fn;
-//     handler->next = NULL;
-//     if (!*list) {
-//         *list = handler;
-//         return;
-//     }
-//     // append to end
-//     ui_boxhandler_t *curr = *list;
-//     while (curr->next)
-//         curr = curr->next;
-//     curr->next = handler;
-// }
 
 void ui_bhook_fire(ui_boxhandler_t *list, ui_box_t *box, SDL_Event *e, void* data) {
     while (list) {
@@ -44,3 +29,28 @@ void ui_bhook_clean(ui_boxhandler_t **list) {
     *list = NULL;
 }
 
+void ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn)
+{
+    if (!list || !*list || !fn)
+        return;
+
+    ui_boxhandler_t *curr = *list;
+    ui_boxhandler_t *prev = NULL;
+
+    while (curr)
+    {
+        if (curr->fn == fn)
+        {
+            if (prev)
+                prev->next = curr->next;
+            else
+                *list = curr->next;
+
+            free(curr);
+            return;
+        }
+
+        prev = curr;
+        curr = curr->next;
+    }
+}

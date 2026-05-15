@@ -1,5 +1,22 @@
 #include "libui.h"
+void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) {
+	ui_win_t* win = btn->parent_window;
 
+	(void)e;
+	(void)data;
+
+	ui_layer_t* layer = btn->layers;
+	int count = ui_box_count_prev(btn);
+	btn->area.w = (win->area.w - 3 * MENU_GAP_X) / 2;
+	if (count % 2 == 1 || count % 2 == 2) {
+		btn->area.x = MENU_GAP_X;
+	} else {
+		btn->area.x = MENU_GAP_X * 2 + btn->area.w;
+	}
+	if(layer)
+		layer->area.x = btn->area.x + (BOX_MENU_W - layer->area.w) / 2;
+	btn->parent_window->state |= WIN_DIRTY;
+}
 void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data)
 {
 	ui_win_t* win;
@@ -68,15 +85,15 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 	(void)data;
 	(void)e;
 	if (box->flags & BOX_HOVERED) {
-		ui_box_flags(box->list, BOX_HIDDEN, false);
+		ui_box_flags(box->childs, BOX_HIDDEN, false);
 	} else {
-		ui_box_t *curr = box->list;
+		ui_box_t *curr = box->childs;
 		while (curr) {
 			if (curr->flags & BOX_HOVERED) 
 				return;
 			curr = curr->next;
 		}
-		ui_box_flags(box->list, BOX_HIDDEN, true);
+		ui_box_flags(box->childs, BOX_HIDDEN, true);
 	}
 }
 
@@ -131,7 +148,7 @@ void transfert_all_input(ui_globalApp_t* app, ui_box_t* box)
 		box->parent_window->state |= WIN_QUIT;
 		box->parent_window->global->windows->state |= WIN_DIRTY;
 	}
-    transfert_all_input(app, box->list);
+    transfert_all_input(app, box->childs);
     transfert_all_input(app, box->next);
 }
 

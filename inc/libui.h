@@ -20,6 +20,13 @@ typedef struct ui_box_s ui_box_t;
 typedef struct ui_win_s ui_win_t;
 typedef void (*ui_bhook_fn_t)(ui_box_t*, SDL_Event*, void*);
 
+typedef struct ui_slider_data_s {
+	float max_value;
+	float min_value;
+	float default_value;
+	float current_value;
+	bool isdragging;
+} ui_slider_data_t;
 
 typedef struct ui_layer_s {
 	short			state;

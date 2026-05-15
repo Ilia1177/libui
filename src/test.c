@@ -74,7 +74,7 @@ void new_window(ui_box_t* box, SDL_Event *e, void* data)
 	}
 }
 
-ui_win_t* main_window(ui_globalApp_t* app, char* name, menutype_e type)
+ui_win_t* main_window(ui_globalApp_t* app, char* name, boxtype_e type)
 {
 	ui_win_t* win;
 
@@ -91,6 +91,17 @@ ui_win_t* main_window(ui_globalApp_t* app, char* name, menutype_e type)
 	return win;
 }
 
+void change_canvas_color(ui_box_t* slider, SDL_Event* e, void*data)
+{
+	(void)e;
+	(void)data;
+
+	ui_slider_data_t* slider_data = (ui_slider_data_t*)slider->data;
+	ui_box_t* cnv = slider->parent_window->global->windows->canvas;
+	cnv->color.r = (int)slider_data->current_value;
+	printf("current value: %f\n", slider_data->current_value);
+}
+
 ui_win_t* palette_window(ui_globalApp_t* app, char* name)
 {
 	ui_win_t* win;
@@ -98,7 +109,15 @@ ui_win_t* palette_window(ui_globalApp_t* app, char* name)
 	win = ui_win_create(app, (SDL_Rect){800, 400, 200, 800}, name, 0);
 	ui_box_t* menu = ui_belem_menu_make(win, UI_FULLWINDOW_MENU);
 	ui_belem_menu_item(menu, "A", set_move_layer);
-	ui_box_flags(menu->list, BOX_HIDDEN, false);
+	ui_slider_data_t data;
+	data.min_value = 0.0f;
+	data.max_value = 255.0f;
+	data.default_value = 0.5f;
+	ui_box_t* slider = ui_belem_slider(win, data);
+	ui_box_add_child(menu, slider);
+	// ui_bhook_add(&slider->on_window_event, ui_bhook_fullwindow_button);
+	ui_bhook_add(&slider->update, change_canvas_color);
+	ui_box_flags(menu->childs, BOX_HIDDEN, false);
 	return win;
 }
 

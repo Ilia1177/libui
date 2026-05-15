@@ -15,6 +15,7 @@ INCS =	-I$(BREW_PREFIX)/include \
 		-I$(BREW_PREFIX)/include/SDL2 \
 		-I$(INC_DIR) \
 		-I$(SRC_DIR) \
+		-I../libft/include \
 		-I/usr/local/include \
 		-I$(HOME)/.local/include
 
@@ -22,6 +23,7 @@ LDFLAGS  =	$(SDL2_LIBS) \
     		-L$(BREW_PREFIX)/lib \
 			-L$(HOME)/.local/lib \
     		-lSDL2_image \
+			-L../libft/bin -lft \
 
 # CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 # LDFLAGS += -fsanitize=address
@@ -34,6 +36,7 @@ SRC		= window/ui_win_create.c\
 		  window/ui_win_size.c\
 		  window/ui_text.c\
 		  elem/ui_elem.c\
+		  elem/ui_belem_slider.c\
 		  global/ui_globalApp.c\
 		  hook/ui_bhook.c\
 		  hook/ui_bhook_render.c\

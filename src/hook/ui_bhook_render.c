@@ -153,7 +153,7 @@ void ui_bhook_render_default(ui_box_t *box, SDL_Event*e, void* data)
 	renderer = box->parent_window->renderer;
     if (!renderer) 
 		return;
-    ui_box_t *current = box->list;
+    ui_box_t *current = box->childs;
     while (current) {
         if (current->render)
             ui_bhook_fire(current->render, current, e, data);

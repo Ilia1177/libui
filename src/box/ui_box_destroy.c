@@ -1,7 +1,7 @@
 #include "ui_box.h"
 
 void	ui_bhook_destroy_default(ui_box_t*box, SDL_Event*e, void* data) {
-	ui_box_t *current_child = box->list;
+	ui_box_t *current_child = box->childs;
 	if (!box)
 		return;
 	while(current_child) {

@@ -7,8 +7,8 @@ void ui_box_flags(ui_box_t *b, short flag, bool add)
             b->flags |= flag;
         else
             b->flags &= ~flag;
-		if (b->list)
-			ui_box_flags(b->list, flag, add);
+		if (b->childs)
+			ui_box_flags(b->childs, flag, add);
         b = b->next;
     }
 }
@@ -19,7 +19,7 @@ int ui_box_count_all(ui_box_t* head)
 	ui_box_t* curr = head;
 	while(curr) {
 		n++;
-		n += ui_box_count_all(curr->list);
+		n += ui_box_count_all(curr->childs);
 		curr = curr->next;
 	}
 	return n;

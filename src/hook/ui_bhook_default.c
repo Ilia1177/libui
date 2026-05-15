@@ -3,7 +3,7 @@
 void	ui_bhook_clickup_default(ui_box_t *b, SDL_Event* e, void* data)
 {
     b->flags &= ~BOX_PRESSED;
-	ui_box_t *curr = b->list;
+	ui_box_t *curr = b->childs;
 	while(curr) {
 		if(curr->on_click_up)
 			ui_bhook_fire(curr->on_click_up, curr, e, data);
@@ -13,7 +13,7 @@ void	ui_bhook_clickup_default(ui_box_t *b, SDL_Event* e, void* data)
 
 void	ui_bhook_windowevent_default(ui_box_t *b, SDL_Event* e, void* data)
 {
-	ui_box_t *curr = b->list;
+	ui_box_t *curr = b->childs;
 	while(curr) {
 		if(curr->on_window_event)
             ui_bhook_fire(curr->on_window_event, curr, e, data);
@@ -30,7 +30,7 @@ void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
     SDL_Point p = {px, py};
 	bool focused = b->flags & BOX_FOCUSED;
 
-    if (SDL_PointInRect(&p, &b->area) && (!b->list) && b->flags & BOX_HOVERED) {
+    if (SDL_PointInRect(&p, &b->area) && (!b->childs) && b->flags & BOX_HOVERED) {
         b->flags |= BOX_CLICKED;
         b->flags |= BOX_PRESSED;
 		ui_box_flags(win->boxes, BOX_FOCUSED, false);
@@ -42,7 +42,7 @@ void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
     } else {
         b->flags &= ~BOX_PRESSED;  // release even if mouse moved off
     }
-	ui_box_t *curr = b->list;
+	ui_box_t *curr = b->childs;
 	while(curr) {
 		if(curr->on_click_down)
             ui_bhook_fire(curr->on_click_down, curr, e, data);
@@ -60,7 +60,7 @@ ui_box_t* hovered_box(ui_box_t* boxes, SDL_Point *p)
 		if(SDL_PointInRect(p, &curr->area)) {
 			selected = curr;
 		}
-		ui_box_t *child = hovered_box(curr->list, p);
+		ui_box_t *child = hovered_box(curr->childs, p);
 		if (child) {
 			selected = child;
 		}
@@ -88,7 +88,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 		box->flags &= ~BOX_HOVERED;
         box->flags &= ~BOX_PRESSED;
 	}
-	ui_box_t *curr = box->list;
+	ui_box_t *curr = box->childs;
 	while(curr) {
 		if (curr->on_mouse_motion) 
 			ui_bhook_fire(curr->on_mouse_motion, curr, e, data);
@@ -98,7 +98,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 
 void ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *data)
 {
-	ui_box_t *current = box->list;
+	ui_box_t *current = box->childs;
 	box->flags &= ~BOX_CLICKED;
 	while(current) {
 		if (current->update) {

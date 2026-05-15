@@ -22,7 +22,7 @@ static ui_box_t *ui_next_focusable(ui_box_t *box)
     if (ui_box_focusable(box))
         return box;
 
-    ui_box_t *found = ui_next_focusable(box->list);
+    ui_box_t *found = ui_next_focusable(box->childs);
     if (found)
         return found;
 
@@ -37,7 +37,7 @@ static ui_box_t *ui_find_focused(ui_box_t *box)
     if (box->flags & BOX_FOCUSED)
         return box;
 
-    ui_box_t *found = ui_find_focused(box->list);
+    ui_box_t *found = ui_find_focused(box->childs);
     if (found)
         return found;
 
@@ -49,8 +49,8 @@ static ui_box_t *ui_next_node(ui_box_t *box)
     if (!box)
         return NULL;
 
-    if (box->list)
-        return box->list;
+    if (box->childs)
+        return box->childs;
 
     while (box)
     {
