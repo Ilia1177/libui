@@ -24,7 +24,7 @@ void reset_state_and_input(ui_globalApp_t* app, bool* running)
 {
 	if (running)
 		*running = false; 
-	app->state &= APP_LOADING;
+	app->state &= ~APP_LOADING;
 	for (int i = 0; i < app->input_nb; i++)
 		free(app->inputs[i]);
 	free(app->inputs);

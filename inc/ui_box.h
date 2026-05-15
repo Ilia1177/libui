@@ -26,8 +26,11 @@
 #define BOX_CLICKED		(1 << 4)
 #define BOX_DISABLE 	(1 << 5)
 
+#define INPUT_SIZE_MAX 64
 typedef void (*ui_bhook_fn_t)(ui_box_t*, SDL_Event*, void*);
-typedef struct ui_boxhandler_s {
+
+typedef struct ui_boxhandler_s
+{
 	ui_bhook_fn_t fn;
 	struct ui_boxhandler_s *next;
 } ui_boxhandler_t;
@@ -43,9 +46,9 @@ typedef struct ui_box_s {
 	menutype_e		type;
     uint32_t        flags;
 	const char*		label;
-	char*			input;
-	int				input_size;
-	int      		input_sizemax;
+	void*			data;
+	// int				input_size;
+	// int      		input_sizemax;
 	ui_layer_t*		layers;
 	ui_layer_t*		selection;
 

@@ -12,7 +12,7 @@ typedef enum {
 // typedef ui_bhook_fn_s ui_bhook_fn_t;
 //
 ui_box_t* ui_belem_message(ui_win_t* win, const char* msg);
-ui_win_t	*ui_welem_input(ui_win_t *win);
+ui_win_t	*ui_welem_input(ui_globalApp_t *app);
 ui_win_t	*ui_welem_message(ui_globalApp_t* app, const char *message);
 ui_box_t	*ui_belem_input(ui_win_t *win, int max_len);
 ui_box_t	*ui_belem_button(ui_win_t* win, const char* label);

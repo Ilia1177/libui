@@ -33,7 +33,7 @@ SRC		= window/ui_win_create.c\
 		  window/ui_win_pos.c\
 		  window/ui_win_size.c\
 		  window/ui_text.c\
-		  window/ui_elem.c\
+		  elem/ui_elem.c\
 		  global/ui_globalApp.c\
 		  hook/ui_bhook.c\
 		  hook/ui_bhook_render.c\
@@ -41,7 +41,13 @@ SRC		= window/ui_win_create.c\
 		  hook/ui_bhook_default.c\
 		  hook/ui_whook.c\
 		  hook/ui_whook_utils.c\
-		  hook/ui_whook_default.c\
+		  hook/ui_whook_update_default.c\
+		  hook/ui_whook_render_default.c\
+		  hook/ui_whook_clickup_default.c\
+		  hook/ui_whook_clickdown_default.c\
+		  hook/ui_whook_keydown_default.c\
+		  hook/ui_whook_mousemotion_default.c\
+		  hook/ui_whook_windowevent_default.c\
 		  ui_init.c\
 		  ui_quit.c\
 		  utils.c\

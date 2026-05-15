@@ -103,9 +103,9 @@ void ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data)
 		box->flags &= ~BOX_FOCUSED;
 		box->parent_window->state |= WIN_QUIT;
 		box->parent_window->global->windows->state |= WIN_DIRTY;
-		if (box->input)
-			free(box->input);
-		box->input = NULL;
+		if (box->data)
+			free(box->data);
+		box->data = NULL;
 	}
 }
 
@@ -113,7 +113,7 @@ void transfert_all_input(ui_globalApp_t* app, ui_box_t* box)
 {
 	if (!box) {
 		return;
-	} else if (box->input) {
+	} else if (box->data) {
 		printf("valid input\n");
 		fflush(stdout);
 		// append input to app->inputs
@@ -122,11 +122,11 @@ void transfert_all_input(ui_globalApp_t* app, ui_box_t* box)
 			(app->input_nb + 1) * sizeof(char*),  // old
 			(app->input_nb + 2) * sizeof(char*)
 				);
-		app->inputs[n]     = box->input;  // store current input
+		app->inputs[n]     = box->data;  // store current input
 		app->inputs[n + 1] = NULL;        // NULL terminate like argv
 		app->input_nb++;
 
-		box->input = NULL;
+		box->data = NULL;
 		box->flags &= ~BOX_FOCUSED;
 		box->parent_window->state |= WIN_QUIT;
 		box->parent_window->global->windows->state |= WIN_DIRTY;
@@ -195,22 +195,23 @@ void ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data)
     (void)data;
     if (!box || !(box->flags & BOX_FOCUSED) || !e)
         return;
-
+	char *input = (char *)box->data;
     // ui_globalApp_t *app = box->parent_window->global;
     bool updated = false;
 
+	int input_size = box->data ? strlen((char*)box->data) : 0;
     if (e->type == SDL_TEXTINPUT) {
         int add = strlen(e->text.text);
-        if (box->input_size + add < box->input_sizemax) {
-            strcat(box->input, e->text.text);
-            box->input_size += add;
+        if (input_size + add < INPUT_SIZE_MAX) {
+            strcat(box->data, e->text.text);
+            // box->input_size += add;
             updated = true;
         }
     } else if (e->type == SDL_KEYDOWN) {
         switch (e->key.keysym.sym) {
             case SDLK_BACKSPACE:
-                if (box->input_size > 0) {
-                    box->input[--box->input_size] = '\0';
+                if (input_size > 0) {
+                    input[--input_size] = '\0';
                     updated = true;
                 }
                 break;
@@ -221,7 +222,6 @@ void ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data)
             case SDLK_RETURN:
         		SDL_StopTextInput();
 				transfert_all_input(box->parent_window->global, box);
-				// ui_bhook_inputvalid(box, e, NULL);
 				break;
         }
     }
@@ -230,7 +230,7 @@ void ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data)
         ui_layer_clean(&box->layers);
         SDL_Color c = {0, 0, 0, 255};
         SDL_Texture *texture = ui_tool_text2texture(box->parent_window,
-            box->input_size > 0 ? box->input : "", c);
+            input_size > 0 ? box->data : "", c);
 
         // int tw, th;
         // SDL_QueryTexture(texture, NULL, NULL, &tw, &th);

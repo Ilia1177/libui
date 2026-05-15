@@ -7,6 +7,7 @@ int ui_win_init_handlers(ui_win_t* win)
 	ui_whook_add(&win->destroy ,ui_whook_destroy_default);
 	ui_whook_add(&win->render ,ui_whook_render_default);
 	ui_whook_add(&win->on_click_down, ui_whook_clickdown_default);
+	ui_whook_add(&win->on_key_down, ui_whook_keydown_default);
 	ui_whook_add(&win->on_click_up, ui_whook_clickup_default);
 	ui_whook_add(&win->on_mouse_motion, ui_whook_mousemotion_default);
 	ui_whook_add(&win->on_window_event, ui_whook_windowevent_default);

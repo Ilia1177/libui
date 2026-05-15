@@ -122,13 +122,13 @@ ui_box_t *ui_belem_canvas(ui_win_t* win)
 
 ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 {
+	(void)max_len;
 	ui_box_t		*input = NULL;
 
 	SDL_Rect area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 	input = ui_box_create(win, area, COLOR_WHITE);
-    input->input = calloc(max_len + 1, sizeof(char));
-    input->input_sizemax = max_len;
-    input->input_size = 0;
+    input->data = calloc(INPUT_SIZE_MAX + 1, sizeof(char));
+    // input->input_size = 0;
     ui_bhook_add(&input->update, ui_bhook_inputfocus);
     ui_bhook_add(&input->update, ui_bhook_inputcatch);
 	ui_boxhandler_t * curr = input->render;
@@ -212,14 +212,13 @@ ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
     return popup;
 }
 
-ui_win_t *ui_welem_input(ui_win_t *win)//, char *message)
+ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
 {
 	printf("welem input 1\n");
-    ui_globalApp_t *ref = win->global;
 	SDL_Rect area = {-1, -1, 230, 150};
     ui_win_t *popup;
 
-	popup = ui_win_create(ref, area, "pop up", 0);
+	popup = ui_win_create(app, area, "pop up", 0);
 	ui_belem_menu_make(popup, UI_FULLWINDOW_MENU);
 	ui_box_t* msg = ui_belem_message(popup, "Select the image path");
     ui_box_add_child(popup->boxes, msg);
@@ -230,8 +229,8 @@ ui_win_t *ui_welem_input(ui_win_t *win)//, char *message)
     ui_bhook_wincenter(valid, NULL, &(SDL_Rect){0, 100, 0, 0});
     ui_box_add_child(popup->boxes, input);
     ui_box_add_child(popup->boxes, valid);
-	ui_whook_add(&popup->on_window_event, ui_whook_reset_global_state);
-	ui_whook_add(&popup->on_key_down, ui_whook_next_focus);
+	// ui_whook_add(&popup->on_window_event, ui_whook_reset_global_state);
+	ui_whook_add(&popup->on_key_down, ui_whook_keydown_default);
     return popup;
 }
 

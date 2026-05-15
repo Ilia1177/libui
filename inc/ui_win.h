@@ -53,7 +53,7 @@ void ui_win_add(ui_win_t **list, ui_win_t *win);
 ui_scale_t ui_win_get_scale(ui_win_t *win);
 ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, char* title, uint32_t flags);
  
-int ui_whook_next_focus(ui_win_t* win, SDL_Event* e, void* data);
+int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data);
 int ui_whook_reset_global_state(ui_win_t* win, SDL_Event *e, void* data);
 int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data);
 int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *pathraw);
