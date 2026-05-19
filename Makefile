@@ -38,8 +38,14 @@ SRC		= window/ui_win_create.c\
 		  elem/ui_elem.c\
 		  elem/ui_belem_slider.c\
 		  global/ui_globalApp.c\
+		  hook/ui_bhook_mousemotion_default.c\
+		  hook/ui_bhook_clickdown_default.c\
+		  hook/ui_bhook_clickup_default.c\
+		  hook/ui_bhook_update_default.c\
+		  hook/ui_bhook_render_default.c\
+		  hook/ui_bhook_windowevent_default.c\
+		  hook/ui_bhook_mousewheel_default.c\
 		  hook/ui_bhook.c\
-		  hook/ui_bhook_render.c\
 		  hook/ui_bhook_utils.c\
 		  hook/ui_bhook_default.c\
 		  hook/ui_whook.c\
@@ -50,6 +56,7 @@ SRC		= window/ui_win_create.c\
 		  hook/ui_whook_clickdown_default.c\
 		  hook/ui_whook_keydown_default.c\
 		  hook/ui_whook_mousemotion_default.c\
+		  hook/ui_whook_mousewheel_default.c\
 		  hook/ui_whook_windowevent_default.c\
 		  ui_init.c\
 		  ui_quit.c\

@@ -37,20 +37,28 @@ void ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn)
     ui_boxhandler_t *curr = *list;
     ui_boxhandler_t *prev = NULL;
 
-    while (curr)
-    {
-        if (curr->fn == fn)
-        {
+    while (curr) {
+        if (curr->fn == fn) {
             if (prev)
                 prev->next = curr->next;
             else
                 *list = curr->next;
-
             free(curr);
             return;
         }
-
         prev = curr;
         curr = curr->next;
     }
+}
+
+void ui_bhook_replace(ui_boxhandler_t *handler, ui_bhook_fn_t old, ui_bhook_fn_t new)
+{
+	ui_boxhandler_t * curr = handler;
+	while(curr) {
+		ui_boxhandler_t *next = curr->next;
+		if (curr->fn == old)
+			curr->fn = new;
+		curr = next;
+	}
+
 }

@@ -10,19 +10,19 @@ void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
     SDL_Point p = {px, py};
 	bool focused = b->flags & BOX_FOCUSED;
 
-    if (SDL_PointInRect(&p, &b->area) && (!b->list) && b->flags & BOX_HOVERED) {
+    if (SDL_PointInRect(&p, &b->area) && b->flags & BOX_HOVERED) {
         b->flags |= BOX_CLICKED;
         b->flags |= BOX_PRESSED;
-		ui_box_flags(win->boxes, BOX_FOCUSED, false);
-		ui_box_flags(win->canvas, BOX_FOCUSED, false);
+		// ui_box_flags(win->boxes, BOX_FOCUSED, false, true);
+		// ui_box_flags(win->canvas, BOX_FOCUSED, false, true);
 		if (!focused) {
 			b->flags |= BOX_FOCUSED;
-			printf("box focused\n");
 		}
     } else {
+		b->flags &= ~BOX_FOCUSED;
         b->flags &= ~BOX_PRESSED;  // release even if mouse moved off
     }
-	ui_box_t *curr = b->list;
+	ui_box_t *curr = b->childs;
 	while(curr) {
 		if(curr->on_click_down)
             ui_bhook_fire(curr->on_click_down, curr, e, data);

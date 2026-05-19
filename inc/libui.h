@@ -41,7 +41,9 @@ typedef struct ui_scale_s {
     float y;
 } ui_scale_t;
 
+ui_slider_data_t ui_slider_data(float max, float min, float def);
 SDL_Texture *create_white_texture(SDL_Renderer *renderer, int w, int h);
+SDL_Point ui_layer_mousepos(ui_layer_t *box);
 SDL_Point ui_box_mousepos(ui_box_t *box);
 SDL_Point ui_win_mousepos(ui_win_t *win);
 // bool ui_is_mouse_in(ui_box_t*);
@@ -60,7 +62,13 @@ ui_layer_t*		ui_layer_make(ui_box_t* cnv, SDL_Texture* texture);
 void			ui_layer_clean(ui_layer_t** list);
 int 			ui_layer_count(ui_layer_t* layers);
 void			ui_layer_add(ui_layer_t** layers, ui_layer_t* new);
+void			ui_layer_center_all(ui_layer_t* layer, ui_box_t* box);
+void ui_layer_draw_at(ui_layer_t *layer, SDL_Point p);
+SDL_Rect ui_layer_zoomed_area(ui_layer_t *layer);
 
+// SDL_Texture*	ui_texture_text(const char* label);
+SDL_Texture*	ui_texture_path(SDL_Renderer* render, const char* path);
+SDL_Texture *ui_texture_text(ui_win_t* win, const char *text, SDL_Color color);
 # include "ui_win.h"
 # include "ui_box.h"
 # include "ui_global.h"

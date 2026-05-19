@@ -1,6 +1,6 @@
 #include "ui_win.h"
 
-static int ui_box_focusable(ui_box_t *box)
+static int ui_box_focusable(ui_box_t* box)
 {
     if (!box)
         return 0;
@@ -14,7 +14,7 @@ static int ui_box_focusable(ui_box_t *box)
     return 1;
 }
 
-static ui_box_t *ui_next_focusable(ui_box_t *box)
+static ui_box_t* ui_next_focusable(ui_box_t* box)
 {
     if (!box)
         return NULL;
@@ -22,14 +22,14 @@ static ui_box_t *ui_next_focusable(ui_box_t *box)
     if (ui_box_focusable(box))
         return box;
 
-    ui_box_t *found = ui_next_focusable(box->childs);
+    ui_box_t* found = ui_next_focusable(box->childs);
     if (found)
         return found;
 
     return ui_next_focusable(box->next);
 }
 
-static ui_box_t *ui_find_focused(ui_box_t *box)
+static ui_box_t* ui_find_focused(ui_box_t* box)
 {
     if (!box)
         return NULL;
@@ -37,14 +37,14 @@ static ui_box_t *ui_find_focused(ui_box_t *box)
     if (box->flags & BOX_FOCUSED)
         return box;
 
-    ui_box_t *found = ui_find_focused(box->childs);
+    ui_box_t* found = ui_find_focused(box->childs);
     if (found)
         return found;
 
     return ui_find_focused(box->next);
 }
 
-static ui_box_t *ui_next_node(ui_box_t *box)
+static ui_box_t* ui_next_node(ui_box_t* box)
 {
     if (!box)
         return NULL;
@@ -52,8 +52,7 @@ static ui_box_t *ui_next_node(ui_box_t *box)
     if (box->childs)
         return box->childs;
 
-    while (box)
-    {
+    while (box) {
         if (box->next)
             return box->next;
 
@@ -63,31 +62,30 @@ static ui_box_t *ui_next_node(ui_box_t *box)
     return NULL;
 }
 
-void ui_focus_next(ui_box_t *root)
+void ui_focus_next(ui_box_t* root)
 {
     if (!root)
         return;
+	printf("focus next !\n");
+	fflush(stdout);
+    ui_box_t* current = ui_find_focused(root);
 
-    ui_box_t *current = ui_find_focused(root);
+    if (!current) {
+        ui_box_t* first = ui_next_focusable(root);
 
-    if (!current)
-    {
-        ui_box_t *first = ui_next_focusable(root);
-
-        if (first)
+        if (first) {
             first->flags |= BOX_FOCUSED;
+		}
 
         return;
     }
 
     current->flags &= ~BOX_FOCUSED;
 
-    ui_box_t *iter = ui_next_node(current);
+    ui_box_t* iter = ui_next_node(current);
 
-    while (iter)
-    {
-        if (ui_box_focusable(iter))
-        {
+    while (iter) {
+        if (ui_box_focusable(iter)) {
             iter->flags |= BOX_FOCUSED;
             return;
         }
@@ -95,33 +93,51 @@ void ui_focus_next(ui_box_t *root)
         iter = ui_next_node(iter);
     }
 
-    ui_box_t *first = ui_next_focusable(root);
+    ui_box_t* first = ui_next_focusable(root);
 
     if (first) {
         first->flags |= BOX_FOCUSED;
-        // first->flags |= BOX_HOVERED;
-	}
+    }
 }
 
-int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data) {
-	(void)data;
-	ui_box_t* focused;
-	if (!e || !win) {
-		return 1;
-	} else if (e->type == SDL_KEYDOWN) {
-		switch (e->key.keysym.sym) {
-			case SDLK_TAB:
-				ui_focus_next(win->boxes);
-				return 1;
-			case SDLK_RETURN:
-				focused = ui_find_focused(win->boxes);
-				focused->flags |= BOX_CLICKED;
-			default:
-				return 1;
-		}
-	}
-	return 1;
+int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data)
+{
+    (void)data;
+    ui_box_t* focused;
+    printf("win keydown default !\n");
+    if (!e || !win) {
+        return 1;
+    } else if (e->type == SDL_KEYDOWN) {
+        switch (e->key.keysym.sym) {
+        case SDLK_TAB:
+            ui_focus_next(win->boxes);
+            win->state |= WIN_DIRTY;
+            break;
+        case SDLK_RETURN:
+            focused = ui_find_focused(win->boxes);
+            if (focused)
+                focused->flags |= BOX_CLICKED;
+            ui_focus_next(win->boxes);
+            win->state |= WIN_DIRTY;
+            break;
+        case SDLK_ESCAPE:
+            win->state |= WIN_QUIT;
+			reset_state_and_input(win->global, NULL);
+            break;
+        default:
+            break;
+        }
+    }
+    ui_box_t* curr = win->boxes;
+    while (curr) {
+        if (curr->on_key_down) {
+            ui_bhook_fire(curr->on_key_down, curr, e, data);
+        }
+        curr = curr->next;
+    }
+    curr = win->canvas;
+    if (curr && curr->on_key_down) {
+        ui_bhook_fire(curr->on_key_down, curr, e, data);
+    }
+    return 1;
 }
-
-
-

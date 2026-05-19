@@ -1,14 +1,14 @@
 #include "ui_box.h"
 
-void ui_box_flags(ui_box_t *b, short flag, bool add)
+void ui_box_flags(ui_box_t *b, short flag, bool add, bool all)
 {
     while (b) {
         if (add)
             b->flags |= flag;
         else
             b->flags &= ~flag;
-		if (b->childs)
-			ui_box_flags(b->childs, flag, add);
+		if (b->childs && all)
+			ui_box_flags(b->childs, flag, add, all);
         b = b->next;
     }
 }

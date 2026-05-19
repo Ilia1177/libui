@@ -9,12 +9,15 @@ SDL_Rect ui_area_center(SDL_Rect boxarea, SDL_Rect tocenter) {
     };
 }
 
-SDL_Texture *ui_tool_text2texture(ui_win_t* win, const char *text, SDL_Color color)
+
+SDL_Texture *ui_texture_text(ui_win_t* win, const char *text, SDL_Color color)
 {
-	SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(win->font, text, color, win->area.w);
-    // SDL_Surface *surface = TTF_RenderText_Blended(win->font, text, color);
-    if (!surface) 
+	// SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(win->font, text, color, win->area.w);
+    SDL_Surface *surface = TTF_RenderText_Blended(win->font, text, color);
+    if (!surface) {
+		printf("Error: %s\n", SDL_GetError());
 		return NULL;
+	} 
     SDL_Texture *texture = SDL_CreateTextureFromSurface(win->renderer, surface);
     SDL_FreeSurface(surface);
     return texture;

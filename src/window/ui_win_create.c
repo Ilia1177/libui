@@ -8,6 +8,7 @@ int ui_win_init_handlers(ui_win_t* win)
 	ui_whook_add(&win->render ,ui_whook_render_default);
 	ui_whook_add(&win->on_click_down, ui_whook_clickdown_default);
 	ui_whook_add(&win->on_key_down, ui_whook_keydown_default);
+	ui_whook_add(&win->on_mouse_wheel, ui_whook_mousewheel_default);
 	ui_whook_add(&win->on_click_up, ui_whook_clickup_default);
 	ui_whook_add(&win->on_mouse_motion, ui_whook_mousemotion_default);
 	ui_whook_add(&win->on_window_event, ui_whook_windowevent_default);
@@ -28,7 +29,7 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 	SDL_GL_GetDrawableSize(win->ptr, &win->area.w, &win->area.h);
 	ui_win_get_scale(win);
     win->id = SDL_GetWindowID(win->ptr);
-	win->font = TTF_OpenFont("Abell Extended.ttf", 38);
+	win->font = TTF_OpenFont("AgentExtLgtDB Normal.ttf", 24);
 	TTF_SetFontStyle(win->font, TTF_STYLE_BOLD);
 	ui_win_init_handlers(win);
 	win->background_color = COLOR_BG;
@@ -38,6 +39,7 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 	win->colors[2] = ORANGE;
 	win->colors[3] = TEAL;
 	win->colors[4] = COLOR_BG;
+	win->zoom = 1.0f;
     // Initialize event handler pointers to NULL
 	return 0;
 }

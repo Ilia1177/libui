@@ -8,7 +8,7 @@ int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data)
 		return 1;
 	} else if (e->type == SDL_KEYDOWN) {
 		switch (e->key.keysym.sym) {
-			case SDLK_RETURN: case SDLK_ESCAPE:
+			case SDLK_ESCAPE:
 				win->state |= WIN_QUIT;
 				return 0;
 
@@ -27,7 +27,7 @@ int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *data)
 	static bool running = false;
 
 	app = win->global;
-	printf("loading: %d, running: %d, input_nb: %d\n", app->state & APP_LOADING, running, app->input_nb);
+	// printf("loading: %d, running: %d, input_nb: %d\n", app->state & APP_LOADING, running, app->input_nb);
 	app = win->global;
 	if (!(app->state & APP_LOADING) && !running) {
 		ui_welem_input(app);

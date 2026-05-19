@@ -29,6 +29,7 @@ typedef struct ui_win_s
 	ui_globalApp_t	*global;
 	ui_box_t		*boxes;
 	ui_box_t		*canvas;
+	float			zoom;
 
 	SDL_Color		background_color;
 	TTF_Font		*font;
@@ -45,7 +46,6 @@ typedef struct ui_win_s
 	struct ui_win_s *next;
 } ui_win_t;
 
-SDL_Texture *ui_tool_text2texture(ui_win_t* win, const char *text, SDL_Color color);
 void ui_tool_drawcenter(SDL_Renderer *renderer, SDL_Texture *texture, SDL_Rect box);
 void ui_win_add_box(ui_win_t *win, ui_box_t *box);
 void ui_win_add(ui_win_t **list, ui_win_t *win);
@@ -64,6 +64,7 @@ int ui_whook_update_default(ui_win_t*, SDL_Event*, void*);
 int ui_whook_clickup_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_clickdown_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_mousemotion_default(ui_win_t*, SDL_Event*, void *);
+int ui_whook_mousewheel_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_windowevent_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void* data);
 int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn); 

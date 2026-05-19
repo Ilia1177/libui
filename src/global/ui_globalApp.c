@@ -16,21 +16,21 @@ ui_win_t* find_window_by_id(ui_globalApp_t* app, uint32_t window_id) {
     return NULL;
 }
 
-// ui_pos_t ui_get_mouse() {
-// 	SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
-// }
-
 void reset_state_and_input(ui_globalApp_t* app, bool* running)
 {
-	if (running)
-		*running = false; 
+	printf("reset app states !\n");
+	fflush(stdout);
+	if (running) {
+		*running = false;
+	}
 	app->state &= ~APP_LOADING;
-	for (int i = 0; i < app->input_nb; i++)
+	for (int i = 0; i < app->input_nb; i++) {
 		free(app->inputs[i]);
+	}
 	free(app->inputs);
-	app->inputs      = calloc(1, sizeof(char*));
-	app->inputs[0]   = NULL;
-	app->input_nb = 0;
+	app->inputs		= calloc(1, sizeof(char*));
+	app->inputs[0]	= NULL;
+	app->input_nb	= 0;
 }
 
 ui_globalApp_t* ui_global_init(char* name)
@@ -97,7 +97,6 @@ void ui_win_remove(ui_win_t** windows, ui_win_t* toremove)
 {
 	if(!windows || !*windows || !toremove)
 		return;
-	printf("  remove window %d\n", toremove->id);
     ui_win_t *curr = *windows;
     ui_win_t *prev = NULL;
     while (curr) {
@@ -134,6 +133,8 @@ ui_win_t* ui_global_mousewheel(ui_globalApp_t *app, SDL_Event* e)
 	ui_win_t *win = find_window_by_id(app, e->wheel.windowID);
 	if (!win)
 		return NULL;
+	printf("on mouse wheel fire\n");
+	fflush(stdout);
 	ui_whook_fire(&win->on_mouse_wheel, win, e, NULL);
 	return win;
 }
@@ -155,8 +156,7 @@ ui_win_t *ui_global_mouseclick(ui_globalApp_t* app, SDL_Event *e)
 	if (!win)
 		return NULL;
 	SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
-	switch (e->type) 
-	{
+	switch (e->type) {
 		case SDL_MOUSEBUTTONDOWN:
 			ui_whook_fire(&win->on_click_down, win, e, NULL);
 			break;
@@ -203,13 +203,13 @@ int	ui_check_dead_window(ui_globalApp_t *app)
 
 void ui_action_update_and_render(ui_globalApp_t* app, ui_win_t* win, SDL_Event* e)
 {
-		if (app->actions) {
-			ui_whook_fire(&app->actions, app->windows, e, (void*)app->inputs);
-		}
-		if (win) {
-			ui_whook_fire(&win->update, win, e, NULL);
-			ui_whook_fire(&win->render, win, e, NULL);
-		}
+	if (app->actions) {
+		ui_whook_fire(&app->actions, app->windows, e, app->inputs);
+	}
+	if (win) {
+		ui_whook_fire(&win->update, win, e, NULL);
+		ui_whook_fire(&win->render, win, e, NULL);
+	}
 }
 
 ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
@@ -218,25 +218,20 @@ ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 
 	win = NULL;
 	while (SDL_PollEvent(e)) {
-		// printf("event is: %d\n", e->type);
 		switch (e->type) {
 			case SDL_QUIT:
-				printf("SDL_QUIT\n");
 				app->state |= APP_QUIT; return NULL;
 			case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP:
-				// printf("SDL_MOUSE_CLICK\n");
 				win = ui_global_mouseclick(app, e); break;
 			case SDL_MOUSEMOTION:
-				// printf("SDL_MOUSE_MOTION\n");
 				win = ui_global_mousemotion(app, e); break;
 			case SDL_MOUSEWHEEL:
-				printf("SDL_MOUSE_WHEEL\n");
+				printf("mouse wheel event !\n");
+				fflush(stdout);
 				win = ui_global_mousewheel(app, e); break;
 			case SDL_KEYUP: case SDL_KEYDOWN: //case SDL_TEXTINPUT:
-				// printf("SDL_KEYBOARD\n");
 				win = ui_global_keyboard(app, e); break;
 			case SDL_WINDOWEVENT:
-				// printf("SDL_WINDOW_EVENT\n");
 				win = ui_global_windowevent(app, e); break;
 		}
 		ui_action_update_and_render(app, win, e);
@@ -254,17 +249,12 @@ void ui_start(ui_globalApp_t *app)
 
 	printf("1. start\n");
     while (!(app->state & APP_QUIT)) {
-		// printf("%s - 2. check dead win\n", ui_get_time());
 		ui_check_dead_window(app);
-		// printf("%s - 3. dispatch events\n", ui_get_time());
 		ui_dispatch_event(app, &e);
-
-		// ui_bhook_fire(app->tool, app->windows->canvas, NULL, NULL);
 		if (app->rawtool)
 			app->rawtool(app->windows->canvas, &e, NULL);
 		curr = app->windows;
 		while(curr) {
-			// printf("%s - 4. update & render\n", ui_get_time());
 			ui_win_t* next = curr->next;
 			ui_whook_fire(&curr->update, curr, &e, NULL);
 			ui_whook_fire(&curr->render, curr, &e, NULL);

@@ -1,5 +1,8 @@
 #include "libui.h"
-void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) {
+#include "libft.h"
+
+void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) 
+{
 	ui_win_t* win = btn->parent_window;
 
 	(void)e;
@@ -17,6 +20,7 @@ void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) {
 		layer->area.x = btn->area.x + (BOX_MENU_W - layer->area.w) / 2;
 	btn->parent_window->state |= WIN_DIRTY;
 }
+
 void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data)
 {
 	ui_win_t* win;
@@ -26,19 +30,59 @@ void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data)
 
 	win = b->parent_window;
 	menu = win->boxes;
-	switch(win->boxes->type) {
-		case UI_VERTICAL_MENU:
-			b->area = ui_area(menu->area.w, 0, 
-					win->area.w - menu->area.w, win->area.h);
-			break;
-		case UI_HORIZONTAL_MENU:
-			b->area = ui_area(0, menu->area.h, 
-					win->area.w, win->area.h - menu->area.h);
-		default :
-			break;
+	int menuH = menu->area.h;
+	int menuW = menu->area.w;
+	int winH = win->area.h;
+	int winW = win->area.w;
+	if (menuW == winW && menuH == winH) {
+		return;
+	} else if (menuW == winW) {
+		b->area = ui_area(0, menuH, winW, winH - menuH);
+	} else if (menuH == winH) {
+		b->area = ui_area(menuW, 0, winW - menuW, winH);
 	}
 }
 
+// in ui_bhook_zoomin — capture mouse at scroll time
+void ui_bhook_zoomin_save(ui_box_t *cnv, SDL_Event *e, void *data) {
+    (void)data;
+    if (!cnv || !e || e->type != SDL_MOUSEWHEEL) return;
+    if (!cnv->layers) return;
+
+    float delta = (e->wheel.y > 0) ? 0.1f : -0.1f;
+    cnv->zoom_amt = ft_clampf(
+        cnv->zoom_amt + delta, 0.1f, 10.0f);
+
+    // freeze zoom origin at current mouse pos
+    cnv->zoom_origin = ui_box_mousepos(cnv);
+
+    cnv->parent_window->state |= WIN_DIRTY;
+}
+void ui_bhook_zoomin(ui_box_t *cnv, SDL_Event *e, void *data) {
+    (void)data;
+    if (!cnv || !e || e->type != SDL_MOUSEWHEEL) return;
+    if (!cnv->layers) return;
+
+    float delta = (e->wheel.y > 0) ? 0.1f : -0.1f;
+    float old_zoom = cnv->zoom_amt;
+    float new_zoom = ft_clampf(old_zoom + delta, 0.1f, 10.0f);
+
+    // zoom origin = mouse position in box space
+    SDL_Point mouse = ui_box_mousepos(cnv);
+
+    // adjust layer positions to zoom around mouse
+    ui_layer_t *curr = cnv->layers;
+    while (curr) {
+        curr->area.x = mouse.x + cnv->area.x + 
+            (int)((curr->area.x - mouse.x - cnv->area.x) * new_zoom / old_zoom);
+        curr->area.y = mouse.y + cnv->area.y + 
+            (int)((curr->area.y - mouse.y - cnv->area.y) * new_zoom / old_zoom);
+        curr = curr->next;
+    }
+
+    cnv->zoom_amt = new_zoom;
+    cnv->parent_window->state |= WIN_DIRTY;
+}
 void ui_bhook_nopressed(ui_box_t *b, SDL_Event *e, void* data) {
 	(void)e;
 	(void)data;
@@ -84,8 +128,14 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 
 	(void)data;
 	(void)e;
-	if (box->flags & BOX_HOVERED) {
-		ui_box_flags(box->childs, BOX_HIDDEN, false);
+	SDL_MouseMotionEvent *btn = &e->motion;
+	ui_win_t *win = box->parent_window;
+    int px = (int)(btn->x * win->scale.x);
+    int py = (int)(btn->y * win->scale.y);
+    SDL_Point p = {px, py};
+
+	if (box->flags & BOX_HOVERED || ui_box_hovered(box->childs, &p)) {
+		ui_box_flags(box->childs, BOX_HIDDEN, false, false);
 	} else {
 		ui_box_t *curr = box->childs;
 		while (curr) {
@@ -93,7 +143,7 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 				return;
 			curr = curr->next;
 		}
-		ui_box_flags(box->childs, BOX_HIDDEN, true);
+		ui_box_flags(box->childs, BOX_HIDDEN, true, true);
 	}
 }
 
@@ -128,28 +178,31 @@ void ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data)
 
 void transfert_all_input(ui_globalApp_t* app, ui_box_t* box)
 {
+	static int box_nb = 0;
 	if (!box) {
 		return;
 	} else if (box->data) {
-		printf("valid input\n");
+		printf("Input is: %s\n", (char*)box->data);
 		fflush(stdout);
-		// append input to app->inputs
 		int n = app->input_nb;
-		app->inputs = ui_realloc(app->inputs, 
-			(app->input_nb + 1) * sizeof(char*),  // old
-			(app->input_nb + 2) * sizeof(char*)
-				);
-		app->inputs[n]     = box->data;  // store current input
-		app->inputs[n + 1] = NULL;        // NULL terminate like argv
+		app->inputs = ui_realloc(app->inputs,
+			(app->input_nb + 1) * sizeof(char*),  //0ld
+			(app->input_nb + 2) * sizeof(char*));
+		app->inputs[n]     = box->data;		// store current input
+		app->inputs[n + 1] = NULL;			// NULL terminate like argv
 		app->input_nb++;
-
+		printf("input nb: %d\n", app->input_nb);
+		fflush(stdout);
 		box->data = NULL;
 		box->flags &= ~BOX_FOCUSED;
-		box->parent_window->state |= WIN_QUIT;
-		box->parent_window->global->windows->state |= WIN_DIRTY;
+		// box->parent_window->state |= WIN_QUIT;
+		// box->parent_window->global->windows->state |= WIN_DIRTY;
 	}
     transfert_all_input(app, box->childs);
     transfert_all_input(app, box->next);
+	box_nb++;
+	printf("Box number: %d\n", box_nb);
+	fflush(stdout);
 }
 
 void ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data)
@@ -161,7 +214,14 @@ void ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data)
 	if (!(b->flags & BOX_CLICKED))
 		return;
 	app = b->parent_window->global;
+	printf("hook: valid input\n");
+	fflush(stdout);
+	// transfert_all_input(b->parent_window);
 	transfert_all_input(app, b->parent_window->boxes);
+	app->windows->state |= WIN_DIRTY;
+	b->parent_window->state |= WIN_QUIT;
+	printf("total boxe: %d\n", ui_box_count_all(b->parent_window->boxes));
+	fflush(stdout);
 }
 
 // void ui_bhook_inputvalid(ui_box_t *box, SDL_Event *e, void *data) {
@@ -207,54 +267,56 @@ void ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data)
 //
 // }
 
-void ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data) 
+void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data) 
 {
     (void)data;
+	ui_win_t* win;
+	char* input;
+	int len;
+	bool updated;
+
     if (!box || !(box->flags & BOX_FOCUSED) || !e)
         return;
-	char *input = (char *)box->data;
-    // ui_globalApp_t *app = box->parent_window->global;
-    bool updated = false;
-
-	int input_size = box->data ? strlen((char*)box->data) : 0;
+	win = box->parent_window;
+	input = (char *)box->data;
+    updated = false;
+	len = box->data ? strlen((char*)box->data) : 0;
     if (e->type == SDL_TEXTINPUT) {
+		printf("TEXT input\n");
+		fflush(stdout);
         int add = strlen(e->text.text);
-        if (input_size + add < INPUT_SIZE_MAX) {
+        if (len + add < INPUT_SIZE_MAX) {
+			printf("add to box data\n");
+			fflush(stdout);
             strcat(box->data, e->text.text);
-            // box->input_size += add;
             updated = true;
         }
     } else if (e->type == SDL_KEYDOWN) {
         switch (e->key.keysym.sym) {
             case SDLK_BACKSPACE:
-                if (input_size > 0) {
-                    input[--input_size] = '\0';
+                if (len > 0) {
+                    input[--len] = '\0';
                     updated = true;
-                }
-                break;
+                } break;
             case SDLK_ESCAPE:
         		SDL_StopTextInput();
 				ui_bhook_inputcancel(box, e, NULL);
                 break;
             case SDLK_RETURN:
         		SDL_StopTextInput();
-				transfert_all_input(box->parent_window->global, box);
+				// transfert_all_input(win->global, win->boxes);
 				break;
         }
     }
 
-    if (updated || !box->layers) {
+    if (updated || (!box->layers && len > 0)) {
+		win->state |= WIN_DIRTY;
         ui_layer_clean(&box->layers);
         SDL_Color c = {0, 0, 0, 255};
-        SDL_Texture *texture = ui_tool_text2texture(box->parent_window,
-            input_size > 0 ? box->data : "", c);
-
-        // int tw, th;
-        // SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
-
-        ui_layer_t *layer = ui_layer_make(box, texture);
-
-        if (layer->area.w <= box->area.w) {
+        ui_layer_t *layer = ui_layer_make(box, ui_texture_text(win, box->data, c));
+		if (!layer) {
+			return;
+		} if (layer->area.w <= box->area.w) {
             // text fits — center vertically, align left with padding
             layer->area = (SDL_Rect){
                 box->area.x + 4,
@@ -269,8 +331,6 @@ void ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data)
                 layer->area.w, layer->area.h
             };
         }
-        // ui_layer_add(&box->layers, layer);
-		box->parent_window->state |= WIN_DIRTY;
     }
 }
 
@@ -321,7 +381,7 @@ void ui_bhook_movelayer(ui_box_t *cnv, SDL_Event *e, void *data)
 			selected->area.y += dy;
 			last = p;  // update for next frame
 		}
-		cnv->selection = selected;
+		cnv->selected_layer = selected;
     } else {
 		selected = NULL;
         last = (SDL_Point){0, 0};

@@ -1,7 +1,7 @@
 #include "ui_win.h" // For ui_box_t, ui_win_t, SDL_Event
 #include "ui_box.h" // For ui_bhook_fire, BOX_HIDDEN, BOX_HOVERED
 
-static ui_box_t* hovered_box(ui_box_t* boxes, SDL_Point *p)
+ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p)
 {
 	if ( !boxes || (boxes->flags & BOX_HIDDEN))
 		return NULL;
@@ -11,7 +11,7 @@ static ui_box_t* hovered_box(ui_box_t* boxes, SDL_Point *p)
 		if(SDL_PointInRect(p, &curr->area)) {
 			selected = curr;
 		}
-		ui_box_t *child = hovered_box(curr->list, p);
+		ui_box_t *child = ui_box_hovered(curr->childs, p);
 		if (child) {
 			selected = child;
 		}
@@ -28,8 +28,8 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
     int py = (int)(btn->y * win->scale.y);
     SDL_Point p = {px, py};
 
-	ui_box_t *top_hovered_menubox = hovered_box(win->boxes, &p);
-	ui_box_t *cnv_hovered = hovered_box(win->canvas, &p);
+	ui_box_t *top_hovered_menubox = ui_box_hovered(win->boxes, &p);
+	ui_box_t *cnv_hovered = ui_box_hovered(win->canvas, &p);
 	if(top_hovered_menubox == box) {
 		box->flags |= BOX_HOVERED;
 	} else if (cnv_hovered == box && !top_hovered_menubox) {
@@ -38,7 +38,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 		box->flags &= ~BOX_HOVERED;
         box->flags &= ~BOX_PRESSED;
 	}
-	ui_box_t *curr = box->list;
+	ui_box_t *curr = box->childs;
 	while(curr) {
 		if (curr->on_mouse_motion) 
 			ui_bhook_fire(curr->on_mouse_motion, curr, e, data);

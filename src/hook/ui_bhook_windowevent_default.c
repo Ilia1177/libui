@@ -3,7 +3,7 @@
 
 void	ui_bhook_windowevent_default(ui_box_t *b, SDL_Event* e, void* data)
 {
-	ui_box_t *curr = b->list;
+	ui_box_t *curr = b->childs;
 	while(curr) {
 		if(curr->on_window_event)
             ui_bhook_fire(curr->on_window_event, curr, e, data);

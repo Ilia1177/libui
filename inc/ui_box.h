@@ -48,16 +48,19 @@ typedef struct ui_box_s
 	int				padding;
 	int 			border;
 	int 			margin;
-	boxtype_e		type;
+	SDL_Point		zoom_origin;
+	float			zoom_amt;
+	// boxtype_e		type;
     uint32_t        flags;
 	const char*		label;
 	void*			data;
 	ui_layer_t*		layers;
-	ui_layer_t*		selection;
+	ui_layer_t*		selected_layer;
     ui_win_t*		parent_window;
 
 	ui_boxhandler_t *on_window_event;
 	ui_boxhandler_t *on_key_down;
+	ui_boxhandler_t *on_mouse_wheel;
 	ui_boxhandler_t *on_mouse_motion;
     ui_boxhandler_t *on_click_down;
     ui_boxhandler_t *on_click_up;
@@ -77,6 +80,9 @@ typedef struct ui_box_s
 // ui_box_t*	ui_elem_menu_navbar(ui_win_t *win, menutype_e type);
 // ui_box_t*	ui_box_menu_list_option_add(ui_win_t *win, ui_box_t **list, void(*fn)(ui_box_t*, SDL_Event*, void*));
 
+void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* r);
+void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn);
+ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p);
 ui_box_t*	ui_box_last(ui_box_t* boxes);
 ui_box_t*	ui_box_create(ui_win_t* parent_window, SDL_Rect rect, SDL_Color color);
 ui_box_t*	ui_box_iter(ui_box_t *b, int n);
@@ -85,18 +91,21 @@ void		ui_box_add_child(ui_box_t *parent, ui_box_t *new);
 int			ui_box_count_prev(ui_box_t *);
 int			ui_box_count_next(ui_box_t *);
 int			ui_box_count_all(ui_box_t *);
-void		ui_box_flags(ui_box_t *b, short flag, bool add);
+void		ui_box_flags(ui_box_t *b, short flag, bool add, bool all);
 
 // Hook tools
 void	ui_bhook_clean(ui_boxhandler_t **list);
 void	ui_bhook_add(ui_boxhandler_t **list, ui_bhook_fn_t fn);
 void	ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn);
 void	ui_bhook_fire(ui_boxhandler_t*, ui_box_t*, SDL_Event*, void*);
+void ui_bhook_replace(ui_boxhandler_t *handler, ui_bhook_fn_t old, ui_bhook_fn_t new);
 
 // Loop hooks added by default to the box obj;
 void      	ui_bhook_destroy_default(ui_box_t* box, SDL_Event* e, void* data);
 void 		ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *data);
 void      	ui_bhook_render_default(ui_box_t* box, SDL_Event *e, void *data);
+void      	ui_bhook_mousewheel_default(ui_box_t* box, SDL_Event *e, void *data);
+
 
 // render hook
 void ui_bhook_drawbox(ui_box_t* box, SDL_Event* e, void* data);
@@ -114,13 +123,14 @@ void 		ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data);
 
 // Custom hooks;
 //
+void ui_bhook_zoomin(ui_box_t *cnv, SDL_Event *e, void *data);
 void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data);
 void	ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data);
 void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data);
 void	ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_inputvalid(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data);
-void	ui_bhook_inputcatch(ui_box_t *box, SDL_Event *e, void *data);
+void	ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data);
 void	ui_bhook_fullheight(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_fullwidth(ui_box_t*, SDL_Event*, void*);
