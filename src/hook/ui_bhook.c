@@ -106,7 +106,7 @@ void ui_bhook_winclose(ui_box_t* b, SDL_Event* e, void* data)
 	(void)e;
 	(void)data;
 	ui_win_t *win = b->parent_window;
-	if (b->flags & BOX_PRESSED) {
+	if (b->flags & BOX_CLICKED) {
 		win->state |= WIN_QUIT;
 	}
 }
@@ -128,13 +128,17 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 
 	(void)data;
 	(void)e;
-	SDL_MouseMotionEvent *btn = &e->motion;
-	ui_win_t *win = box->parent_window;
-    int px = (int)(btn->x * win->scale.x);
-    int py = (int)(btn->y * win->scale.y);
-    SDL_Point p = {px, py};
 
-	if (box->flags & BOX_HOVERED || ui_box_hovered(box->childs, &p)) {
+	uint32_t state = box->flags;
+	// SDL_MouseMotionEvent *btn = &e->motion;
+	// ui_win_t *win = box->parent_window;
+	//    int px = (int)(btn->x * win->scale.x);
+	//    int py = (int)(btn->y * win->scale.y);
+	//    SDL_Point p = {px, py};
+	//
+	SDL_Point p = ui_win_mousepos(box->parent_window);
+	if (state & BOX_HOVERED || state & BOX_CLICKED || ui_box_hovered(box->childs, &p)) {
+	// if (box->flags & BOX_HOVERED || ui_box_hovered(box->childs, &p)) {
 		ui_box_flags(box->childs, BOX_HIDDEN, false, false);
 	} else {
 		ui_box_t *curr = box->childs;

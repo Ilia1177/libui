@@ -10,6 +10,8 @@ typedef struct ui_win_s ui_win_t;
 # define APP_LOADING (1 << 0)
 # define APP_QUIT (1 << 1)
 
+typedef struct ui_tool_s ui_tool_t;
+
 typedef struct ui_globalApp_s 
 {
 	SDL_Point 	mouse;
@@ -32,7 +34,7 @@ typedef struct ui_globalApp_s
     void(*on_mouse_wheel)(struct ui_globalApp_s*, SDL_Event*);
     void(*on_window_resized)(struct ui_globalApp_s*, ui_win_t*, int w, int h);
 
-	void(*rawtool)(ui_box_t*, SDL_Event*, void*);
+	ui_tool_t *active_tool;
 	ui_boxhandler_t *tool;
 	ui_winhandler_t *actions;
 	void(*start)(struct ui_globalApp_s*);

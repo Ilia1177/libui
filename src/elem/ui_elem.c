@@ -70,26 +70,34 @@ ui_box_t* ui_belem_message(ui_win_t* win, const char* msg)
 		message->color = (SDL_Color) {255,255,255,0};
 		texture = ui_texture_text(message->parent_window, msg, COLOR_WHITE);
 		ui_layer_make(message, texture);
-    	ui_bhook_wincenter(message, NULL, NULL);
-		ui_bhook_prepend(&message->update, ui_bhook_nopressed);
-		ui_bhook_prepend(&message->update, ui_bhook_nohovered);
+    	ui_bhook_wincenter(message, NULL, &(SDL_Rect){0, 10, 0, 0});
+		// ui_bhook_prepend(&message->update, ui_bhook_nopressed);
+		// ui_bhook_prepend(&message->update, ui_bhook_nohovered);
+		ui_bhook_remove(&message->on_click_down, ui_bhook_clickdown_default);
+		ui_bhook_remove(&message->on_mouse_motion, ui_bhook_mousemotion_default);
 		return message;
 }
 
 ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
 {
-	SDL_Rect area = {-1, -1, 200, 100};
+	SDL_Rect area = {-1, -1, 0, 0};
+	TTF_SizeText(ref->windows->font, message, &area.w, &area.h);
+	// area.w += 50;
+	area.h *= 4;
     ui_win_t *popup = ui_win_create(ref, area, "pop up", 0);
 	ui_whook_add(&popup->on_key_down, ui_whook_quitkey);
 	ui_box_t *menu = ui_menu_init(popup);
-    ui_bhook_prepend(&popup->boxes->update, ui_bhook_maxsize);
-    ui_bhook_prepend(&popup->boxes->update, ui_bhook_nopressed);
-    ui_bhook_prepend(&popup->boxes->update, ui_bhook_nohovered);
+    ui_bhook_append(&menu->on_window_event, ui_bhook_maxsize);
+	ui_whook_remove(&popup->on_click_down, ui_whook_clickdown_default);
+	ui_whook_remove(&popup->on_mouse_motion, ui_whook_mousemotion_default);
+    // ui_bhook_append(&popup->boxes->update, ui_bhook_nopressed);
+    // ui_bhook_append(&popup->boxes->update, ui_bhook_nohovered);
 	ui_box_t* msg = ui_belem_message(popup, message);
-	printf("message color: %d, %d, %d, %d\n", msg->color.r, msg->color.g, msg->color.b, msg->color.a);
     ui_box_t *btn = ui_belem_button(popup,  ui_texture_text(popup, "ok", COLOR_WHITE));
-	ui_bhook_prepend(&btn->update, ui_bhook_winclose);
+	ui_bhook_append(&btn->on_key_down, ui_bhook_winclose);
+	ui_bhook_append(&btn->on_click_down, ui_bhook_winclose);
     ui_bhook_wincenter(btn, NULL, &(SDL_Rect){0, 40, 0, 0});
+    ui_bhook_wincenter(msg, NULL, &(SDL_Rect){0, -80, 0, 0});
     ui_box_add_child(menu, btn);
     ui_box_add_child(menu, msg);
 	ui_menu_build(menu, UI_NONE);
@@ -179,8 +187,11 @@ ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 			break;
 		}
 		ui_box_center_layers(curr, NULL);
-		ui_bhook_prepend(&curr->on_click_down, ui_bhook_revealchild);
-		ui_bhook_prepend(&curr->on_key_down, ui_bhook_revealchild);
+		if(curr->childs) {
+			ui_bhook_append(&curr->on_mouse_motion, ui_bhook_revealchild);
+			ui_bhook_append(&curr->on_click_down, ui_bhook_revealchild);
+			ui_bhook_append(&curr->on_key_down, ui_bhook_revealchild);
+		}
 		curr = curr->next;
 		i++;
 	}
@@ -193,16 +204,12 @@ int ui_find_max_text_width(ui_box_t* list)
 
 	if (!list)
 		return 0;
-	// ui_win_t* win = list->parent_window;
 	int max_width;
-	// int w;
 	max_width = 0;
 	while(curr) 
 	{
 		if (curr->layers && curr->layers->area.w > max_width)
 			max_width = curr->layers->area.w;
-		// if(!TTF_SizeText(win->font, curr->label, &w, NULL) && w > max_width)
-			// max_width = w;
 		curr = curr->next;
 	}
 	return max_width;
@@ -218,13 +225,13 @@ void ui_itemlist_build(ui_box_t* list, boxtype_e type, int rec)
 	else offset_y = 0;
 	int i = 0;
 	int width = ui_find_max_text_width(list) + 10 * MENU_GAP_X;
-	printf("label: %s, Max width: %d\n", list->label, width);
 	while(curr)
 	{
 		switch(type) {
 			case UI_HORIZONTAL_MENU:
+				printf("build list item width: %d rec: %d\n", width, rec);
 				curr->area.w = width;
-				curr->area.x = curr->parent->area.x + rec * BOX_MENU_W;
+				curr->area.x = curr->parent->area.x + rec * curr->parent->area.w;
 				curr->area.y = curr->parent->area.y + (offset_y + i) * BOX_MENU_H;
 				break;
 			case UI_VERTICAL_MENU:
@@ -240,8 +247,9 @@ void ui_itemlist_build(ui_box_t* list, boxtype_e type, int rec)
 				break;
 		}
 		curr->flags |= BOX_HIDDEN;
-		ui_bhook_prepend(&curr->on_click_down, ui_bhook_revealchild);
-		ui_bhook_prepend(&curr->on_key_down, ui_bhook_revealchild);
+		ui_bhook_append(&curr->on_mouse_motion, ui_bhook_revealchild);
+		ui_bhook_append(&curr->on_click_down, ui_bhook_revealchild);
+		ui_bhook_append(&curr->on_key_down, ui_bhook_revealchild);
 		ui_box_center_layers(curr, &(SDL_Rect){10, 0,0,0});
 		ui_itemlist_build(curr->childs, type, rec + 1);
 		curr = curr->next;

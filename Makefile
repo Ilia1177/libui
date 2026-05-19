@@ -69,6 +69,7 @@ SRC		= window/ui_win_create.c\
 		  box/ui_box_iter.c\
 		  box/ui_box_destroy.c\
 		  layer/ui_layer.c\
+		  tools/ui_tool.c\
 
 SRC := $(addprefix $(SRC_DIR),$(SRC) )
 

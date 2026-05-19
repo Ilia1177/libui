@@ -260,8 +260,6 @@ void ui_start(ui_globalApp_t *app)
     while (!(app->state & APP_QUIT)) {
 		ui_check_dead_window(app);
 		ui_dispatch_event(app, &e);
-		if (app->rawtool)
-			app->rawtool(app->windows->canvas, &e, NULL);
 		curr = app->windows;
 		while(curr) {
 			ui_win_t* next = curr->next;

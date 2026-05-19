@@ -52,6 +52,7 @@ void ui_win_add(ui_win_t **list, ui_win_t *win);
 
 ui_scale_t ui_win_get_scale(ui_win_t *win);
 ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, char* title, uint32_t flags);
+int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn);
  
 int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data);
 int ui_whook_reset_global_state(ui_win_t* win, SDL_Event *e, void* data);

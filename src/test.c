@@ -4,17 +4,6 @@
 # include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-void set_move_layer(ui_box_t*b, SDL_Event* e, void*data) {
-	(void)e;
-	(void)data;
-	if(!b || !(b->flags & BOX_CLICKED))
-		return;
-	if (!(b->flags & BOX_FOCUSED))
-		b->parent_window->global->rawtool = NULL;
-	else
-		b->parent_window->global->rawtool = ui_bhook_movelayer;
-}
-
 void load_image_handler(ui_box_t *box, SDL_Event *e, void *data)
 {
     (void)e;
@@ -56,10 +45,18 @@ ui_win_t* main_window(ui_globalApp_t* app, char* name, boxtype_e type)
 	ui_box_t* factice_btn2 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
 	ui_box_t* factice_btn3 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
 	ui_box_t* factice_btn4 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
+	ui_box_t* factice_btn5 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
+	ui_box_t* factice_btn6 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
+	ui_box_t* factice_btn7 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
+	ui_box_t* factice_btn8 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
 	ui_box_add_child(image, factice_btn1);
 	ui_box_add_child(image, factice_btn2);
 	ui_box_add_child(image, factice_btn3);
 	ui_box_add_child(image, factice_btn4);
+	ui_box_add_child(factice_btn3, factice_btn5);
+	ui_box_add_child(factice_btn3, factice_btn6);
+	ui_box_add_child(factice_btn3, factice_btn7);
+	ui_box_add_child(factice_btn3, factice_btn8);
 
 
 	ui_box_add_child(menu, file);
@@ -118,9 +115,9 @@ ui_win_t* palette_window(ui_globalApp_t* app, char* name)
 	win = ui_win_create(app, (SDL_Rect){800, 400, 200, 800}, name, 0);
 	ui_box_t* menu = ui_menu_init(win);
 	ui_box_t* tool_move_layer = ui_belem_button(win, ui_texture_text(win, "A", COLOR_WHITE));
-	ui_bhook_prepend(&tool_move_layer->update, set_move_layer);
+	ui_bhook_prepend(&tool_move_layer->update, new_window);
 	ui_box_t* slider = ui_belem_slider(win, ui_slider_data(0.0f, 255.0f, 0.5f));
-	ui_bhook_prepend(&slider->update, change_canvas_color);
+	ui_bhook_append(&slider->update, change_canvas_color);
 	ui_box_add_child(menu, slider);
 	ui_box_add_child(menu, tool_move_layer);
 	ui_menu_build(menu, UI_FULLWINDOW_MENU);
