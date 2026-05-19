@@ -9,6 +9,22 @@ int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn) {
 	return 0;
 }
 
+int ui_whook_append(ui_winhandler_t **list, ui_whook_fn_t fn) {
+	if (!fn) return -1;
+	ui_winhandler_t *handler = calloc(1, sizeof(ui_winhandler_t));
+	handler->fn = fn;
+	handler->next = NULL;
+	if (!*list) {
+		*list = handler;
+		return 0;
+	}
+	ui_winhandler_t *curr = *list;
+	while (curr->next)
+		curr = curr->next;
+	curr->next = handler;
+	return 0;
+}
+
 int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn) { //could be winhandler instead of ui_whook_fn_t
     if (!list || !*list || !fn) return -1;
     ui_winhandler_t *curr = *list;

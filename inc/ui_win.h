@@ -68,6 +68,7 @@ int ui_whook_mousewheel_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_windowevent_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void* data);
 int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn); 
+int ui_whook_append(ui_winhandler_t **list, ui_whook_fn_t fn);
 int ui_whook_clean(ui_winhandler_t **list);
 // New: Event registration functions (using SDL_Event*)
 // void ui_win_set_on_resize(ui_win_t* win, void(*handler)(ui_win_t*, SDL_Event*));

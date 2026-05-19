@@ -3,7 +3,6 @@
 
 int ui_win_init_handlers(ui_win_t* win)
 {
-	ui_whook_add(&win->update, ui_whook_update_default);
 	ui_whook_add(&win->destroy ,ui_whook_destroy_default);
 	ui_whook_add(&win->render ,ui_whook_render_default);
 	ui_whook_add(&win->on_click_down, ui_whook_clickdown_default);

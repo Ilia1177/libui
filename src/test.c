@@ -49,8 +49,8 @@ ui_win_t* main_window(ui_globalApp_t* app, char* name, boxtype_e type)
 
 	ui_box_t* load_btn = ui_belem_button(win, ui_texture_text(win, "load", COLOR_WHITE));
 	ui_box_t* exit_btn = ui_belem_button(win, ui_texture_text(win, "exit", COLOR_WHITE));
-	ui_bhook_add(&load_btn->update, load_image_handler);
-	ui_bhook_add(&exit_btn->update, ui_bhook_winclose);
+	ui_bhook_prepend(&load_btn->update, load_image_handler);
+	ui_bhook_prepend(&exit_btn->update, ui_bhook_winclose);
 
 	ui_box_t* factice_btn1 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
 	ui_box_t* factice_btn2 = ui_belem_button(win, ui_texture_text(win, "factice", COLOR_WHITE));
@@ -118,9 +118,9 @@ ui_win_t* palette_window(ui_globalApp_t* app, char* name)
 	win = ui_win_create(app, (SDL_Rect){800, 400, 200, 800}, name, 0);
 	ui_box_t* menu = ui_menu_init(win);
 	ui_box_t* tool_move_layer = ui_belem_button(win, ui_texture_text(win, "A", COLOR_WHITE));
-	ui_bhook_add(&tool_move_layer->update, set_move_layer);
+	ui_bhook_prepend(&tool_move_layer->update, set_move_layer);
 	ui_box_t* slider = ui_belem_slider(win, ui_slider_data(0.0f, 255.0f, 0.5f));
-	ui_bhook_add(&slider->update, change_canvas_color);
+	ui_bhook_prepend(&slider->update, change_canvas_color);
 	ui_box_add_child(menu, slider);
 	ui_box_add_child(menu, tool_move_layer);
 	ui_menu_build(menu, UI_FULLWINDOW_MENU);

@@ -3,6 +3,7 @@
 #include <stdio.h> // For printf debugging
 #include <stdlib.h> // For malloc, free
 #include "ui_win.h"
+#include "ui_forward.h"
 
 // Helper to find ui_win_t from SDL_WindowID
 ui_win_t* find_window_by_id(ui_globalApp_t* app, uint32_t window_id) {
@@ -121,6 +122,7 @@ ui_win_t* ui_global_keyboard(ui_globalApp_t *app, SDL_Event* e)
 	switch(e->type) {
 		case SDL_KEYDOWN:
 			ui_whook_fire(&win->on_key_down, win, e, NULL);
+			ui_forward_to_boxes(win, e, NULL, UI_FORWARD_KEY_DOWN);
 			break;
 		case SDL_KEYUP:
 			ui_whook_fire(&win->on_key_up, win, e, NULL);
@@ -136,6 +138,7 @@ ui_win_t* ui_global_mousewheel(ui_globalApp_t *app, SDL_Event* e)
 	printf("on mouse wheel fire\n");
 	fflush(stdout);
 	ui_whook_fire(&win->on_mouse_wheel, win, e, NULL);
+	ui_forward_to_boxes(win, e, NULL, UI_FORWARD_MOUSE_WHEEL);
 	return win;
 }
 
@@ -145,6 +148,7 @@ ui_win_t *ui_global_mousemotion(ui_globalApp_t* app, SDL_Event *e)
 	if (!win)
 		return NULL;
 	ui_whook_fire(&win->on_mouse_motion, win, e, NULL);
+	ui_forward_to_boxes(win, e, NULL, UI_FORWARD_MOUSE_MOTION);
 	return win;
 }
 
@@ -159,9 +163,11 @@ ui_win_t *ui_global_mouseclick(ui_globalApp_t* app, SDL_Event *e)
 	switch (e->type) {
 		case SDL_MOUSEBUTTONDOWN:
 			ui_whook_fire(&win->on_click_down, win, e, NULL);
+			ui_forward_to_boxes(win, e, NULL, UI_FORWARD_CLICK_DOWN);
 			break;
 		case SDL_MOUSEBUTTONUP:
 			ui_whook_fire(&win->on_click_up, win, e, NULL);
+			ui_forward_to_boxes(win, e, NULL, UI_FORWARD_CLICK_UP);
 			break;
 	}
 	return win;
@@ -175,6 +181,7 @@ ui_win_t* ui_global_windowevent(ui_globalApp_t* app, SDL_Event* e)
 	if (!win)
 		return NULL;
 	ui_whook_fire(&win->on_window_event, win, e, NULL);
+	ui_forward_to_boxes(win, e, NULL, UI_FORWARD_WINDOW_EVENT);
 	return win;
 }
 
@@ -208,7 +215,9 @@ void ui_action_update_and_render(ui_globalApp_t* app, ui_win_t* win, SDL_Event* 
 	}
 	if (win) {
 		ui_whook_fire(&win->update, win, e, NULL);
+		ui_forward_to_boxes(win, e, NULL, UI_FORWARD_UPDATE);
 		ui_whook_fire(&win->render, win, e, NULL);
+		ui_forward_to_boxes(win, e, NULL, UI_FORWARD_RENDER);
 	}
 }
 
@@ -257,7 +266,9 @@ void ui_start(ui_globalApp_t *app)
 		while(curr) {
 			ui_win_t* next = curr->next;
 			ui_whook_fire(&curr->update, curr, &e, NULL);
+			ui_forward_to_boxes(curr, &e, NULL, UI_FORWARD_UPDATE);
 			ui_whook_fire(&curr->render, curr, &e, NULL);
+			ui_forward_to_boxes(curr, &e, NULL, UI_FORWARD_RENDER);
 			curr = next;
 		}
 	}

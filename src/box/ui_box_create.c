@@ -13,21 +13,20 @@ ui_box_t* ui_box_create(ui_win_t* win, SDL_Rect rect, SDL_Color color) {
 	box->zoom_origin = (SDL_Point){box->area.w / 2, box->area.h / 2};
 	box->zoom_amt = 1.0f;
 
-    ui_bhook_add(&box->render, ui_bhook_render_default);
-    // ui_bhook_add(&box->render, ui_bhook_drawtextfocused);
-    ui_bhook_add(&box->render, ui_bhook_drawlayers);
-    ui_bhook_add(&box->render, ui_bhook_drawfocused);
-    ui_bhook_add(&box->render, ui_bhook_drawhovered);
-    ui_bhook_add(&box->render, ui_bhook_drawpressed);
-    ui_bhook_add(&box->render, ui_bhook_drawbox);
+    ui_bhook_prepend(&box->render, ui_bhook_render_default);
+    ui_bhook_prepend(&box->render, ui_bhook_drawlayers);
+    ui_bhook_prepend(&box->render, ui_bhook_drawfocused);
+    ui_bhook_prepend(&box->render, ui_bhook_drawhovered);
+    ui_bhook_prepend(&box->render, ui_bhook_drawpressed);
+    ui_bhook_prepend(&box->render, ui_bhook_drawbox);
 
-	ui_bhook_add(&box->update, ui_bhook_update_default);
-    ui_bhook_add(&box->destroy, ui_bhook_destroy_default);
+	ui_bhook_prepend(&box->update, ui_bhook_update_default);
+    ui_bhook_prepend(&box->destroy, ui_bhook_destroy_default);
 
-	ui_bhook_add(&box->on_window_event, ui_bhook_windowevent_default);
-	ui_bhook_add(&box->on_mouse_motion, ui_bhook_mousemotion_default);
-    ui_bhook_add(&box->on_click_up, ui_bhook_clickup_default);
-    ui_bhook_add(&box->on_click_down, ui_bhook_clickdown_default);
+	ui_bhook_prepend(&box->on_window_event, ui_bhook_windowevent_default);
+	ui_bhook_prepend(&box->on_mouse_motion, ui_bhook_mousemotion_default);
+    ui_bhook_prepend(&box->on_click_up, ui_bhook_clickup_default);
+    ui_bhook_prepend(&box->on_click_down, ui_bhook_clickdown_default);
 
     box->prev = NULL;
     box->next = NULL;

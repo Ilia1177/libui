@@ -1,5 +1,24 @@
 #include "ui_box.h"
 
+ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p)
+{
+	if ( !boxes || (boxes->flags & BOX_HIDDEN))
+		return NULL;
+	ui_box_t* selected = NULL;
+	ui_box_t* curr = boxes;
+	while(curr) {
+		if(SDL_PointInRect(p, &curr->area)) {
+			selected = curr;
+		}
+		ui_box_t *child = ui_box_hovered(curr->childs, p);
+		if (child) {
+			selected = child;
+		}
+		curr = curr->next;
+	}
+	return selected;
+}
+
 void ui_box_flags(ui_box_t *b, short flag, bool add, bool all)
 {
     while (b) {

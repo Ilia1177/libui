@@ -94,6 +94,7 @@ void ui_bhook_drawlayers_save(ui_box_t *box, SDL_Event *e, void *data) {
         curr = curr->next;
     }
 }
+
 void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
     (void)e;
     (void)data;
@@ -111,6 +112,7 @@ void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
         curr = curr->next;
     }
 }
+
 void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data)
 {
 	(void)e;
@@ -146,9 +148,9 @@ void ui_bhook_drawtextfocused(ui_box_t *box, SDL_Event *e, void *data) {
         SDL_QueryTexture(box->layers->texture, NULL, NULL, &tw, NULL);
 
     int padding = 4;
-    int cx      = box->area.x + padding + tw;          // right after text
-    int max_cx  = box->area.x + box->area.w - padding; // right edge limit
-    cx = (cx < max_cx) ? cx : max_cx;                  // clamp to box
+    int cx      = box->area.x + padding + tw;
+    int max_cx  = box->area.x + box->area.w - padding;
+    cx = (cx < max_cx) ? cx : max_cx;
 
     int cy = box->area.y + padding;
     int ch = box->area.h - padding * 2;
@@ -159,17 +161,8 @@ void ui_bhook_drawtextfocused(ui_box_t *box, SDL_Event *e, void *data) {
 
 void ui_bhook_render_default(ui_box_t *box, SDL_Event*e, void* data)
 {
-    SDL_Renderer *renderer;
-
+	(void)e;
+	(void)data;
     if (!box || (box->flags & BOX_HIDDEN))
         return;
-	renderer = box->parent_window->renderer;
-    if (!renderer) 
-		return;
-    ui_box_t *current = box->childs;
-    while (current) {
-        if (current->render)
-            ui_bhook_fire(current->render, current, e, data);
-        current = current->next;
-    }
 }

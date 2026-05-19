@@ -1,31 +1,18 @@
-#include "ui_win.h" // For ui_box_t, ui_win_t, SDL_Event
-#include "ui_box.h" // For ui_bhook_fire, BOX_FOCUSED, BOX_CLICKED, BOX_PRESSED, ui_box_flags
+#include "ui_win.h"
+#include "ui_box.h"
 
-void	ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
+void ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
 	(void)data;
-	SDL_MouseButtonEvent *btn = &e->button;
-	ui_win_t *win = b->parent_window;
-    int px = (int)(btn->x * win->scale.x);
-    int py = (int)(btn->y * win->scale.y);
-    SDL_Point p = {px, py};
-	bool focused = b->flags & BOX_FOCUSED;
+	(void)e;
+	SDL_Point p;
 
+	p = ui_win_mousepos(b->parent_window);
     if (SDL_PointInRect(&p, &b->area) && b->flags & BOX_HOVERED) {
         b->flags |= BOX_CLICKED;
         b->flags |= BOX_PRESSED;
-		// ui_box_flags(win->boxes, BOX_FOCUSED, false, true);
-		// ui_box_flags(win->canvas, BOX_FOCUSED, false, true);
-		if (!focused) {
-			b->flags |= BOX_FOCUSED;
-		}
+		b->flags |= BOX_FOCUSED;
     } else {
 		b->flags &= ~BOX_FOCUSED;
-        b->flags &= ~BOX_PRESSED;  // release even if mouse moved off
+        b->flags &= ~BOX_PRESSED;
     }
-	ui_box_t *curr = b->childs;
-	while(curr) {
-		if(curr->on_click_down)
-            ui_bhook_fire(curr->on_click_down, curr, e, data);
-		curr = curr->next;
-	}
 }

@@ -147,8 +147,8 @@ ui_box_t* ui_belem_slider(ui_win_t* win, ui_slider_data_t parameters)
         slider_data->default_value;
 
 	ui_bhook_remove(&slider->render, ui_bhook_drawbox);
-    ui_bhook_add(&slider->render, ui_bhook_drawslider);
-    ui_bhook_add(&slider->update, ui_bhook_keydownslider);
+    ui_bhook_prepend(&slider->render, ui_bhook_drawslider);
+    ui_bhook_prepend(&slider->update, ui_bhook_keydownslider);
 
     return slider;
 }

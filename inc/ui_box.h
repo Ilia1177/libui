@@ -95,10 +95,11 @@ void		ui_box_flags(ui_box_t *b, short flag, bool add, bool all);
 
 // Hook tools
 void	ui_bhook_clean(ui_boxhandler_t **list);
-void	ui_bhook_add(ui_boxhandler_t **list, ui_bhook_fn_t fn);
+void	ui_bhook_prepend(ui_boxhandler_t **list, ui_bhook_fn_t fn);
+void	ui_bhook_append(ui_boxhandler_t **list, ui_bhook_fn_t fn);
 void	ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn);
 void	ui_bhook_fire(ui_boxhandler_t*, ui_box_t*, SDL_Event*, void*);
-void ui_bhook_replace(ui_boxhandler_t *handler, ui_bhook_fn_t old, ui_bhook_fn_t new);
+void	ui_bhook_replace(ui_boxhandler_t *handler, ui_bhook_fn_t old, ui_bhook_fn_t new);
 
 // Loop hooks added by default to the box obj;
 void      	ui_bhook_destroy_default(ui_box_t* box, SDL_Event* e, void* data);

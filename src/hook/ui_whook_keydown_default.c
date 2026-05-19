@@ -128,16 +128,5 @@ int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data)
             break;
         }
     }
-    ui_box_t* curr = win->boxes;
-    while (curr) {
-        if (curr->on_key_down) {
-            ui_bhook_fire(curr->on_key_down, curr, e, data);
-        }
-        curr = curr->next;
-    }
-    curr = win->canvas;
-    if (curr && curr->on_key_down) {
-        ui_bhook_fire(curr->on_key_down, curr, e, data);
-    }
     return 1;
 }

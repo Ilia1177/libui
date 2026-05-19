@@ -47,10 +47,9 @@ SRC		= window/ui_win_create.c\
 		  hook/ui_bhook_mousewheel_default.c\
 		  hook/ui_bhook.c\
 		  hook/ui_bhook_utils.c\
-		  hook/ui_bhook_default.c\
 		  hook/ui_whook.c\
 		  hook/ui_whook_utils.c\
-		  hook/ui_whook_update_default.c\
+		  hook/ui_forward.c\
 		  hook/ui_whook_render_default.c\
 		  hook/ui_whook_clickup_default.c\
 		  hook/ui_whook_clickdown_default.c\
