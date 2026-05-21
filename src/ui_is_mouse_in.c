@@ -26,6 +26,7 @@ SDL_Point ui_layer_mousepos(ui_layer_t *layer) {
         (int)((box_mouse.y - (layer->area.y - box->area.y)) / zoom)
     };
 }
+
 SDL_Point ui_layer_mousepos2(ui_layer_t *layer) {
 
 	SDL_Point box_mouse;
@@ -49,19 +50,22 @@ SDL_Point ui_box_mousepos(ui_box_t *box) {
     };
 }
 
-SDL_Point ui_win_mousepos(ui_win_t* win) {
+SDL_Point ui_win_mousepos(ui_win_t* win) 
+{
+	(void)win;
     int gx, gy;
     SDL_GetGlobalMouseState(&gx, &gy);
 
-    // global mouse → window-relative logical coords
-    int lx = gx - win->area.x;
-    int ly = gy - win->area.y;
+	ui_scale_t scale = ui_win_get_scale(win);
 
-    // logical → physical pixels
-    int px = (int)(lx * win->scale.x);
-    int py = (int)(ly * win->scale.y);
+   // global mouse → window-relative logical coords
+	int lx = gx - win->area.x;
+	int ly = gy - win->area.y;
+	// logical → physical pixels
+	int px = (int)(lx * scale.x);
+	int py = (int)(ly * scale.y);
 
-    SDL_Point p = {px, py};
+	SDL_Point p = {px, py};
 	return p;
 }
 

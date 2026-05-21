@@ -25,6 +25,8 @@
 #define BOX_FOCUSED		(1 << 3)
 #define BOX_CLICKED		(1 << 4)
 #define BOX_DISABLE 	(1 << 5)
+#define BOX_INPUTABLE 	(1 << 6)
+#define BOX_CLICKABLE 	(1 << 7)
 
 #define INPUT_SIZE_MAX 64
 typedef struct s_ui_input_data {

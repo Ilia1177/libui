@@ -22,7 +22,7 @@ ui_box_t* ui_menu_init(ui_win_t* win) {
 ui_box_t *ui_belem_canvas(ui_win_t* win) 
 {
 	win->canvas = ui_box_create(win, ui_area(0,0,0,0), win->colors[3]);
-	ui_bhook_prepend(&win->canvas->update, ui_bhook_canvassize);
+	ui_bhook_append(&win->canvas->on_window_event, ui_bhook_canvassize);
 	return win->canvas;
 }
 
@@ -34,8 +34,10 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 	SDL_Rect area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 	input = ui_box_create(win, area, COLOR_WHITE);
     input->data = ft_calloc(INPUT_SIZE_MAX + 1, sizeof(char));
+	input->flags |= BOX_INPUTABLE;
+	ui_whook_append(&win->render, ui_whook_windirty);
     ui_bhook_prepend(&input->update, ui_bhook_inputfocus);
-    ui_bhook_prepend(&input->update, ui_bhook_catch_input);
+    ui_bhook_append(&input->on_key_down, ui_bhook_catch_input);
 	ui_bhook_replace(input->render, ui_bhook_drawlayers, ui_bhook_drawcliplayers);
 	ui_bhook_replace(input->render, ui_bhook_drawfocused, ui_bhook_drawtextfocused);
     return input;
@@ -52,8 +54,8 @@ ui_box_t*	ui_belem_button(ui_win_t* win, SDL_Texture* texture)
 
 		area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 		btn = ui_box_create(win, area, win->colors[1]);
+		btn->flags |= BOX_CLICKABLE;
 		ui_layer_make(btn, texture);
-		// ui_box_center_layers(btn, NULL);
 		return btn;
 }
 
@@ -68,7 +70,7 @@ ui_box_t* ui_belem_message(ui_win_t* win, const char* msg)
 		message = ui_box_create(win, area, win->colors[2]);
 		message->flags |= BOX_DISABLE;
 		message->color = (SDL_Color) {255,255,255,0};
-		texture = ui_texture_text(message->parent_window, msg, COLOR_WHITE);
+		texture = ui_tex_str(message->parent_window, msg, COLOR_WHITE);
 		ui_layer_make(message, texture);
     	ui_bhook_wincenter(message, NULL, &(SDL_Rect){0, 10, 0, 0});
 		// ui_bhook_prepend(&message->update, ui_bhook_nopressed);
@@ -80,10 +82,9 @@ ui_box_t* ui_belem_message(ui_win_t* win, const char* msg)
 
 ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
 {
-	SDL_Rect area = {-1, -1, 0, 0};
-	TTF_SizeText(ref->windows->font, message, &area.w, &area.h);
-	// area.w += 50;
-	area.h *= 4;
+	SDL_Rect area = {-1, -1, 0, 100};
+	TTF_SizeText(ref->windows->font, message, &area.w, NULL);
+	area.w /= ref->scale_x;
     ui_win_t *popup = ui_win_create(ref, area, "pop up", 0);
 	ui_whook_add(&popup->on_key_down, ui_whook_quitkey);
 	ui_box_t *menu = ui_menu_init(popup);
@@ -93,7 +94,7 @@ ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
     // ui_bhook_append(&popup->boxes->update, ui_bhook_nopressed);
     // ui_bhook_append(&popup->boxes->update, ui_bhook_nohovered);
 	ui_box_t* msg = ui_belem_message(popup, message);
-    ui_box_t *btn = ui_belem_button(popup,  ui_texture_text(popup, "ok", COLOR_WHITE));
+    ui_box_t *btn = ui_belem_button(popup,  ui_tex_str(popup, "ok", COLOR_WHITE));
 	ui_bhook_append(&btn->on_key_down, ui_bhook_winclose);
 	ui_bhook_append(&btn->on_click_down, ui_bhook_winclose);
     ui_bhook_wincenter(btn, NULL, &(SDL_Rect){0, 40, 0, 0});
@@ -106,7 +107,6 @@ ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
 
 ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
 {
-	printf("welem input 1\n");
 	SDL_Rect area = {-1, -1, 230, 150};
     ui_win_t *popup;
 
@@ -114,17 +114,16 @@ ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
 	ui_box_t* menu = ui_menu_init(popup);
 	ui_box_t* msg = ui_belem_message(popup, "Select the image path");
     ui_box_t *input = ui_belem_input(popup, 64);
-	ui_box_t* valid = ui_belem_button(popup, ui_texture_text(popup, "load", COLOR_WHITE));
-	ui_bhook_prepend(&valid->update,ui_bhook_valid_input);
+	ui_box_t* valid = ui_belem_button(popup, ui_tex_str(popup, "load", COLOR_WHITE));
     ui_bhook_wincenter(input, NULL, &(SDL_Rect){0, 40, 0, 0});
     ui_bhook_wincenter(valid, NULL, &(SDL_Rect){0, 100, 0, 0});
     ui_box_add_child(menu, input);
     ui_box_add_child(menu, valid);
     ui_box_add_child(menu, msg);
-	ui_whook_add(&popup->on_key_down, ui_whook_keydown_default);
+	ui_bhook_append(&valid->on_click_down, ui_bhook_valid_input);
+	ui_bhook_append(&valid->on_key_down, ui_bhook_valid_input);
 	ui_menu_build(menu, UI_NONE);
 
-	printf("message color: %d, %d, %d, %d\n", msg->color.r, msg->color.g, msg->color.b, msg->color.a);
     return popup;
 }
 
@@ -229,7 +228,6 @@ void ui_itemlist_build(ui_box_t* list, boxtype_e type, int rec)
 	{
 		switch(type) {
 			case UI_HORIZONTAL_MENU:
-				printf("build list item width: %d rec: %d\n", width, rec);
 				curr->area.w = width;
 				curr->area.x = curr->parent->area.x + rec * curr->parent->area.w;
 				curr->area.y = curr->parent->area.y + (offset_y + i) * BOX_MENU_H;

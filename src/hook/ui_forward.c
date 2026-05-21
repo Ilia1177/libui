@@ -1,74 +1,100 @@
 #include "ui_forward.h"
 
-static void forward_one_box(ui_box_t *box, SDL_Event *e, void *data, ui_forward_type_t type)
+static void event_one_box(ui_box_t *box, SDL_Event *e, void *data)
 {
-	if (!box)
+	if (!box || !e)
 		return;
-
-	switch (type) {
-	case UI_FORWARD_CLICK_DOWN:
-		if (box->on_click_down)
-			ui_bhook_fire(box->on_click_down, box, e, data);
+	switch (e->type) {
+	case SDL_MOUSEBUTTONDOWN:
+		ui_bhook_fire(box->on_click_down, box, e, data);
 		break;
-	case UI_FORWARD_CLICK_UP:
-		if (box->on_click_up)
-			ui_bhook_fire(box->on_click_up, box, e, data);
+	case SDL_MOUSEBUTTONUP:
+		ui_bhook_fire(box->on_click_up, box, e, data);
 		break;
-	case UI_FORWARD_MOUSE_MOTION:
-		if (box->on_mouse_motion)
-			ui_bhook_fire(box->on_mouse_motion, box, e, data);
+	case SDL_MOUSEMOTION:
+		ui_bhook_fire(box->on_mouse_motion, box, e, data);
 		break;
-	case UI_FORWARD_MOUSE_WHEEL:
-		if (box->on_mouse_wheel)
-			ui_bhook_fire(box->on_mouse_wheel, box, e, data);
+	case SDL_MOUSEWHEEL:
+		ui_bhook_fire(box->on_mouse_wheel, box, e, data);
 		break;
-	case UI_FORWARD_KEY_DOWN:
-		if (box->on_key_down)
-			ui_bhook_fire(box->on_key_down, box, e, data);
+	case SDL_KEYDOWN: case SDL_TEXTINPUT:
+		ui_bhook_fire(box->on_key_down, box, e, data);
 		break;
-	case UI_FORWARD_WINDOW_EVENT:
-		if (box->on_window_event)
-			ui_bhook_fire(box->on_window_event, box, e, data);
-		break;
-	case UI_FORWARD_UPDATE:
-		if (box->update)
-			ui_bhook_fire(box->update, box, e, data);
-		break;
-	case UI_FORWARD_RENDER:
-		if (box->render)
-			ui_bhook_fire(box->render, box, e, data);
+	case SDL_WINDOWEVENT:
+		ui_bhook_fire(box->on_window_event, box, e, data);
 		break;
 	}
 
 	ui_box_t *child = box->childs;
 	while (child) {
-		forward_one_box(child, e, data, type);
+		event_one_box(child, e, data);
 		child = child->next;
 	}
 }
 
-void ui_forward_to_boxes(ui_win_t *win, SDL_Event *e, void *data, ui_forward_type_t type)
+static void update_one_box(ui_box_t* b, SDL_Event *e, void* data) 
+{
+	if (!b)
+		return;
+	ui_bhook_fire(b->update, b, e, data);
+
+	ui_box_t* child = b->childs;
+	while(child) {
+		update_one_box(child, e, data);
+		child = child->next;
+	}
+}
+
+static void render_one_box(ui_box_t* b, SDL_Event *e, void* data) 
+{
+	if (!b)
+		return;
+	ui_bhook_fire(b->render, b, e, data);
+	ui_box_t* child = b->childs;
+	while(child) {
+		render_one_box(child, e, data);
+		child = child->next;
+	}
+}
+
+void ui_box_render_forward(ui_win_t* win, SDL_Event *e, void *data) 
+{
+	if(!win)
+		return;
+	// ui_log("render canvas");
+	// render_one_box(win->canvas, e, data);
+	// ui_log("done render canvas");
+	ui_box_t *root = win->boxes;
+	while (root) {
+		render_one_box(root, e, data);
+		root = root->next;
+	}
+	return;
+}
+
+void ui_box_update_forward(ui_win_t* win, SDL_Event *e, void *data) 
+{
+	if(!win)
+		return
+	update_one_box(win->canvas, e, data);
+	ui_box_t *root = win->boxes;
+	while (root) {
+		update_one_box(root, e, data);
+		root = root->next;
+	}
+	return;
+}
+
+void ui_box_event_forward(ui_win_t *win, SDL_Event *e, void *data)
 {
 	if (!win || (win->state & WIN_QUIT))
 		return;
-
-	if (type == UI_FORWARD_RENDER) {
-		if (win->canvas)
-			forward_one_box(win->canvas, e, data, type);
-		ui_box_t *root = win->boxes;
-		while (root) {
-			forward_one_box(root, e, data, type);
-			root = root->next;
-		}
-		SDL_RenderPresent(win->renderer);
-		return;
-	}
-
 	ui_box_t *root = win->boxes;
 	while (root) {
-		forward_one_box(root, e, data, type);
+		event_one_box(root, e, data);
 		root = root->next;
 	}
-	if (win->canvas)
-		forward_one_box(win->canvas, e, data, type);
+	if (win->canvas) {
+		event_one_box(win->canvas, e, data);
+	}
 }

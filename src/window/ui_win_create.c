@@ -26,6 +26,7 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
     }
 	SDL_GetWindowPosition(win->ptr, &win->area.x, &win->area.y);
 	SDL_GL_GetDrawableSize(win->ptr, &win->area.w, &win->area.h);
+	SDL_RenderGetScale(win->renderer, &app->scale_x, &app->scale_y);
 	ui_win_get_scale(win);
     win->id = SDL_GetWindowID(win->ptr);
 	win->font = TTF_OpenFont("AgentExtLgtDB Normal.ttf", 24);

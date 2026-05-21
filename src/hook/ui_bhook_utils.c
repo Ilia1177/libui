@@ -8,33 +8,46 @@ void ui_bhook_prepend(ui_boxhandler_t **list, ui_bhook_fn_t fn) {
     *list = handler;        // become new head
 }
 
-void ui_bhook_append(ui_boxhandler_t **list, ui_bhook_fn_t fn) {
-	if (!fn) return;
-	ui_boxhandler_t *handler = calloc(1, sizeof(ui_boxhandler_t));
+void ui_bhook_append(ui_boxhandler_t **list, ui_bhook_fn_t fn) 
+{
+	ui_boxhandler_t *handler;
+	ui_boxhandler_t *curr;
+
+	if (!fn) 
+		return;
+	handler = calloc(1, sizeof(ui_boxhandler_t));
 	handler->fn = fn;
 	handler->next = NULL;
 	if (!*list) {
 		*list = handler;
 		return;
 	}
-	ui_boxhandler_t *curr = *list;
+	curr = *list;
 	while (curr->next)
 		curr = curr->next;
 	curr->next = handler;
 }
 
-void ui_bhook_fire(ui_boxhandler_t *list, ui_box_t *box, SDL_Event *e, void* data) {
-    while (list) {
-		ui_boxhandler_t *next = list->next;
-        if (list->fn) {
-            list->fn(box, e, data);
+void ui_bhook_fire(ui_boxhandler_t *list, ui_box_t *b, SDL_Event *e, void* d) 
+{
+	ui_boxhandler_t* handler;
+	ui_boxhandler_t* next;
+
+	// ui_log("box hook fire");
+	handler = list;
+    while (handler) {
+		next = handler->next;
+        if (handler->fn) {
+            handler->fn(b, e, d);
 		}
-        list = next;
+        handler = next;
     }
 }
 
-void ui_bhook_clean(ui_boxhandler_t **list) {
-	if (!list || !*list) return;
+void ui_bhook_clean(ui_boxhandler_t **list) 
+{
+	if (!list || !*list) 
+		return;
 	ui_boxhandler_t *curr = *list;
 	while(curr) {
 		ui_boxhandler_t *next = curr->next;
@@ -69,12 +82,14 @@ void ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn)
 
 void ui_bhook_replace(ui_boxhandler_t *handler, ui_bhook_fn_t old, ui_bhook_fn_t new)
 {
-	ui_boxhandler_t * curr = handler;
+	ui_boxhandler_t * curr;
+	ui_boxhandler_t *next;
+
+	curr = handler;
 	while(curr) {
-		ui_boxhandler_t *next = curr->next;
+		next = curr->next;
 		if (curr->fn == old)
 			curr->fn = new;
 		curr = next;
 	}
-
 }

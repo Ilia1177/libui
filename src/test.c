@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
 	(void)argc;
 	(void)argv;
 
-	ui_globalApp_t* app = ui_global_init("GuImP");
+	ui_globalApp_t* app = ui_global_init("GuImP", NULL);
 	if (!app)
 		return -1;
 

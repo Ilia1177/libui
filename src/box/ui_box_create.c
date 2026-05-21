@@ -27,6 +27,7 @@ ui_box_t* ui_box_create(ui_win_t* win, SDL_Rect rect, SDL_Color color) {
 	ui_bhook_prepend(&box->on_mouse_motion, ui_bhook_mousemotion_default);
     ui_bhook_prepend(&box->on_click_up, ui_bhook_clickup_default);
     ui_bhook_prepend(&box->on_click_down, ui_bhook_clickdown_default);
+	box->on_mouse_wheel = NULL;
 
     box->prev = NULL;
     box->next = NULL;

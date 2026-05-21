@@ -23,6 +23,7 @@ void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data)
 
 void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data)
 {
+	ui_log("hook update canvas size");
 	ui_win_t* win;
 	ui_box_t* menu;
 	(void)e;
@@ -130,12 +131,6 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 	(void)e;
 
 	uint32_t state = box->flags;
-	// SDL_MouseMotionEvent *btn = &e->motion;
-	// ui_win_t *win = box->parent_window;
-	//    int px = (int)(btn->x * win->scale.x);
-	//    int py = (int)(btn->y * win->scale.y);
-	//    SDL_Point p = {px, py};
-	//
 	SDL_Point p = ui_win_mousepos(box->parent_window);
 	if (state & BOX_HOVERED || state & BOX_CLICKED || ui_box_hovered(box->childs, &p)) {
 	// if (box->flags & BOX_HOVERED || ui_box_hovered(box->childs, &p)) {
@@ -143,7 +138,7 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 	} else {
 		ui_box_t *curr = box->childs;
 		while (curr) {
-			if (curr->flags & BOX_HOVERED) 
+			if (curr->flags & BOX_HOVERED || curr->flags & BOX_FOCUSED) 
 				return;
 			curr = curr->next;
 		}
@@ -154,8 +149,9 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 void ui_bhook_inputfocus(ui_box_t *box, SDL_Event *e, void *data) {
     (void)e;
     (void)data;
-    if (box->flags & BOX_PRESSED) {
-        SDL_StartTextInput();
+    if (box->flags & BOX_CLICKED || box->flags & BOX_FOCUSED) {
+		if (box->flags & BOX_INPUTABLE)
+			SDL_StartTextInput();
 		box->flags |= BOX_FOCUSED;
 		box->flags &= ~BOX_PRESSED;
     }
@@ -278,7 +274,6 @@ void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data)
 	char* input;
 	int len;
 	bool updated;
-
     if (!box || !(box->flags & BOX_FOCUSED) || !e)
         return;
 	win = box->parent_window;
@@ -286,12 +281,8 @@ void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data)
     updated = false;
 	len = box->data ? strlen((char*)box->data) : 0;
     if (e->type == SDL_TEXTINPUT) {
-		printf("TEXT input\n");
-		fflush(stdout);
         int add = strlen(e->text.text);
         if (len + add < INPUT_SIZE_MAX) {
-			printf("add to box data\n");
-			fflush(stdout);
             strcat(box->data, e->text.text);
             updated = true;
         }
@@ -303,8 +294,8 @@ void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data)
                     updated = true;
                 } break;
             case SDLK_ESCAPE:
-        		SDL_StopTextInput();
-				ui_bhook_inputcancel(box, e, NULL);
+				//     		SDL_StopTextInput();
+				// ui_bhook_inputcancel(box, e, NULL);
                 break;
             case SDLK_RETURN:
         		SDL_StopTextInput();
@@ -314,10 +305,9 @@ void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data)
     }
 
     if (updated || (!box->layers && len > 0)) {
-		win->state |= WIN_DIRTY;
         ui_layer_clean(&box->layers);
         SDL_Color c = {0, 0, 0, 255};
-        ui_layer_t *layer = ui_layer_make(box, ui_texture_text(win, box->data, c));
+        ui_layer_t *layer = ui_layer_make(box, ui_tex_str(win, box->data, c));
 		if (!layer) {
 			return;
 		} if (layer->area.w <= box->area.w) {
@@ -336,6 +326,7 @@ void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data)
             };
         }
     }
+	win->state |= WIN_DIRTY;
 }
 
 void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data) {

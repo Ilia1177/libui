@@ -16,6 +16,9 @@ typedef enum {
 	UI_FORWARD_RENDER,
 } ui_forward_type_t;
 
-void ui_forward_to_boxes(ui_win_t *win, SDL_Event *e, void *data, ui_forward_type_t type);
+void ui_bhook_forward(ui_win_t *win, SDL_Event *e, void *data, ui_forward_type_t type);
 
+void ui_box_event_forward(ui_win_t *win, SDL_Event *e, void *data);
+void ui_box_update_forward(ui_win_t* win, SDL_Event *e, void *data);
+void ui_box_render_forward(ui_win_t* win, SDL_Event *e, void *data);
 #endif

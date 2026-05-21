@@ -1,5 +1,14 @@
 #include "ui_win.h"
 
+int ui_whook_windirty(ui_win_t* win, SDL_Event *e, void *data) {
+	(void)data;
+	(void)e;
+	if (!win)
+		return 0;
+	win->state |= WIN_DIRTY;
+	return 1;
+}
+
 int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data)
 {
 	(void)data;
@@ -19,6 +28,7 @@ int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data)
 	return 1;
 } 
 
+// ONLY FOR TESTING
 int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *data) 
 {
 	(void)e;

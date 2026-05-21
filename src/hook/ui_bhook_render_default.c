@@ -37,6 +37,7 @@ void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	ui_win_t *win;
 
+	// printf("box hovered: %d\n", box->flags & BOX_HOVERED);
 	if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_HOVERED))
         return;
 	win = box->parent_window;

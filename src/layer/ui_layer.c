@@ -130,7 +130,7 @@ void	ui_layer_add(ui_layer_t**list, ui_layer_t* layer) {
 	}
 	curr->next = layer;
 }
-SDL_Texture *ui_texture_path(SDL_Renderer *renderer, const char *path) {
+SDL_Texture *ui_tex_path(SDL_Renderer *renderer, const char *path) {
     SDL_Surface *surface = IMG_Load(path);
     if (!surface) {
         fprintf(stderr, "IMG_Load: %s\n", IMG_GetError());

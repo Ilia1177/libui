@@ -20,7 +20,10 @@ typedef struct ui_globalApp_s
 	uint32_t 	state;
 	void		**inputs;
 	int			input_nb;
+	void		*env;
 
+	float		scale_x;
+	float		scale_y;
 	bool loading;
 	// SDL_Rect  button_area;
 	SDL_Color menu_color_1;
@@ -40,7 +43,8 @@ typedef struct ui_globalApp_s
 	void(*start)(struct ui_globalApp_s*);
 } ui_globalApp_t;
  
-ui_globalApp_t* ui_global_init(char* name);
+void 		ui_global_get_scale(ui_globalApp_t* app);
+ui_globalApp_t* ui_global_init(char* name, void* env);
 void			ui_global_free(ui_globalApp_t*);
 void 			ui_start(ui_globalApp_t *app); // This is ui_run
 void            ui_global_add_window(ui_globalApp_t* app, ui_win_t* win); // New: Function to add window to list

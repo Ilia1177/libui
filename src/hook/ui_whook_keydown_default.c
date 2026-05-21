@@ -77,26 +77,29 @@ void ui_focus_next(ui_box_t* root)
             first->flags |= BOX_FOCUSED;
 		}
 
+		ui_log("first box is focused & return");
         return;
     }
 
+	ui_log("focus removed from current");
     current->flags &= ~BOX_FOCUSED;
+	if (current->flags & BOX_INPUTABLE)
+		SDL_StopTextInput();
 
     ui_box_t* iter = ui_next_node(current);
 
     while (iter) {
         if (ui_box_focusable(iter)) {
             iter->flags |= BOX_FOCUSED;
+			ui_log("next is focused");
             return;
         }
-
         iter = ui_next_node(iter);
     }
-
     ui_box_t* first = ui_next_focusable(root);
-
     if (first) {
         first->flags |= BOX_FOCUSED;
+		ui_log("first is focused");
     }
 }
 
@@ -111,14 +114,19 @@ int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data)
         switch (e->key.keysym.sym) {
         case SDLK_TAB:
             ui_focus_next(win->boxes);
-            win->state |= WIN_DIRTY;
             break;
         case SDLK_RETURN:
             focused = ui_find_focused(win->boxes);
-            if (focused)
-                focused->flags |= BOX_CLICKED;
-            ui_focus_next(win->boxes);
-            win->state |= WIN_DIRTY;
+            if (!focused) {
+				ui_focus_next(win->boxes);
+			} else if (focused->flags & BOX_CLICKABLE) {
+				if (focused->flags & BOX_CLICKED)
+					ui_focus_next(focused);
+				else
+					focused->flags |= BOX_CLICKED;
+			} else if (focused->flags & BOX_INPUTABLE) {
+				ui_focus_next(focused);
+			}
             break;
         case SDLK_ESCAPE:
             win->state |= WIN_QUIT;
@@ -127,6 +135,7 @@ int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data)
         default:
             break;
         }
+        win->state |= WIN_DIRTY;
     }
     return 1;
 }

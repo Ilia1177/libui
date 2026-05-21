@@ -79,7 +79,7 @@ AR 			=	ar -rcs
 
 CC			=	cc 
 
-CFLAGS		=	-Wall -Wextra -Werror -g
+CFLAGS		=	-Wall -Wextra -Werror -O0 -g
 
 RM			=	rm -f
 

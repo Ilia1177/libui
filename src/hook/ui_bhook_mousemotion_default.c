@@ -8,6 +8,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 	ui_win_t* win;
 	SDL_Point p;
 
+	uint32_t previous = box->flags;
 	win = box->parent_window;
 	p = ui_win_mousepos(win);
 
@@ -20,4 +21,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 		box->flags &= ~BOX_HOVERED;
         box->flags &= ~BOX_PRESSED;
 	}
+
+	if (previous != box->flags)
+		box->parent_window->state |= WIN_DIRTY;
 }

@@ -34,7 +34,7 @@ void reset_state_and_input(ui_globalApp_t* app, bool* running)
 	app->input_nb	= 0;
 }
 
-ui_globalApp_t* ui_global_init(char* name)
+ui_globalApp_t* ui_global_init(char* name, void* env)
 {
 	ui_globalApp_t *app;
 	(void)name;
@@ -45,6 +45,7 @@ ui_globalApp_t* ui_global_init(char* name)
     if (!app) {
         return NULL;
     }
+	app->env = env;
 	app->loading = false;
     app->state = 0;
 	app->actions = NULL;
@@ -53,20 +54,10 @@ ui_globalApp_t* ui_global_init(char* name)
 	app->inputs[0] = NULL;
 	app->input_nb = 0;
     app->windows = NULL; // Initialize list of windows_list
-	// app->windows = ui_win_create(app, (SDL_Rect){0, 0, 0, 0}, name);
-	// app->windows->canvas = ui_box_create(app->windows->area, TEAL, app->windows);
-	// app->windows->canvas->area.x = 0;
-	// app->windows->canvas->area.y = 0;
-	// ui_bhook_add(&app->windows->canvas->update, ui_bhook_fullwidth);
-	// ui_bhook_add(&app->windows->canvas->update, ui_bhook_fullheight);
-	// ui_bhook_add(&app->windows->canvas->update, ui_bhook_movelayer);
+	app->scale_x = 1.0f;
+	app->scale_y = 1.0f;
 	SDL_GetGlobalMouseState(&app->mouse.x, &app->mouse.y);
-	// app->selected_window = app->windows;
     app->start = ui_start; // Set the start function pointer
- 	// app->menu_color_1 = (SDL_Color){124, 56, 210, 255};
- 	// app->menu_color_2 = (SDL_Color){138, 46, 2, 255};
-
-	// app->button_area = (SDL_Rect){MENU_OFFSET_X, MENU_OFFSET_Y, BOX_MENU_W, BOX_MENU_H};
     return app;
 }
 
@@ -120,9 +111,9 @@ ui_win_t* ui_global_keyboard(ui_globalApp_t *app, SDL_Event* e)
 	if (!win)
 		return NULL;
 	switch(e->type) {
-		case SDL_KEYDOWN:
+		case SDL_KEYDOWN: case SDL_TEXTINPUT:
 			ui_whook_fire(&win->on_key_down, win, e, NULL);
-			ui_forward_to_boxes(win, e, NULL, UI_FORWARD_KEY_DOWN);
+			ui_box_event_forward(win, e, NULL);
 			break;
 		case SDL_KEYUP:
 			ui_whook_fire(&win->on_key_up, win, e, NULL);
@@ -138,7 +129,7 @@ ui_win_t* ui_global_mousewheel(ui_globalApp_t *app, SDL_Event* e)
 	printf("on mouse wheel fire\n");
 	fflush(stdout);
 	ui_whook_fire(&win->on_mouse_wheel, win, e, NULL);
-	ui_forward_to_boxes(win, e, NULL, UI_FORWARD_MOUSE_WHEEL);
+	ui_box_event_forward(win, e, NULL);
 	return win;
 }
 
@@ -148,7 +139,7 @@ ui_win_t *ui_global_mousemotion(ui_globalApp_t* app, SDL_Event *e)
 	if (!win)
 		return NULL;
 	ui_whook_fire(&win->on_mouse_motion, win, e, NULL);
-	ui_forward_to_boxes(win, e, NULL, UI_FORWARD_MOUSE_MOTION);
+	ui_box_event_forward(win, e, NULL);
 	return win;
 }
 
@@ -163,11 +154,11 @@ ui_win_t *ui_global_mouseclick(ui_globalApp_t* app, SDL_Event *e)
 	switch (e->type) {
 		case SDL_MOUSEBUTTONDOWN:
 			ui_whook_fire(&win->on_click_down, win, e, NULL);
-			ui_forward_to_boxes(win, e, NULL, UI_FORWARD_CLICK_DOWN);
+			ui_box_event_forward(win, e, NULL);
 			break;
 		case SDL_MOUSEBUTTONUP:
 			ui_whook_fire(&win->on_click_up, win, e, NULL);
-			ui_forward_to_boxes(win, e, NULL, UI_FORWARD_CLICK_UP);
+			ui_box_event_forward(win, e, NULL);
 			break;
 	}
 	return win;
@@ -181,7 +172,7 @@ ui_win_t* ui_global_windowevent(ui_globalApp_t* app, SDL_Event* e)
 	if (!win)
 		return NULL;
 	ui_whook_fire(&win->on_window_event, win, e, NULL);
-	ui_forward_to_boxes(win, e, NULL, UI_FORWARD_WINDOW_EVENT);
+	ui_box_event_forward(win, e, NULL);
 	return win;
 }
 
@@ -196,9 +187,11 @@ int	ui_check_dead_window(ui_globalApp_t *app)
 		ui_win_t *next = curr->next;
 		if (curr->state & WIN_QUIT) {
 			if (curr->id == 1) {
+				ui_log("Quit app");
 				app->state |= APP_QUIT;
 				return -1;
 			} else {
+				ui_log("Remove window");
 				ui_win_remove(&app->windows, curr);
 				windows_closed++;
 			}
@@ -210,15 +203,16 @@ int	ui_check_dead_window(ui_globalApp_t *app)
 
 void ui_action_update_and_render(ui_globalApp_t* app, ui_win_t* win, SDL_Event* e)
 {
+	(void)win;
 	if (app->actions) {
 		ui_whook_fire(&app->actions, app->windows, e, app->inputs);
 	}
-	if (win) {
-		ui_whook_fire(&win->update, win, e, NULL);
-		ui_forward_to_boxes(win, e, NULL, UI_FORWARD_UPDATE);
-		ui_whook_fire(&win->render, win, e, NULL);
-		ui_forward_to_boxes(win, e, NULL, UI_FORWARD_RENDER);
-	}
+	// if (win && win->state & WIN_DIRTY) {
+	// 	ui_whook_fire(&win->update, win, e, NULL);
+	// 	ui_bhook_forward(win, e, NULL, UI_FORWARD_UPDATE);
+	// 	ui_whook_fire(&win->render, win, e, NULL);
+	// 	ui_bhook_forward(win, e, NULL, UI_FORWARD_RENDER);
+	// }
 }
 
 ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
@@ -227,6 +221,7 @@ ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 
 	win = NULL;
 	while (SDL_PollEvent(e)) {
+		ui_log_eventstr(e);
 		switch (e->type) {
 			case SDL_QUIT:
 				app->state |= APP_QUIT; return NULL;
@@ -235,39 +230,54 @@ ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 			case SDL_MOUSEMOTION:
 				win = ui_global_mousemotion(app, e); break;
 			case SDL_MOUSEWHEEL:
-				printf("mouse wheel event !\n");
-				fflush(stdout);
 				win = ui_global_mousewheel(app, e); break;
-			case SDL_KEYUP: case SDL_KEYDOWN: //case SDL_TEXTINPUT:
+			case SDL_KEYUP: case SDL_KEYDOWN: case SDL_TEXTINPUT:
 				win = ui_global_keyboard(app, e); break;
 			case SDL_WINDOWEVENT:
 				win = ui_global_windowevent(app, e); break;
 		}
-		ui_action_update_and_render(app, win, e);
+		// ui_whook_update_default(win, e, NULL);
+		// ui_whook_render_default(win, e, NULL);
+		// ui_action_update_and_render(app, win, e);
 	}
 	return win;
 }
 
+
 // Main loop
-// 1. dispatch event to windows and boxes;
-// 2. update & render all dirty windows;
+// 1. dispatch event to windows and forward event to boxes;
+// 2. fire action hook if any (action are menu button)
+// 3. update all windows and boxes
+// 4  render dirty windows + boxes only;
 void ui_start(ui_globalApp_t *app)
 {
 	ui_win_t *curr;
 	SDL_Event e;
 
-	printf("1. start\n");
+	ui_scale_t scale1;
+	ui_scale_t scale2 = ui_win_get_scale(app->windows);
+	app->scale_x = scale2.x;
+	app->scale_y = scale2.y;
+	SDL_RenderGetScale(app->windows->renderer, &scale1.x, &scale1.y);
+	printf("scale1 x: %f scale1 y: %f, scale2 x: %f, scale2 y: %f\n", scale1.x, scale1.y, scale2.x, scale2.y);
+	ui_log("1. start");
+	// ui_global_get_scale(app);
+	// ui_win_t* win = app->windows;
+	// printf("canvas area: %d", app->windows->canvas->color.a);
+	// printf("canvas area: %d %d %d %d\n", win->canvas->area.x, win->canvas->area.y, win->canvas->area.w, win->canvas->area.h);
     while (!(app->state & APP_QUIT)) {
 		ui_check_dead_window(app);
 		ui_dispatch_event(app, &e);
+		ui_whook_fire(&app->actions, app->windows, &e, app->inputs);
 		curr = app->windows;
 		while(curr) {
-			ui_win_t* next = curr->next;
-			ui_whook_fire(&curr->update, curr, &e, NULL);
-			ui_forward_to_boxes(curr, &e, NULL, UI_FORWARD_UPDATE);
-			ui_whook_fire(&curr->render, curr, &e, NULL);
-			ui_forward_to_boxes(curr, &e, NULL, UI_FORWARD_RENDER);
-			curr = next;
+			if (curr->state & WIN_DIRTY) {
+				// ui_log("update and render");
+				ui_whook_fire(&curr->update, curr, &e, NULL);
+				ui_box_update_forward(curr, &e, NULL);
+				ui_whook_fire(&curr->render, curr, &e, NULL);
+			}
+			curr = curr->next;
 		}
 	}
 	SDL_Delay(1);

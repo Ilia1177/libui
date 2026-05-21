@@ -56,6 +56,7 @@ int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn);
  
 int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data);
 int ui_whook_reset_global_state(ui_win_t* win, SDL_Event *e, void* data);
+int ui_whook_windirty(ui_win_t* win, SDL_Event *e, void *data);
 int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data);
 int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *pathraw);
 // principales Hooks de la fenetre. happen each frame

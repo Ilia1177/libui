@@ -49,6 +49,8 @@ SDL_Point ui_win_mousepos(ui_win_t *win);
 // bool ui_is_mouse_in(ui_box_t*);
 int ui_init();
 int ui_quit();
+void ui_log(const char* msg);
+void ui_log_eventstr(SDL_Event *e);
 char *ui_get_time(void);
 void *ui_realloc(void *ptr, size_t old_size, size_t new_size);
 SDL_Rect ui_area_center(SDL_Rect from, SDL_Rect to_center);
@@ -67,10 +69,11 @@ void ui_layer_draw_at(ui_layer_t *layer, SDL_Point p);
 SDL_Rect ui_layer_zoomed_area(ui_layer_t *layer);
 
 // SDL_Texture*	ui_texture_text(const char* label);
-SDL_Texture*	ui_texture_path(SDL_Renderer* render, const char* path);
-SDL_Texture *ui_texture_text(ui_win_t* win, const char *text, SDL_Color color);
+SDL_Texture*	ui_tex_path(SDL_Renderer* render, const char* path);
+SDL_Texture *ui_tex_str(ui_win_t* win, const char *text, SDL_Color color);
 # include "ui_win.h"
 # include "ui_box.h"
 # include "ui_global.h"
 # include "ui_elem.h"
 #endif
+
