@@ -73,8 +73,6 @@ ui_box_t* ui_belem_message(ui_win_t* win, const char* msg)
 		texture = ui_tex_str(message->parent_window, msg, COLOR_WHITE);
 		ui_layer_make(message, texture);
     	ui_bhook_wincenter(message, NULL, &(SDL_Rect){0, 10, 0, 0});
-		// ui_bhook_prepend(&message->update, ui_bhook_nopressed);
-		// ui_bhook_prepend(&message->update, ui_bhook_nohovered);
 		ui_bhook_remove(&message->on_click_down, ui_bhook_clickdown_default);
 		ui_bhook_remove(&message->on_mouse_motion, ui_bhook_mousemotion_default);
 		return message;
@@ -84,15 +82,13 @@ ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
 {
 	SDL_Rect area = {-1, -1, 0, 100};
 	TTF_SizeText(ref->windows->font, message, &area.w, NULL);
-	area.w /= ref->scale_x;
+	area.w = (int)area.w / ref->scale_x;
     ui_win_t *popup = ui_win_create(ref, area, "pop up", 0);
 	ui_whook_add(&popup->on_key_down, ui_whook_quitkey);
 	ui_box_t *menu = ui_menu_init(popup);
     ui_bhook_append(&menu->on_window_event, ui_bhook_maxsize);
 	ui_whook_remove(&popup->on_click_down, ui_whook_clickdown_default);
 	ui_whook_remove(&popup->on_mouse_motion, ui_whook_mousemotion_default);
-    // ui_bhook_append(&popup->boxes->update, ui_bhook_nopressed);
-    // ui_bhook_append(&popup->boxes->update, ui_bhook_nohovered);
 	ui_box_t* msg = ui_belem_message(popup, message);
     ui_box_t *btn = ui_belem_button(popup,  ui_tex_str(popup, "ok", COLOR_WHITE));
 	ui_bhook_append(&btn->on_key_down, ui_bhook_winclose);
@@ -181,7 +177,7 @@ ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 			curr->area.w = (curr->area.w - 3 * MENU_GAP_X) / 2;
 			curr->area.x = MENU_GAP_X + (i % 2) * (curr->area.w + MENU_GAP_X);
 			curr->area.y = MENU_GAP_Y + (i / 2) * (BOX_MENU_H + MENU_GAP_Y);
-			ui_bhook_prepend(&curr->on_window_event, ui_bhook_fullwindow_button);
+			// ui_bhook_prepend(&curr->on_window_event, ui_bhook_fullwindow_button);
 			case UI_NONE:
 			break;
 		}

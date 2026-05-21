@@ -8,6 +8,8 @@ int	ui_whook_render_default(ui_win_t* win, SDL_Event* e, void* data)
 	if (!win || !win->renderer || win->state & WIN_QUIT)
 		return 1;
 
+	ui_box_flags(win->boxes, BOX_CLICKED, false, true);
+	ui_box_flags(win->canvas, BOX_CLICKED, false, true);
 	// SDL_Color color = win->background_color;
 	SDL_SetRenderDrawColor(win->renderer, 122, 9, 34, 128);
 	SDL_RenderClear(win->renderer);

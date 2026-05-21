@@ -33,6 +33,7 @@ typedef struct ui_layer_s {
 	SDL_Texture*	texture;
 	ui_box_t*		parent_box;
 	SDL_Rect		area;
+	double			angle;
 	struct ui_layer_s *next;
 } ui_layer_t;
 

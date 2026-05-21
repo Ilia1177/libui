@@ -60,40 +60,16 @@ void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
 	if (box->layers) {
 		ui_layer_t *curr = box->layers;
 		while (curr) {
-			if (curr->texture)
-				SDL_RenderCopy(win->renderer, curr->texture, NULL, &curr->area);
+			if (curr->texture) {
+				if (curr->angle != 0.0)
+					SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &curr->area, curr->angle, NULL, SDL_FLIP_NONE);
+				else
+					SDL_RenderCopy(win->renderer, curr->texture, NULL, &curr->area);
+			}
 			curr = curr->next;
 		}
 	}
 	SDL_RenderSetClipRect(win->renderer, NULL);
-}
-
-void ui_bhook_drawlayers_save(ui_box_t *box, SDL_Event *e, void *data) {
-    (void)e;
-    (void)data;
-    if (!box || (box->flags & BOX_HIDDEN)) return;
-
-    ui_win_t *win  = box->parent_window;
-    float     zoom = box->zoom_amt;
-    int       cx   = box->zoom_origin.x + box->area.x;
-    int       cy   = box->zoom_origin.y + box->area.y;
-
-    SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
-
-    ui_layer_t *curr = box->layers;
-    while (curr) {
-        if (!curr->texture) { curr = curr->next; continue; }
-        int offset_x = curr->area.x - cx;
-        int offset_y = curr->area.y - cy;
-        SDL_Rect dest = {
-            cx + (int)(offset_x * zoom),
-            cy + (int)(offset_y * zoom),
-            (int)(curr->area.w * zoom),
-            (int)(curr->area.h * zoom)
-        };
-        SDL_RenderCopy(win->renderer, curr->texture, NULL, &dest);
-        curr = curr->next;
-    }
 }
 
 void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
@@ -109,7 +85,10 @@ void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
     while (curr) {
         if (!curr->texture) { curr = curr->next; continue; }
 		SDL_Rect dest = ui_layer_zoomed_area(curr);
-        SDL_RenderCopy(win->renderer, curr->texture, NULL, &dest);
+        if (curr->angle != 0.0)
+            SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &dest, curr->angle, NULL, SDL_FLIP_NONE);
+        else
+            SDL_RenderCopy(win->renderer, curr->texture, NULL, &dest);
         curr = curr->next;
     }
 }
