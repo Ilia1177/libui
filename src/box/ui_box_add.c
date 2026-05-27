@@ -15,7 +15,8 @@ void ui_box_add_root(ui_box_t **list, ui_box_t *new)
 	new->prev = curr;
 }
 
-void ui_box_add_child(ui_box_t *parent, ui_box_t *child) {
+void ui_box_add_child(ui_box_t *parent, ui_box_t *child)
+{
     if (!parent || !child) 
 		return;
     child->parent = parent;

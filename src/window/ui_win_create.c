@@ -1,4 +1,5 @@
 #include "ui_win.h"
+// #include "libft.h"
 #include <unistd.h>
 
 int ui_win_init_handlers(ui_win_t* win)
@@ -30,6 +31,8 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 	ui_win_get_scale(win);
     win->id = SDL_GetWindowID(win->ptr);
 	win->font = TTF_OpenFont("AgentExtLgtDB Normal.ttf", 24);
+	if (!win->font)
+		return -1;
 	TTF_SetFontStyle(win->font, TTF_STYLE_BOLD);
 	ui_win_init_handlers(win);
 	win->background_color = COLOR_BG;
@@ -48,12 +51,12 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 // area.x <= 0 makes the window centered on the x axe
 // area.y <= 0 makes the window centered on the y axe
 // area.<w|h> <= 0 makes the window resizable with w=400 h=200
-ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, char* title, uint32_t flags)
+ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, const char* title, uint32_t flags)
 {
 	ui_win_t *win;
 
 	win = (ui_win_t*)calloc(sizeof(ui_win_t), 1);
-	if (!win)
+	if (!win || !title)
 		return NULL;
 	if (area.x <= 0)
 		area.x = SDL_WINDOWPOS_CENTERED;
@@ -71,6 +74,21 @@ ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, char* title, uint32_
 	if (ui_win_init(app, win) != 0) {
 		return NULL;
 	}
+	win->label = title;
 	ui_win_add(&app->windows, win);
 	return win;
+}
+
+ui_win_t* ui_get_win_by_name(ui_globalApp_t* app, const char* name)
+{
+	ui_win_t* curr;
+
+	curr = app->windows;
+	while(curr) {
+		if (!strncmp(name, curr->label, strlen(curr->label))) {
+			return curr;
+		}
+		curr = curr->next;
+	}
+	return NULL;
 }

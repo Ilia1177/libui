@@ -78,16 +78,10 @@ void ui_tool_activate(ui_globalApp_t *app, ui_tool_t *tool, ui_box_t *canvas)
 	app->active_tool = tool;
    if (tool->on_activate)
 	   tool->on_activate(canvas, tool->data);
-	printf("Clickdown of %s tool is: %p\n", tool->name, tool->on_click_down);
-	fflush(stdout);
-	if (tool->on_click_down) {
-		printf("add clickup bridge\n");
-		fflush(stdout);
+	if (tool->on_click_down)
 	    ui_bhook_append(&canvas->on_click_down, bridge_click_down);
-	}
-	if (tool->on_click_up) {
+	if (tool->on_click_up)
 	    ui_bhook_append(&canvas->on_click_up, bridge_click_up);
-	}
 	if (tool->on_mouse_motion)
 		ui_bhook_append(&canvas->on_mouse_motion, bridge_mouse_motion);
 	if (tool->on_key_down)
@@ -96,14 +90,6 @@ void ui_tool_activate(ui_globalApp_t *app, ui_tool_t *tool, ui_box_t *canvas)
 		ui_bhook_append(&canvas->update, bridge_update);
 	if (tool->on_render)
 		ui_bhook_append(&canvas->render, bridge_render);
-	// ui_boxhandler_t* curr = canvas->on_click_down;
-	// while(curr) {
-	// 	printf("box handler click down is : %p\n", curr->fn);
-	// 	fflush(stdout);
-	// 	curr = curr->next;
-	// }
-	printf("end tool activate\n");
-	fflush(stdout);
 }
 
 void ui_tool_deactivate(ui_globalApp_t *app, ui_box_t *canvas) {

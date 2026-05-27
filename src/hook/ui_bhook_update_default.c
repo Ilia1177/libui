@@ -5,5 +5,6 @@ void ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *data)
 {
 	(void)e;
 	(void)data;
-	box->flags &= ~BOX_CLICKED;
+	(void)box;
+	// box->flags &= ~BOX_CLICKED;
 }

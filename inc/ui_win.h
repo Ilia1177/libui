@@ -31,6 +31,7 @@ typedef struct ui_win_s
 	ui_box_t		*canvas;
 	float			zoom;
 
+	const char*		label;
 	SDL_Color		background_color;
 	TTF_Font		*font;
 	ui_winhandler_t *on_mouse_wheel;
@@ -51,7 +52,7 @@ void ui_win_add_box(ui_win_t *win, ui_box_t *box);
 void ui_win_add(ui_win_t **list, ui_win_t *win);
 
 ui_scale_t ui_win_get_scale(ui_win_t *win);
-ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, char* title, uint32_t flags);
+ui_win_t* ui_win_create(ui_globalApp_t * app, SDL_Rect, const char* title, uint32_t flags);
 int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn);
  
 int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data);
@@ -72,6 +73,7 @@ int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void* dat
 int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn); 
 int ui_whook_append(ui_winhandler_t **list, ui_whook_fn_t fn);
 int ui_whook_clean(ui_winhandler_t **list);
+ui_win_t* ui_get_win_by_name(ui_globalApp_t* app, const char* name);
 // New: Event registration functions (using SDL_Event*)
 // void ui_win_set_on_resize(ui_win_t* win, void(*handler)(ui_win_t*, SDL_Event*));
 // void ui_win_set_on_mousewheel(ui_win_t* win, void(*handler)(ui_win_t*, SDL_Event*));

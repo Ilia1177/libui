@@ -5,6 +5,7 @@
 #include "ui_global.h" // For ui_globalApp_t
 #include "ui_win.h" // For ui_win_t and its ID
 #include "ui_elem.h"
+
 // typedef enum menutype {
 // 	UI_HORIZONTAL_MENU,
 // 	UI_VERTICAL_MENU,
@@ -27,8 +28,8 @@
 #define BOX_DISABLE 	(1 << 5)
 #define BOX_INPUTABLE 	(1 << 6)
 #define BOX_CLICKABLE 	(1 << 7)
+#define INPUT_SIZE_MAX	64
 
-#define INPUT_SIZE_MAX 64
 typedef struct s_ui_input_data {
     char* buffer;
     int size;
@@ -57,7 +58,6 @@ typedef struct ui_box_s
 	const char*		label;
 	void*			data;
 	ui_layer_t*		layers;
-	ui_layer_t*		selected_layer;
     ui_win_t*		parent_window;
 
 	ui_boxhandler_t *on_window_event;
@@ -126,6 +126,7 @@ void 		ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data);
 
 // Custom hooks;
 //
+void ui_bhook_drawborder(ui_box_t *cnv, SDL_Event *e, void *data);
 void ui_bhook_zoomin(ui_box_t *cnv, SDL_Event *e, void *data);
 void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data);
 void	ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data);

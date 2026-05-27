@@ -1,5 +1,6 @@
 #include "libui.h"
-#include "libft.h"
+#include "math.h"
+// #include "libft.h"
 
 void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) 
 {
@@ -51,7 +52,7 @@ void ui_bhook_zoomin_save(ui_box_t *cnv, SDL_Event *e, void *data) {
     if (!cnv->layers) return;
 
     float delta = (e->wheel.y > 0) ? 0.1f : -0.1f;
-    cnv->zoom_amt = ft_clampf(
+    cnv->zoom_amt = clampf(
         cnv->zoom_amt + delta, 0.1f, 10.0f);
 
     // freeze zoom origin at current mouse pos
@@ -66,7 +67,7 @@ void ui_bhook_zoomin(ui_box_t *cnv, SDL_Event *e, void *data) {
 
     float delta = (e->wheel.y > 0) ? 0.1f : -0.1f;
     float old_zoom = cnv->zoom_amt;
-    float new_zoom = ft_clampf(old_zoom + delta, 0.1f, 10.0f);
+    float new_zoom = clampf(old_zoom + delta, 0.1f, 10.0f);
 
     // zoom origin = mouse position in box space
     SDL_Point mouse = ui_box_mousepos(cnv);
@@ -106,6 +107,8 @@ void ui_bhook_winclose(ui_box_t* b, SDL_Event* e, void* data)
 {
 	(void)e;
 	(void)data;
+	printf("win close\n");
+	fflush(stdout);
 	ui_win_t *win = b->parent_window;
 	if (b->flags & BOX_CLICKED) {
 		win->state |= WIN_QUIT;
@@ -352,37 +355,37 @@ void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data) {
 
 
 
-void ui_bhook_movelayer(ui_box_t *cnv, SDL_Event *e, void *data)
-{
-    (void)e;
-    (void)data;
-    static SDL_Point last = {0, 0};
-    static ui_layer_t *selected = NULL;
-
-    SDL_Point p = ui_box_mousepos(cnv);
-    if (cnv->flags & BOX_PRESSED) {
-		if(!selected)
-			selected = ui_layer_selected(cnv->layers, &p);
-    	if (selected) {
-			if (last.x == 0 && last.y == 0) {
-				last = p;
-				return;
-			}
-			// compute delta
-			int dx = p.x - last.x;
-			int dy = p.y - last.y;
-			// move the layer
-			selected->area.x += dx;
-			selected->area.y += dy;
-			last = p;  // update for next frame
-		}
-		cnv->selected_layer = selected;
-    } else {
-		selected = NULL;
-        last = (SDL_Point){0, 0};
-    }
-}
-
+// void ui_bhook_movelayer(ui_box_t *cnv, SDL_Event *e, void *data)
+// {
+//     (void)e;
+//     (void)data;
+//     static SDL_Point last = {0, 0};
+//     static ui_layer_t *selected = NULL;
+//
+//     SDL_Point p = ui_box_mousepos(cnv);
+//     if (cnv->flags & BOX_PRESSED) {
+// 		if(!selected)
+// 			selected = ui_layer_selected(cnv->layers, &p);
+//     	if (selected) {
+// 			if (last.x == 0 && last.y == 0) {
+// 				last = p;
+// 				return;
+// 			}
+// 			// compute delta
+// 			int dx = p.x - last.x;
+// 			int dy = p.y - last.y;
+// 			// move the layer
+// 			selected->area.x += dx;
+// 			selected->area.y += dy;
+// 			last = p;  // update for next frame
+// 		}
+// 		cnv->selected_layer = selected;
+//     } else {
+// 		selected = NULL;
+//         last = (SDL_Point){0, 0};
+//     }
+// }
+//
 void	ui_bhook_maxsize(ui_box_t *box, SDL_Event *e, void *data) 
 {
 	(void)e;

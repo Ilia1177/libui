@@ -1,6 +1,6 @@
 #include "ui_win.h"
 #include "ui_box.h"
-#include "libft.h"
+// #include "libft.h"
 
 SDL_Rect ui_area(int x, int y, int w, int h)
 {
@@ -33,7 +33,7 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 
 	SDL_Rect area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 	input = ui_box_create(win, area, COLOR_WHITE);
-    input->data = ft_calloc(INPUT_SIZE_MAX + 1, sizeof(char));
+    input->data = calloc(INPUT_SIZE_MAX + 1, sizeof(char));
 	input->flags |= BOX_INPUTABLE;
 	ui_whook_append(&win->render, ui_whook_windirty);
     ui_bhook_prepend(&input->update, ui_bhook_inputfocus);
@@ -73,8 +73,8 @@ ui_box_t* ui_belem_message(ui_win_t* win, const char* msg)
 		texture = ui_tex_str(message->parent_window, msg, COLOR_WHITE);
 		ui_layer_make(message, texture);
     	ui_bhook_wincenter(message, NULL, &(SDL_Rect){0, 10, 0, 0});
-		ui_bhook_remove(&message->on_click_down, ui_bhook_clickdown_default);
-		ui_bhook_remove(&message->on_mouse_motion, ui_bhook_mousemotion_default);
+		// ui_bhook_remove(&message->on_click_down, ui_bhook_clickdown_default);
+		// ui_bhook_remove(&message->on_mouse_motion, ui_bhook_mousemotion_default);
 		return message;
 }
 
@@ -143,8 +143,8 @@ static void ui_navbar_build(ui_box_t* menu, boxtype_e type)
 			widthhandler = ui_bhook_fullwidth;
 	}
 	menu->flags |= BOX_DISABLE;
-	ui_bhook_prepend(&menu->update, ui_bhook_nohovered);
-	ui_bhook_prepend(&menu->update, ui_bhook_nopressed);
+	// ui_bhook_prepend(&menu->update, ui_bhook_nohovered);
+	// ui_bhook_prepend(&menu->update, ui_bhook_nopressed);
 	ui_bhook_prepend(&menu->on_window_event, widthhandler);
 	ui_bhook_prepend(&menu->on_window_event, heighthandler);
 }

@@ -40,18 +40,41 @@ SDL_Rect ui_layer_zoomed_area(ui_layer_t *layer) {
         (int)(layer->area.h * zoom)
     };
 }
-// ui_layer_selected
-ui_layer_t *ui_layer_selected(ui_layer_t *layers, SDL_Point *p) {
-    ui_layer_t *selected = NULL;
-    ui_layer_t *layer    = layers;
-    while (layer) {
-        SDL_Rect zoomed = ui_layer_zoomed_area(layer);
-        if (SDL_PointInRect(p, &zoomed))
-            selected = layer;
-        layer = layer->next;
-    }
-    return selected;
+
+SDL_bool ui_layer_point_in_rotated(ui_layer_t *layer, SDL_Point *p)
+{
+    SDL_Rect zoomed = ui_layer_zoomed_area(layer);
+
+    // Center of the rect
+    float cx = zoomed.x + zoomed.w / 2.0f;
+    float cy = zoomed.y + zoomed.h / 2.0f;
+
+    // Translate point relative to center
+    float dx = p->x - cx;
+    float dy = p->y - cy;
+
+    // Rotate point by -angle (inverse rotation)
+    float rad = -layer->angle * M_PI / 180.0f;
+    float lx = dx * cosf(rad) - dy * sinf(rad);
+    float ly = dx * sinf(rad) + dy * cosf(rad);
+
+    // Check if local point is inside unrotated rect
+    return (lx >= -zoomed.w / 2.0f && lx <= zoomed.w / 2.0f &&
+            ly >= -zoomed.h / 2.0f && ly <= zoomed.h / 2.0f);
 }
+
+// ui_layer_selected
+// ui_layer_t *ui_layer_selected(ui_layer_t *layers, SDL_Point *p) {
+//     ui_layer_t *selected = NULL;
+//     ui_layer_t *layer    = layers;
+//     while (layer) {
+//         SDL_Rect zoomed = ui_layer_zoomed_area(layer);
+//         if (SDL_PointInRect(p, &zoomed))
+//             selected = layer;
+//         layer = layer->next;
+//     }
+//     return selected;
+// }
 
 int ui_layer_count(ui_layer_t* layers) {
 	int n = 0;
@@ -63,6 +86,14 @@ int ui_layer_count(ui_layer_t* layers) {
 	return n;
 }
 
+Uint32 ui_layer_pixel_at(SDL_Renderer *renderer, SDL_Point *p)
+{
+    Uint32 pixel = 0;
+    SDL_Rect pixel_rect = { p->x, p->y, 1, 1 };
+    SDL_RenderReadPixels(renderer, &pixel_rect, SDL_PIXELFORMAT_RGBA8888, &pixel, 4);
+    return pixel;
+}
+
 ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 {
 	if (!texture)
@@ -72,6 +103,7 @@ ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 	new->texture = texture;
 	new->area.x = 0;
 	new->area.y = 0;
+	new->border = 0;
 	SDL_QueryTexture(texture, NULL, NULL, &new->area.w, &new->area.h);
 	new->area = ui_area_center(box->area, new->area);
 	ui_layer_add(&box->layers, new);

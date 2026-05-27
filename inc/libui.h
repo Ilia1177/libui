@@ -30,6 +30,8 @@ typedef struct ui_slider_data_s {
 
 typedef struct ui_layer_s {
 	short			state;
+	int				border;
+	const char*		label;
 	SDL_Texture*	texture;
 	ui_box_t*		parent_box;
 	SDL_Rect		area;
@@ -61,6 +63,10 @@ void	reset_state_and_input(ui_globalApp_t* app, bool* running);
 
 void transfert_all_input(ui_globalApp_t* app, ui_box_t* box);
 ui_layer_t*		ui_layer_selected(ui_layer_t* layers, SDL_Point* p);
+
+
+SDL_bool ui_layer_point_in_rotated(ui_layer_t *layer, SDL_Point *p);
+Uint32 ui_layer_pixel_at(SDL_Renderer *renderer, SDL_Point *p);
 ui_layer_t*		ui_layer_make(ui_box_t* cnv, SDL_Texture* texture);
 void			ui_layer_clean(ui_layer_t** list);
 int 			ui_layer_count(ui_layer_t* layers);
@@ -72,6 +78,7 @@ SDL_Rect ui_layer_zoomed_area(ui_layer_t *layer);
 // SDL_Texture*	ui_texture_text(const char* label);
 SDL_Texture*	ui_tex_path(SDL_Renderer* render, const char* path);
 SDL_Texture *ui_tex_str(ui_win_t* win, const char *text, SDL_Color color);
+float clampf(float, float, float);
 # include "ui_win.h"
 # include "ui_box.h"
 # include "ui_global.h"

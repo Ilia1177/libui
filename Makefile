@@ -23,7 +23,7 @@ LDFLAGS  =	$(SDL2_LIBS) \
     		-L$(BREW_PREFIX)/lib \
 			-L$(HOME)/.local/lib \
     		-lSDL2_image \
-			-L../libft/bin -lft \
+			# -L../libft/bin -lft \
 
 # CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 # LDFLAGS += -fsanitize=address

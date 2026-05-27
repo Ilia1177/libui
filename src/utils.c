@@ -16,3 +16,8 @@ void *ui_realloc(void *ptr, size_t old_size, size_t new_size)
     free(ptr);
     return new_ptr;
 }
+float clampf(float value, float min, float max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}

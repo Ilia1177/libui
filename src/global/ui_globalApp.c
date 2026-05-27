@@ -236,6 +236,10 @@ ui_win_t* ui_dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 			case SDL_WINDOWEVENT:
 				win = ui_global_windowevent(app, e); break;
 		}
+		if (win && !(win->state & WIN_QUIT))
+			win->state = WIN_DIRTY;
+		else
+			printf("No window for this event\n");
 		// ui_whook_update_default(win, e, NULL);
 		// ui_whook_render_default(win, e, NULL);
 		// ui_action_update_and_render(app, win, e);
@@ -272,9 +276,10 @@ void ui_start(ui_globalApp_t *app)
 		curr = app->windows;
 		while(curr) {
 			if (curr->state & WIN_DIRTY) {
-				// ui_log("update and render");
+				ui_log("update");
 				ui_whook_fire(&curr->update, curr, &e, NULL);
 				ui_box_update_forward(curr, &e, NULL);
+				ui_log("render");
 				ui_whook_fire(&curr->render, curr, &e, NULL);
 			}
 			curr = curr->next;

@@ -1,5 +1,30 @@
 #include "ui_box.h"
 
+void ui_bhook_drawborder(ui_box_t* box, SDL_Event* e, void* data)
+{
+	(void)e;
+	(void)data;
+	SDL_Renderer	*render;
+
+    if (!box || (box->flags & BOX_HIDDEN))
+        return;
+	if (!box->border)
+		return;
+	render = box->parent_window->renderer;
+	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(render, 
+			0, 
+			0, 
+			0, 
+			255);
+	SDL_Rect border = box->area;
+	border.x -= box->border;
+	border.y -= box->border;
+	border.w += box->border * 2;
+	border.h += box->border * 2;
+    SDL_RenderFillRect(render, &box->area);
+}
+
 void ui_bhook_drawbox(ui_box_t* box, SDL_Event* e, void* data)
 {
 	(void)e;
@@ -26,6 +51,8 @@ void ui_bhook_drawpressed(ui_box_t* box, SDL_Event* e, void* data)
 
     if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_PRESSED))
         return;
+	if (box->flags & BOX_DISABLE)
+		return;
 	win = box->parent_window;
 	SDL_SetRenderDrawColor(win->renderer, 0, 0, 0, 80);
 	SDL_RenderFillRect(win->renderer, &box->area);
@@ -37,9 +64,10 @@ void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	ui_win_t *win;
 
-	// printf("box hovered: %d\n", box->flags & BOX_HOVERED);
 	if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_HOVERED))
         return;
+	if (box->flags & BOX_DISABLE)
+		return;
 	win = box->parent_window;
     SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(win->renderer, 255, 255, 255, 50);
@@ -101,6 +129,8 @@ void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data)
 
 	if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_FOCUSED))
 		return;
+	if (box->flags & BOX_DISABLE)
+		return;
 	win = box->parent_window;
 	SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(win->renderer, 12, 23, 23, 50);
@@ -143,6 +173,7 @@ void ui_bhook_render_default(ui_box_t *box, SDL_Event*e, void* data)
 {
 	(void)e;
 	(void)data;
+	box->flags &= ~BOX_CLICKED;
     if (!box || (box->flags & BOX_HIDDEN))
         return;
 }

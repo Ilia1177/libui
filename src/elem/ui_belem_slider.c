@@ -1,5 +1,7 @@
 #include "ui_box.h"
-#include "libft.h"
+#include "math.h"
+
+// #include "libft.h"
 
 void ui_bhook_keydownslider(ui_box_t* slider, SDL_Event* e, void* data) 
 {
@@ -33,7 +35,7 @@ void ui_bhook_keydownslider(ui_box_t* slider, SDL_Event* e, void* data)
             float t = (float)(mx - slider->area.x)
                     / (float)slider->area.w;
 
-            t = ft_clampf(t, 0.0f, 1.0f);
+            t = clampf(t, 0.0f, 1.0f);
 
             s->current_value =
                 s->min_value
@@ -136,7 +138,7 @@ ui_box_t* ui_belem_slider(ui_win_t* win, ui_slider_data_t parameters)
 
     slider = ui_box_create(win, area, win->colors[2]);
 
-    slider->data = ft_calloc(1, sizeof(ui_slider_data_t));
+    slider->data = calloc(1, sizeof(ui_slider_data_t));
 
     ui_slider_data_t *slider_data =
         (ui_slider_data_t *)slider->data;
