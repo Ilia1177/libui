@@ -25,9 +25,10 @@
 #define BOX_HIDDEN      (1 << 2)
 #define BOX_FOCUSED		(1 << 3)
 #define BOX_CLICKED		(1 << 4)
-#define BOX_DISABLE 	(1 << 5)
-#define BOX_INPUTABLE 	(1 << 6)
-#define BOX_CLICKABLE 	(1 << 7)
+#define BOX_DRAGGED 	(1 << 5)
+#define BOX_DISABLE 	(1 << 6)
+#define BOX_INPUTABLE 	(1 << 7)
+#define BOX_CLICKABLE 	(1 << 8)
 #define INPUT_SIZE_MAX	64
 
 typedef struct s_ui_input_data {
@@ -82,6 +83,7 @@ typedef struct ui_box_s
 // ui_box_t*	ui_elem_menu_navbar(ui_win_t *win, menutype_e type);
 // ui_box_t*	ui_box_menu_list_option_add(ui_win_t *win, ui_box_t **list, void(*fn)(ui_box_t*, SDL_Event*, void*));
 
+void ui_box_swap(ui_box_t *a, ui_box_t *b);
 void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* r);
 void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn);
 ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p);
@@ -94,6 +96,7 @@ int			ui_box_count_prev(ui_box_t *);
 int			ui_box_count_next(ui_box_t *);
 int			ui_box_count_all(ui_box_t *);
 void		ui_box_flags(ui_box_t *b, short flag, bool add, bool all);
+void		ui_box_bring_to_front(ui_box_t *b);
 
 // Hook tools
 void	ui_bhook_clean(ui_boxhandler_t **list);

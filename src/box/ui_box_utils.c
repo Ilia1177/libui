@@ -18,7 +18,44 @@
 // 	}
 // 	return selected;
 // }
+void ui_box_swap(ui_box_t *a, ui_box_t *b)
+{
+    // Just swap their list pointers, not the area positions
+    ui_box_t *parent = a->parent;
+    ui_box_t *curr   = parent->childs;
+    ui_box_t *prev_a = NULL, *prev_b = NULL;
 
+    while (curr) {
+        if (curr->next == a) prev_a = curr;
+        if (curr->next == b) prev_b = curr;
+        curr = curr->next;
+    }
+
+    // Swap next pointers
+    if (prev_a) prev_a->next = b; else parent->childs = b;
+    if (prev_b) prev_b->next = a; else parent->childs = a;
+
+    ui_box_t *tmp = a->next;
+    a->next = b->next;
+    b->next = tmp;
+}
+
+void ui_box_bring_to_front(ui_box_t *b)
+{
+    ui_box_t *parent = b->parent;
+    if (!parent || parent->childs == b) return; // already first
+
+    // Unlink b from its current position
+    ui_box_t *curr = parent->childs;
+    while (curr && curr->next != b)
+        curr = curr->next;
+    if (!curr) return;
+    curr->next = b->next;
+
+    // Relink b at the front
+    b->next = parent->childs;
+    parent->childs = b;
+}
 ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point* p)
 {
     if (!boxes || (boxes->flags & BOX_HIDDEN))

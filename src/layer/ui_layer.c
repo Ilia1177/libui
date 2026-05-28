@@ -62,7 +62,27 @@ SDL_bool ui_layer_point_in_rotated(ui_layer_t *layer, SDL_Point *p)
     return (lx >= -zoomed.w / 2.0f && lx <= zoomed.w / 2.0f &&
             ly >= -zoomed.h / 2.0f && ly <= zoomed.h / 2.0f);
 }
+void ui_layer_swap(ui_layer_t **head, ui_layer_t *a, ui_layer_t *b)
+{
+    if (!a || !b || a == b) return;
 
+    ui_layer_t *prev_a = NULL, *prev_b = NULL;
+    ui_layer_t *curr = *head;
+
+    while (curr) {
+        if (curr->next == a) prev_a = curr;
+        if (curr->next == b) prev_b = curr;
+        curr = curr->next;
+    }
+
+    // Unlink a and b, relink swapped
+    if (prev_a) prev_a->next = b; else *head = b;
+    if (prev_b) prev_b->next = a; else *head = a;
+
+    ui_layer_t *tmp = a->next;
+    a->next = b->next;
+    b->next = tmp;
+}
 // ui_layer_selected
 // ui_layer_t *ui_layer_selected(ui_layer_t *layers, SDL_Point *p) {
 //     ui_layer_t *selected = NULL;

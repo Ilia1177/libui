@@ -65,6 +65,7 @@ void transfert_all_input(ui_globalApp_t* app, ui_box_t* box);
 ui_layer_t*		ui_layer_selected(ui_layer_t* layers, SDL_Point* p);
 
 
+void ui_layer_swap(ui_layer_t **head, ui_layer_t *a, ui_layer_t *b);
 SDL_bool ui_layer_point_in_rotated(ui_layer_t *layer, SDL_Point *p);
 Uint32 ui_layer_pixel_at(SDL_Renderer *renderer, SDL_Point *p);
 ui_layer_t*		ui_layer_make(ui_box_t* cnv, SDL_Texture* texture);
