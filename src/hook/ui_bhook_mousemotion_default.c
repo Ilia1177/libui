@@ -22,6 +22,9 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
         box->flags &= ~BOX_PRESSED;
 	}
 
-	if (previous != box->flags)
+	if (previous != box->flags) {
 		box->parent_window->state |= WIN_DIRTY;
+		box->flags |= BOX_DIRTY;
+		ui_box_flags(box->childs, BOX_DIRTY, true, true);
+	}
 }

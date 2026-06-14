@@ -13,11 +13,9 @@ int	ui_whook_render_default(ui_win_t* win, SDL_Event* e, void* data)
 	// SDL_Color color = win->background_color;
 	SDL_SetRenderDrawColor(win->renderer, 122, 9, 34, 128);
 	SDL_RenderClear(win->renderer);
-	if (win->canvas && win->canvas->render) {
-		ui_bhook_fire(win->canvas->render, win->canvas, e, data);
-	}
-	ui_box_render_forward(win, e, NULL);
-	SDL_RenderPresent(win->renderer);
+	// if (win->canvas && win->canvas->render) {
+	// 	ui_bhook_fire(win->canvas->render, win->canvas, e, data);
+	// }
 	win->state &= ~WIN_DIRTY;
 	return 1;
 }

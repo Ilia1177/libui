@@ -35,8 +35,14 @@ SRC		= window/ui_win_create.c\
 		  window/ui_win_pos.c\
 		  window/ui_win_size.c\
 		  window/ui_text.c\
-		  elem/ui_elem.c\
+		  elem/ui_belem_menu.c\
+		  elem/ui_belem_button.c\
+		  elem/ui_belem_canvas.c\
+		  elem/ui_belem_input.c\
+		  elem/ui_belem_message.c\
 		  elem/ui_belem_slider.c\
+		  elem/ui_welem_message.c\
+		  elem/ui_welem_input.c\
 		  global/ui_globalApp.c\
 		  hook/ui_bhook_mousemotion_default.c\
 		  hook/ui_bhook_clickdown_default.c\
@@ -69,6 +75,7 @@ SRC		= window/ui_win_create.c\
 		  box/ui_box_iter.c\
 		  box/ui_box_destroy.c\
 		  layer/ui_layer.c\
+		  layer/ui_filter.c\
 		  tools/ui_tool.c\
 
 SRC := $(addprefix $(SRC_DIR),$(SRC) )

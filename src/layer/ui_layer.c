@@ -124,6 +124,8 @@ ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 	new->area.x = 0;
 	new->area.y = 0;
 	new->border = 0;
+	new->filters = NULL;
+	new->state = 0;
 	SDL_QueryTexture(texture, NULL, NULL, &new->area.w, &new->area.h);
 	new->area = ui_area_center(box->area, new->area);
 	ui_layer_add(&box->layers, new);
@@ -287,6 +289,7 @@ void ui_layer_draw_at(ui_layer_t *layer, SDL_Point p) {
     // int ry = p.y - (layer->area.y - layer->parent_box->area.y);
     // printf("drawing at texture coords: %d, %d\n", rx, ry);
 
+	// !! maybe we should draw on the texture and not onto the renderer ??
 	int size = 5;
     SDL_Texture *old = SDL_GetRenderTarget(renderer);
     SDL_SetRenderTarget(renderer, layer->texture);

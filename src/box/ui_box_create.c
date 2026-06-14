@@ -12,6 +12,8 @@ ui_box_t* ui_box_create(ui_win_t* win, SDL_Rect rect, SDL_Color color) {
 	box->parent_window->state |= WIN_DIRTY;
 	box->zoom_origin = (SDL_Point){box->area.w / 2, box->area.h / 2};
 	box->zoom_amt = 1.0f;
+	if (!win->global->env)
+		exit(1);
 
     ui_bhook_prepend(&box->render, ui_bhook_render_default);
     ui_bhook_prepend(&box->render, ui_bhook_drawlayers);

@@ -32,59 +32,6 @@ static void event_one_box(ui_box_t *box, SDL_Event *e, void *data)
 	}
 }
 
-static void update_one_box(ui_box_t* b, SDL_Event *e, void* data) 
-{
-	if (!b)
-		return;
-	ui_bhook_fire(b->update, b, e, data);
-
-	ui_box_t* child = b->childs;
-	while(child) {
-		update_one_box(child, e, data);
-		child = child->next;
-	}
-}
-
-static void render_one_box(ui_box_t* b, SDL_Event *e, void* data) 
-{
-	if (!b)
-		return;
-	ui_bhook_fire(b->render, b, e, data);
-	ui_box_t* child = b->childs;
-	while(child) {
-		render_one_box(child, e, data);
-		child = child->next;
-	}
-}
-
-void ui_box_render_forward(ui_win_t* win, SDL_Event *e, void *data) 
-{
-	if(!win)
-		return;
-	// ui_log("render canvas");
-	// render_one_box(win->canvas, e, data);
-	// ui_log("done render canvas");
-	ui_box_t *root = win->boxes;
-	while (root) {
-		render_one_box(root, e, data);
-		root = root->next;
-	}
-	return;
-}
-
-void ui_box_update_forward(ui_win_t* win, SDL_Event *e, void *data) 
-{
-	if(!win)
-		return
-	update_one_box(win->canvas, e, data);
-	ui_box_t *root = win->boxes;
-	while (root) {
-		update_one_box(root, e, data);
-		root = root->next;
-	}
-	return;
-}
-
 void ui_box_event_forward(ui_win_t *win, SDL_Event *e, void *data)
 {
 	if (!win || (win->state & WIN_QUIT))
@@ -98,3 +45,60 @@ void ui_box_event_forward(ui_win_t *win, SDL_Event *e, void *data)
 		event_one_box(win->canvas, e, data);
 	}
 }
+
+static void update_one_box(ui_box_t* b, SDL_Event *e, void* data) 
+{	
+	ui_box_t* child;
+	if (!b)
+		return;
+	ui_bhook_fire(b->update, b, e, data);
+	b->flags &= ~BOX_STALE;
+	child = b->childs;
+	while(child) {
+		update_one_box(child, e, data);
+		child = child->next;
+	}
+}
+
+void ui_box_update_forward(ui_win_t* win, SDL_Event *e, void *data) 
+{
+	if(!win)
+		return;
+	// if (win->canvas == win->global->windows->canvas) {printf("UPDATE: canvas\n");}
+	update_one_box(win->canvas, e, data);
+	ui_box_t *root = win->boxes;
+	while (root) {
+		update_one_box(root, e, data);
+		root = root->next;
+	}
+	return;
+}
+
+static void render_one_box(ui_box_t* b, SDL_Event *e, void* data) 
+{
+	if (!b)
+		return;
+	ui_bhook_fire(b->render, b, e, data);
+	b->flags &= ~BOX_DIRTY;
+	ui_box_t* child = b->childs;
+	while(child) {
+		render_one_box(child, e, data);
+		child = child->next;
+	}
+}
+
+void ui_box_render_forward(ui_win_t* win, SDL_Event *e, void *data) 
+{
+	if(!win)
+		return;
+	render_one_box(win->canvas, e, data);
+	// ui_log("done render canvas");
+	ui_box_t *root = win->boxes;
+	while (root) {
+		render_one_box(root, e, data);
+		root = root->next;
+	}
+	return;
+}
+
+

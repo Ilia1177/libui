@@ -2,46 +2,56 @@
 #include "math.h"
 
 // #include "libft.h"
+ui_slider_data_t ui_slider_data(float max, float min, float def) {
+	return (ui_slider_data_t) {
+		max, min, def, def, false, NULL
+	};
+}
 
-void ui_bhook_keydownslider(ui_box_t* slider, SDL_Event* e, void* data) 
+
+void	ui_bhook_slider_mousemotion(ui_box_t*slider, SDL_Event* e, void *d) {
+	(void)d;
+    ui_slider_data_t *s = (ui_slider_data_t *)slider->data;
+	if (!s || !s->isdragging)
+		return;
+	int mx = e->motion.x;
+
+	float t = (float)(mx - slider->area.x)
+			/ (float)slider->area.w;
+
+	t = clampf(t, 0.0f, 1.0f);
+	s->current_value =
+		s->min_value
+		+ t * (s->max_value - s->min_value);
+}
+
+void	ui_bhook_slider_clickdown(ui_box_t*slider, SDL_Event* e, void *d)
 {
-	(void)data;
+	(void)d;
+
     ui_slider_data_t *s = (ui_slider_data_t *)slider->data;
     if (!s)
         return;
-    if (e)
-    {
-        if (e->type == SDL_MOUSEBUTTONDOWN)
-        {
-            int mx = e->button.x;
-            int my = e->button.y;
+	int mx = e->button.x;
+	int my = e->button.y;
+	if (mx >= slider->area.x &&
+		mx <= slider->area.x + slider->area.w &&
+		my >= slider->area.y &&
+		my <= slider->area.y + slider->area.h)
+	{
+		s->isdragging = true;
+	}
+}
 
-            if (mx >= slider->area.x &&
-                mx <= slider->area.x + slider->area.w &&
-                my >= slider->area.y &&
-                my <= slider->area.y + slider->area.h)
-            {
-                s->isdragging = true;
-            }
-        }
-        else if (e->type == SDL_MOUSEBUTTONUP)
-        {
-            s->isdragging = false;
-        }
-        else if (e->type == SDL_MOUSEMOTION && s->isdragging)
-        {
-            int mx = e->motion.x;
-
-            float t = (float)(mx - slider->area.x)
-                    / (float)slider->area.w;
-
-            t = clampf(t, 0.0f, 1.0f);
-
-            s->current_value =
-                s->min_value
-                + t * (s->max_value - s->min_value);
-        }
-    }
+void	ui_bhook_slider_clickup(ui_box_t*slider, SDL_Event* e, void *d)
+{
+	(void)e;
+	(void)d;
+    ui_slider_data_t *s = (ui_slider_data_t *)slider->data;
+	s->isdragging = false;
+	float* target = s->target;
+	if(target)
+		*target = s->current_value;
 }
 
 void ui_bhook_drawslider(ui_box_t* slider, SDL_Event* e, void* data)
@@ -56,39 +66,6 @@ void ui_bhook_drawslider(ui_box_t* slider, SDL_Event* e, void* data)
 
     if (!s)
         return;
-    // if (e)
-    // {
-    //     if (e->type == SDL_MOUSEBUTTONDOWN)
-    //     {
-    //         int mx = e->button.x;
-    //         int my = e->button.y;
-    //
-    //         if (mx >= slider->area.x &&
-    //             mx <= slider->area.x + slider->area.w &&
-    //             my >= slider->area.y &&
-    //             my <= slider->area.y + slider->area.h)
-    //         {
-    //             s->isdragging = true;
-    //         }
-    //     }
-    //     else if (e->type == SDL_MOUSEBUTTONUP)
-    //     {
-    //         s->isdragging = false;
-    //     }
-    //     else if (e->type == SDL_MOUSEMOTION && s->isdragging)
-    //     {
-    //         int mx = e->motion.x;
-    //
-    //         float t = (float)(mx - slider->area.x)
-    //                 / (float)slider->area.w;
-    //
-    //         t = ft_clampf(t, 0.0f, 1.0f);
-    //
-    //         s->current_value =
-    //             s->min_value
-    //             + t * (s->max_value - s->min_value);
-    //     }
-    // }
 
     /*
     ** ------------------------
@@ -148,9 +125,13 @@ ui_box_t* ui_belem_slider(ui_win_t* win, ui_slider_data_t parameters)
     slider_data->current_value =
         slider_data->default_value;
 
-	ui_bhook_remove(&slider->render, ui_bhook_drawbox);
-    ui_bhook_prepend(&slider->render, ui_bhook_drawslider);
-    ui_bhook_prepend(&slider->update, ui_bhook_keydownslider);
+	ui_bhook_replace(slider->render, ui_bhook_drawbox, ui_bhook_drawslider);
+	// ui_bhook_remove(&slider->render, ui_bhook_drawbox);
+    // ui_bhook_prepend(&slider->render, ui_bhook_drawslider);
+    // ui_bhook_prepend(&slider->update, ui_bhook_keydownslider);
+    ui_bhook_append(&slider->on_mouse_motion, ui_bhook_slider_mousemotion);
+    ui_bhook_append(&slider->on_click_down, ui_bhook_slider_clickdown);
+    ui_bhook_append(&slider->on_click_up, ui_bhook_slider_clickup);
 
     return slider;
 }

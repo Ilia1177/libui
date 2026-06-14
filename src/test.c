@@ -26,6 +26,8 @@ void new_window(ui_box_t* box, SDL_Event *e, void* data)
 	}
 }
 
+
+
 ui_win_t* main_window(ui_globalApp_t* app, char* name, boxtype_e type)
 {
 	ui_win_t* win;

@@ -130,7 +130,7 @@ int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data)
             break;
         case SDLK_ESCAPE:
             win->state |= WIN_QUIT;
-			reset_state_and_input(win->global, NULL);
+			ui_reset_state_and_input(win->global, NULL);
             break;
         default:
             break;

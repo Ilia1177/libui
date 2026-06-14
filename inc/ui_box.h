@@ -29,6 +29,8 @@
 #define BOX_DISABLE 	(1 << 6)
 #define BOX_INPUTABLE 	(1 << 7)
 #define BOX_CLICKABLE 	(1 << 8)
+#define BOX_DIRTY	 	(1 << 9)
+#define BOX_STALE	 	(1 << 10)
 #define INPUT_SIZE_MAX	64
 
 typedef struct s_ui_input_data {
@@ -106,6 +108,8 @@ void	ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn);
 void	ui_bhook_fire(ui_boxhandler_t*, ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_replace(ui_boxhandler_t *handler, ui_bhook_fn_t old, ui_bhook_fn_t new);
 
+
+
 // Loop hooks added by default to the box obj;
 void      	ui_bhook_destroy_default(ui_box_t* box, SDL_Event* e, void* data);
 void 		ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *data);
@@ -131,23 +135,23 @@ void 		ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data);
 //
 void ui_bhook_drawborder(ui_box_t *cnv, SDL_Event *e, void *data);
 void ui_bhook_zoomin(ui_box_t *cnv, SDL_Event *e, void *data);
-void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data);
+// void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data);
 void	ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data);
-void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data);
+// void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data);
 void	ui_bhook_inputcancel(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_inputvalid(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data);
-void	ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data);
+// void	ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data);
-void	ui_bhook_fullheight(ui_box_t*, SDL_Event*, void*);
-void	ui_bhook_fullwidth(ui_box_t*, SDL_Event*, void*);
-void	ui_bhook_inputfocus(ui_box_t*, SDL_Event*, void*);
-void	ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data);
-void	ui_bhook_nofocused(ui_box_t*, SDL_Event*, void*);
-void	ui_bhook_nohovered(ui_box_t*, SDL_Event*, void*);
-void	ui_bhook_nopressed(ui_box_t*, SDL_Event*, void*);
+// void	ui_bhook_fullheight(ui_box_t*, SDL_Event*, void*);
+// void	ui_bhook_fullwidth(ui_box_t*, SDL_Event*, void*);
+// void	ui_bhook_inputfocus(ui_box_t*, SDL_Event*, void*);
+// void	ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data);
+// void	ui_bhook_nofocused(ui_box_t*, SDL_Event*, void*);
+// void	ui_bhook_nohovered(ui_box_t*, SDL_Event*, void*);
+// void	ui_bhook_nopressed(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_winclose(ui_box_t*, SDL_Event*, void*);
-void	ui_bhook_maxsize(ui_box_t *cnv, SDL_Event *e, void *data);
+// void	ui_bhook_maxsize(ui_box_t *cnv, SDL_Event *e, void *data);
 void	ui_bhook_movelayer(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_label2texture(ui_box_t *box, SDL_Event *e, void* data);
 #endif

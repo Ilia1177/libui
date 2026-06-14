@@ -4,6 +4,7 @@
 
 int ui_win_init_handlers(ui_win_t* win)
 {
+	// ui_whook_add(&win->update,ui_whook_update_default);
 	ui_whook_add(&win->destroy ,ui_whook_destroy_default);
 	ui_whook_add(&win->render ,ui_whook_render_default);
 	ui_whook_add(&win->on_click_down, ui_whook_clickdown_default);
@@ -44,6 +45,13 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 	win->colors[4] = COLOR_BG;
 	win->zoom = 1.0f;
     // Initialize event handler pointers to NULL
+	win->cache = SDL_CreateTexture(
+		win->renderer,
+		SDL_PIXELFORMAT_RGBA8888,
+		SDL_TEXTUREACCESS_TARGET,
+		win->area.w,
+		win->area.h
+	);
 	return 0;
 }
 
@@ -72,7 +80,7 @@ ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, const char* title, u
         return NULL;
 	}
 	if (ui_win_init(app, win) != 0) {
-		return NULL;
+		exit(2);
 	}
 	win->label = title;
 	ui_win_add(&app->windows, win);

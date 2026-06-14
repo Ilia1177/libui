@@ -17,6 +17,7 @@ typedef struct ui_globalApp_s ui_globalApp_t;
 typedef struct ui_box_s ui_box_t;
 typedef struct ui_win_s
 {
+	SDL_Texture*	cache;
 	SDL_Renderer*	renderer;
 	SDL_Window*		ptr;
 	SDL_Rect		area;
@@ -57,8 +58,8 @@ int ui_whook_remove(ui_winhandler_t **list, ui_whook_fn_t fn);
  
 int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data);
 int ui_whook_reset_global_state(ui_win_t* win, SDL_Event *e, void* data);
-int ui_whook_windirty(ui_win_t* win, SDL_Event *e, void *data);
-int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data);
+// int ui_whook_windirty(ui_win_t* win, SDL_Event *e, void *data);
+// int ui_whook_quitkey(ui_win_t* win, SDL_Event *e, void *data);
 int ui_whook_loadimage(ui_win_t* win, SDL_Event* e, void *pathraw);
 // principales Hooks de la fenetre. happen each frame
 int ui_whook_render_default(ui_win_t*, SDL_Event*, void*);
