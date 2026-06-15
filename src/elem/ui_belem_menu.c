@@ -53,6 +53,7 @@ static void	ui_bhook_fullwidth(ui_box_t* box, SDL_Event* e, void* data) {
 	(void)data;
 	box->area.w = box->parent_window->area.w;
 }
+
 static void	ui_bhook_fullheight(ui_box_t* box, SDL_Event* e, void* data)
 {
 	(void)e;
@@ -62,22 +63,30 @@ static void	ui_bhook_fullheight(ui_box_t* box, SDL_Event* e, void* data)
 
 static void ui_navbar_build(ui_box_t* menu, boxtype_e type)
 {
-	ui_win_t* win = menu->parent_window;
+	// ui_win_t* win = menu->parent_window;
 	ui_bhook_fn_t widthhandler = NULL;
 	ui_bhook_fn_t heighthandler = NULL;
+	if (!menu)
+		return;
 	switch(type) {
 		case UI_HORIZONTAL_MENU:
-			menu->area = ui_area(0, 0, win->area.x, BOX_MENU_H + MENU_GAP_Y * 2);
+			// menu->area = ui_area(menu->area.x, 0, win->area.x, BOX_MENU_H + MENU_GAP_Y * 2);
 			widthhandler = ui_bhook_fullwidth;
 			break;
 		case UI_VERTICAL_MENU:
-			menu->area = ui_area( 0, 0, BOX_MENU_W + MENU_GAP_X * 2, win->area.h);
+			// menu->area = ui_area( 0, 0, BOX_MENU_W + MENU_GAP_X * 2, win->area.h);
 			heighthandler = ui_bhook_fullheight;
 			break;
-		case UI_FULLWINDOW_MENU: case UI_NONE:
-			menu->area = ui_area(0, 0, win->area.w, win->area.h);
+		case UI_VERTICAL_LIST:
+			heighthandler = ui_bhook_fullheight;
+			// menu->area = (SDL_Rect) {0, BOX_MENU_H, BOX_MENU_W, win->area.h - BOX_MENU_H};
+			break;
+
+		case UI_FULLWINDOW_MENU: case UI_NONE: 
+			// menu->area = ui_area(0, 0, win->area.w, win->area.h);
 			heighthandler = ui_bhook_fullheight;
 			widthhandler = ui_bhook_fullwidth;
+			break;
 	}
 	menu->flags |= BOX_DISABLE;
 	ui_bhook_append(&menu->on_window_event, widthhandler); // change from prepend
@@ -86,7 +95,7 @@ static void ui_navbar_build(ui_box_t* menu, boxtype_e type)
 
 ui_box_t* ui_menu_init(ui_win_t* win) {
 	win->boxes = ui_box_create(win, ui_area(0,0,0,0), win->colors[1]);
-	win->canvas = ui_belem_canvas(win);
+	// win->canvas = ui_belem_canvas(win);
 	return win->boxes;
 }
 
@@ -96,6 +105,7 @@ static ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 		return NULL;
 	int i = 0;
 	ui_box_t* curr = list;
+	ui_box_t* pbox = list->parent;
 	ui_win_t *win = list->parent_window;
 	int width;
 	int offsetx = MENU_OFFSET_X;
@@ -114,12 +124,17 @@ static ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 			curr->area.y = MENU_GAP_Y + (i * (BOX_MENU_H + MENU_GAP_Y));
 			break;
 			case UI_FULLWINDOW_MENU:
-			curr->color = win->colors[2];
+			// curr->color = win->colors[2];
 			curr->area.w = (curr->area.w - 3 * MENU_GAP_X) / 2;
 			curr->area.x = MENU_GAP_X + (i % 2) * (curr->area.w + MENU_GAP_X);
 			curr->area.y = MENU_GAP_Y + (i / 2) * (BOX_MENU_H + MENU_GAP_Y);
+			break;
 			// ui_bhook_prepend(&curr->on_window_event, ui_bhook_fullwindow_button);
-			case UI_NONE:
+			case UI_VERTICAL_LIST:
+			curr->area = (SDL_Rect) {pbox->area.x, pbox->area.y + i * BOX_MENU_H, pbox->area.w, BOX_MENU_H};
+			// curr->area = (SDL_Rect) {0, 0, win->area.w, BOX_MENU_H};
+			// curr->color = win->colors[2];
+			default:
 			break;
 		}
 		ui_box_center_layers(curr, NULL);
@@ -179,7 +194,7 @@ static void ui_itemlist_build(ui_box_t* list, boxtype_e type, int rec)
 				curr->area.x = MENU_GAP_X + (i % 2) * (curr->area.w + MENU_GAP_X);
 				curr->area.y = MENU_GAP_Y + (i / 2) * (BOX_MENU_H + MENU_GAP_Y);
 				ui_bhook_prepend(&curr->on_window_event, ui_bhook_fullwindow_button);
-			case UI_NONE:
+			default:
 				break;
 		}
 		curr->flags |= BOX_HIDDEN;
@@ -199,7 +214,8 @@ void ui_menu_build(ui_box_t* menu, boxtype_e type)
 	ui_option_build(menu->childs, type);
 	ui_box_t *list = menu->childs;
 	while(list) {
-		ui_itemlist_build(list->childs, type, 0);
+		if(list->childs)
+			ui_itemlist_build(list->childs, type, 0);
 		list = list->next;
 	}
 }

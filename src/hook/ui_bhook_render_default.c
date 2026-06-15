@@ -102,6 +102,7 @@ void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
 		ui_layer_t *curr = box->layers;
 		while (curr) {
 			if (curr->texture) {
+				SDL_SetTextureBlendMode(curr->texture, curr->blend_mode);
 				if (curr->angle != 0.0)
 					SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &curr->area, curr->angle, NULL, SDL_FLIP_NONE);
 				else
@@ -131,6 +132,7 @@ void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
 		if(box == win->global->windows->canvas) {
 			ui_log("render canvas's layer");
 		}	
+		SDL_SetTextureBlendMode(curr->texture, curr->blend_mode);
 		SDL_Rect dest = ui_layer_zoomed_area(curr);
         if (curr->angle != 0.0)
             SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &dest, curr->angle, NULL, SDL_FLIP_NONE);

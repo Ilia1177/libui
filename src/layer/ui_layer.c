@@ -126,6 +126,7 @@ ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 	new->border = 0;
 	new->filters = NULL;
 	new->state = 0;
+	new->blend_mode = SDL_BLENDMODE_BLEND;
 	SDL_QueryTexture(texture, NULL, NULL, &new->area.w, &new->area.h);
 	new->area = ui_area_center(box->area, new->area);
 	ui_layer_add(&box->layers, new);

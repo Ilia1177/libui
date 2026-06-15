@@ -13,7 +13,7 @@ void ui_bhook_append(ui_boxhandler_t **list, ui_bhook_fn_t fn)
 	ui_boxhandler_t *handler;
 	ui_boxhandler_t *curr;
 
-	if (!fn) 
+	if (!fn || !list) 
 		return;
 	handler = calloc(1, sizeof(ui_boxhandler_t));
 	handler->fn = fn;

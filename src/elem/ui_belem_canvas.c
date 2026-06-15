@@ -4,23 +4,35 @@ static void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data)
 {
 	ui_log("hook update canvas size");
 	ui_win_t* win;
-	ui_box_t* menu;
+	// ui_box_t* menu;
 	(void)e;
 	(void)data;
 
+
 	win = b->parent_window;
-	menu = win->boxes;
-	int menuH = menu->area.h;
-	int menuW = menu->area.w;
-	int winH = win->area.h;
-	int winW = win->area.w;
-	if (menuW == winW && menuH == winH) {
-		return;
-	} else if (menuW == winW) {
-		b->area = (SDL_Rect) {0, menuH, winW, winH - menuH};
-	} else if (menuH == winH) {
-		b->area = (SDL_Rect) {menuW, 0, winW - menuW, winH};
-	}
+	b->area = (SDL_Rect) {0, 0, win->area.w, win->area.h};
+	// menu = win->boxes;
+	// int w = 0;
+	// int h = 0;
+	//
+	// while (menu) {
+	// 	if (menu->area.h > h)
+	// 		h = menu->area.h;
+	// 	if (menu->area.w > w)
+	// 		w = menu->area.w;
+	// }
+	// while()
+	// int menuH = menu->area.h;
+	// int menuW = menu->area.w;
+	// int winH = win->area.h;
+	// int winW = win->area.w;
+	// if (menuW == winW && menuH == winH) {
+	// 	return;
+	// } else if (menuW == winW) {
+	// 	b->area = (SDL_Rect) {0, menuH, winW, winH - menuH};
+	// } else if (menuH == winH) {
+	// 	b->area = (SDL_Rect) {menuW, 0, winW - menuW, winH};
+	// }
 }
 
 ui_box_t *ui_belem_canvas(ui_win_t* win) 

@@ -7,6 +7,7 @@ typedef enum {
     UI_HORIZONTAL_MENU,
     UI_VERTICAL_MENU,
     UI_FULLWINDOW_MENU,
+	UI_VERTICAL_LIST,
     UI_NONE
 } boxtype_e;
 // typedef ui_bhook_fn_s ui_bhook_fn_t;

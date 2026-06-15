@@ -47,6 +47,7 @@ typedef struct ui_layer_s {
     ui_box_t*          parent_box;
     SDL_Rect           area;
     double             angle;
+    SDL_BlendMode      blend_mode;
     struct ui_layer_s* next;
 } ui_layer_t;
 
