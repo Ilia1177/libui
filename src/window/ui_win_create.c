@@ -5,14 +5,14 @@
 int ui_win_init_handlers(ui_win_t* win)
 {
 	// ui_whook_add(&win->update,ui_whook_update_default);
-	ui_whook_add(&win->destroy ,ui_whook_destroy_default);
-	ui_whook_add(&win->render ,ui_whook_render_default);
-	ui_whook_add(&win->on_click_down, ui_whook_clickdown_default);
-	ui_whook_add(&win->on_key_down, ui_whook_keydown_default);
-	ui_whook_add(&win->on_mouse_wheel, ui_whook_mousewheel_default);
-	ui_whook_add(&win->on_click_up, ui_whook_clickup_default);
-	ui_whook_add(&win->on_mouse_motion, ui_whook_mousemotion_default);
-	ui_whook_add(&win->on_window_event, ui_whook_windowevent_default);
+	ui_whook_prepend(&win->destroy ,ui_whook_destroy_default);
+	ui_whook_prepend(&win->render ,ui_whook_render_default);
+	ui_whook_prepend(&win->on_click_down, ui_whook_clickdown_default);
+	ui_whook_prepend(&win->on_key_down, ui_whook_keydown_default);
+	ui_whook_prepend(&win->on_mouse_wheel, ui_whook_mousewheel_default);
+	ui_whook_prepend(&win->on_click_up, ui_whook_clickup_default);
+	ui_whook_prepend(&win->on_mouse_motion, ui_whook_mousemotion_default);
+	ui_whook_prepend(&win->on_window_event, ui_whook_windowevent_default);
 
 	return 0;
 }
@@ -39,10 +39,10 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 	win->background_color = COLOR_BG;
 	win->global = app;
 	win->colors = calloc(sizeof(SDL_Color), 5);
-	win->colors[1] = PURPLE;
-	win->colors[2] = ORANGE;
-	win->colors[3] = TEAL;
-	win->colors[4] = COLOR_BG;
+	win->colors[0] = UI_COLOR_BG;
+	win->colors[1] = UI_COLOR_A;
+	win->colors[2] = UI_COLOR_B;
+	win->colors[3] = UI_COLOR_TEXT;
 	win->zoom = 1.0f;
     // Initialize event handler pointers to NULL
 	win->cache = SDL_CreateTexture(

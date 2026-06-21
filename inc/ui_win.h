@@ -7,7 +7,7 @@
 #define WIN_SELECTED (1 << 1) //0010
 #define WIN_MAIN (1 << 2) //0100
 #define WIN_DIRTY (1 << 3) //1000
-typedef int (*ui_whook_fn_t)(ui_win_t*, SDL_Event*, void*);
+// typedef int (*ui_whook_fn_t)(ui_win_t*, SDL_Event*, void*);
 typedef struct ui_winhandler_s {
 	ui_whook_fn_t fn;
     struct ui_winhandler_s *next;
@@ -71,7 +71,7 @@ int ui_whook_mousemotion_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_mousewheel_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_windowevent_default(ui_win_t*, SDL_Event*, void *);
 int ui_whook_fire(ui_winhandler_t **list, ui_win_t *win, SDL_Event *e, void* data);
-int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn); 
+int ui_whook_prepend(ui_winhandler_t **list, ui_whook_fn_t fn); 
 int ui_whook_append(ui_winhandler_t **list, ui_whook_fn_t fn);
 int ui_whook_clean(ui_winhandler_t **list);
 ui_win_t* ui_get_win_by_name(ui_globalApp_t* app, const char* name);

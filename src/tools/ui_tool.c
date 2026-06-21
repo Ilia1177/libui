@@ -69,8 +69,7 @@ void ui_tool_activate(ui_globalApp_t *app, ui_tool_t *tool, ui_box_t *canvas)
 	(void)app;
 	(void)tool;
 	(void)canvas;
-	printf("tool activate\n");
-	fflush(stdout);
+
 	if (!app || !tool || !canvas)
 		return;
 	if (app->active_tool)
@@ -95,8 +94,6 @@ void ui_tool_activate(ui_globalApp_t *app, ui_tool_t *tool, ui_box_t *canvas)
 void ui_tool_deactivate(ui_globalApp_t *app, ui_box_t *canvas) {
     if (!app || !app->active_tool || !canvas) return;
 
-	printf("deactivate tool\n");
-	fflush(stdout);
     ui_tool_t *tool = app->active_tool;
 
     ui_bhook_remove(&canvas->on_click_down, bridge_click_down);

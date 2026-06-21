@@ -1,10 +1,11 @@
 #ifndef UI_TOOL_H
 #define UI_TOOL_H
 
+#include "libui.h"
 #include <SDL2/SDL.h>
 
-typedef struct ui_globalApp_s ui_globalApp_t;
-typedef struct ui_box_s ui_box_t;
+// typedef struct ui_globalApp_s ui_globalApp_t;
+// typedef struct ui_box_s ui_box_t;
 
 typedef struct ui_tool_s {
     const char *name;

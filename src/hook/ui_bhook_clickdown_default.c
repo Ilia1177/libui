@@ -12,12 +12,10 @@ void ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
     if (SDL_PointInRect(&p, &b->area) && b->flags & BOX_HOVERED) {
         b->flags |= BOX_CLICKED;
         b->flags |= BOX_PRESSED;
-		b->flags |= BOX_FOCUSED;
-		ui_log("-> 1");
+		// b->flags |= BOX_FOCUSED;
     } else {
 		b->flags &= ~BOX_FOCUSED;
         b->flags &= ~BOX_PRESSED;
-		ui_log("-> 0");
     }
 	if (previous != b->flags) {
 		b->parent_window->state |= WIN_DIRTY;

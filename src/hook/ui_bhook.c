@@ -86,7 +86,8 @@ void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data) {
 		(SDL_Rect){x, y, win->area.w, win->area.h},
 		(SDL_Rect){0, 0, area.w, area.h});
 	if (box->layers) {
-		box->layers->area = ui_area_center(box->area, box->layers->area);
+		ui_box_center_layers(box, NULL);
+		// box->layers->area = ui_area_center(box->area, box->layers->area);
 	}
 }
 

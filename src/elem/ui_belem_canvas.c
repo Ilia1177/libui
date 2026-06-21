@@ -1,43 +1,44 @@
 #include "libui.h"
 
-static void	ui_bhook_canvassize(ui_box_t* b, SDL_Event *e, void* data)
+static void ui_bhook_drawbox_canvas(ui_box_t* box, SDL_Event* e, void* data)
 {
-	ui_log("hook update canvas size");
-	ui_win_t* win;
-	// ui_box_t* menu;
-	(void)e;
-	(void)data;
+    (void)e;
+    (void)data;
+    if (!box || (box->flags & BOX_HIDDEN))
+        return;
 
+    SDL_Renderer* render = box->parent_window->renderer;
 
-	win = b->parent_window;
-	b->area = (SDL_Rect) {0, 0, win->area.w, win->area.h};
-	// menu = win->boxes;
-	// int w = 0;
-	// int h = 0;
-	//
-	// while (menu) {
-	// 	if (menu->area.h > h)
-	// 		h = menu->area.h;
-	// 	if (menu->area.w > w)
-	// 		w = menu->area.w;
-	// }
-	// while()
-	// int menuH = menu->area.h;
-	// int menuW = menu->area.w;
-	// int winH = win->area.h;
-	// int winW = win->area.w;
-	// if (menuW == winW && menuH == winH) {
-	// 	return;
-	// } else if (menuW == winW) {
-	// 	b->area = (SDL_Rect) {0, menuH, winW, winH - menuH};
-	// } else if (menuH == winH) {
-	// 	b->area = (SDL_Rect) {menuW, 0, winW - menuW, winH};
-	// }
+    // 1. Draw the Main Background
+    SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(render, box->color.r, box->color.g, box->color.b, box->color.a);
+    SDL_RenderFillRect(render, &box->area);
+
+    // 2. Define Grid Style
+    const int cell_size = 20; // Size of each grid square in pixels
+    
+    // Grid color (Dark Gray). 
+    // You can change the last value (Alpha) to make it transparent (e.g., 128).
+    SDL_SetRenderDrawColor(render, 100, 100, 100, 255); 
+
+    // 3. Draw Vertical Lines
+    // We start at box->area.x and step by cell_size
+    for (int x = box->area.x; x <= box->area.x + box->area.w; x += cell_size) {
+        SDL_RenderDrawLine(render, x, box->area.y, x, box->area.y + box->area.h);
+    }
+
+    // 4. Draw Horizontal Lines
+    // We start at box->area.y and step by cell_size
+    for (int y = box->area.y; y <= box->area.y + box->area.h; y += cell_size) {
+        SDL_RenderDrawLine(render, box->area.x, y, box->area.x + box->area.w, y);
+    }
 }
 
 ui_box_t *ui_belem_canvas(ui_win_t* win) 
 {
 	win->canvas = ui_box_create(win, ui_area(0,0,0,0), win->colors[3]);
-	ui_bhook_append(&win->canvas->on_window_event, ui_bhook_canvassize);
+	ui_bhook_append(&win->canvas->on_window_event, ui_bhook_fullheight);
+	ui_bhook_append(&win->canvas->on_window_event, ui_bhook_fullwidth);
+	ui_bhook_replace(win->canvas->render, ui_bhook_drawbox, ui_bhook_drawbox_canvas);
 	return win->canvas;
 }

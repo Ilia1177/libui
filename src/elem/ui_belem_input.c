@@ -1,8 +1,17 @@
 #include "libui.h"
 
-static void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data) 
+void ui_bhook_destroy_input(ui_box_t* b, SDL_Event *e, void *d)
 {
-    (void)data;
+	(void)e;
+	(void)d;
+	if (b->data) {
+		free(b->data);
+		b->data = NULL;
+	}
+}
+
+static void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *d) 
+{
 	ui_win_t* win;
 	char* input;
 	int len;
@@ -27,18 +36,19 @@ static void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data)
                     updated = true;
                 } break;
             case SDLK_ESCAPE:
-				//     		SDL_StopTextInput();
-				// ui_bhook_inputcancel(box, e, NULL);
                 break;
             case SDLK_RETURN:
         		SDL_StopTextInput();
-				// transfert_all_input(win->global, win->boxes);
+				//     		ui_layer_destroy_all(&box->layers);
+				// free(box->data);
+				// box->data = NULL;
 				break;
         }
     }
 
+	(void)d;
     if (updated || (!box->layers && len > 0)) {
-        ui_layer_clean(&box->layers);
+        ui_layer_destroy_all(&box->layers);
         SDL_Color c = {0, 0, 0, 255};
         ui_layer_t *layer = ui_layer_make(box, ui_tex_str(win, box->data, c));
 		if (!layer) {
@@ -82,6 +92,8 @@ static void ui_bhook_inputfocus(ui_box_t *box, SDL_Event *e, void *data) {
     }
 }
 
+
+
 ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 {
 	(void)max_len;
@@ -92,6 +104,7 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
     input->data = calloc(INPUT_SIZE_MAX + 1, sizeof(char));
 	input->flags |= BOX_INPUTABLE;
 	ui_whook_append(&win->render, ui_whook_windirty);
+    ui_bhook_prepend(&input->destroy, ui_bhook_destroy_input);
     ui_bhook_prepend(&input->update, ui_bhook_inputfocus);
     ui_bhook_append(&input->on_key_down, ui_bhook_catch_input);
 	ui_bhook_replace(input->render, ui_bhook_drawlayers, ui_bhook_drawcliplayers);

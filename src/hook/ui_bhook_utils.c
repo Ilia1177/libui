@@ -1,7 +1,9 @@
 #include "ui_win.h"
 
+void ui_bhook_slider_destroy(ui_box_t*b, SDL_Event* e, void*d);
 void ui_bhook_prepend(ui_boxhandler_t **list, ui_bhook_fn_t fn) {
     if (!fn) return;
+	if (fn == ui_bhook_slider_destroy) printf("Prepend destroy function\n");
     ui_boxhandler_t *handler = calloc(1, sizeof(ui_boxhandler_t));
     handler->fn = fn;
     handler->next = *list;  // point to current head

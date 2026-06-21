@@ -38,7 +38,7 @@ ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
 	TTF_SizeText(ref->windows->font, message, &area.w, NULL);
 	area.w = (int)area.w / ref->scale_x;
     ui_win_t *popup = ui_win_create(ref, area, "pop up", 0);
-	ui_whook_add(&popup->on_key_down, ui_whook_quitkey);
+	ui_whook_prepend(&popup->on_key_down, ui_whook_quitkey);
 	ui_box_t *menu = ui_menu_init(popup);
     ui_bhook_append(&menu->on_window_event, ui_bhook_maxsize);
 	ui_whook_remove(&popup->on_click_down, ui_whook_clickdown_default);

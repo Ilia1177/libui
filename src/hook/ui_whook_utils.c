@@ -1,6 +1,6 @@
 #include "ui_win.h"
 
-int ui_whook_add(ui_winhandler_t **list, ui_whook_fn_t fn) {
+int ui_whook_prepend(ui_winhandler_t **list, ui_whook_fn_t fn) {
     if (!fn) return -1;
     ui_winhandler_t *handler = calloc(1, sizeof(ui_winhandler_t));
     handler->fn = fn;

@@ -42,6 +42,19 @@ void	ui_bhook_slider_clickdown(ui_box_t*slider, SDL_Event* e, void *d)
 		s->isdragging = true;
 	}
 }
+void	ui_bhook_slider_destroy(ui_box_t*slider, SDL_Event* e, void *d)
+{
+	(void)e;
+	(void)d;
+    ui_slider_data_t *s = (ui_slider_data_t *)slider->data;
+	if(s) {
+		if(s->target)
+			free(s->target);
+		free(s);
+	}
+	printf("Destroy slider\n");
+	fflush(stdout);
+}
 
 void	ui_bhook_slider_clickup(ui_box_t*slider, SDL_Event* e, void *d)
 {
@@ -132,6 +145,6 @@ ui_box_t* ui_belem_slider(ui_win_t* win, ui_slider_data_t parameters)
     ui_bhook_append(&slider->on_mouse_motion, ui_bhook_slider_mousemotion);
     ui_bhook_append(&slider->on_click_down, ui_bhook_slider_clickdown);
     ui_bhook_append(&slider->on_click_up, ui_bhook_slider_clickup);
-
+    ui_bhook_prepend(&slider->destroy, ui_bhook_slider_destroy);
     return slider;
 }

@@ -3,19 +3,21 @@
 int	ui_whook_destroy_default(ui_win_t* win, SDL_Event*e, void*data)
 {
 	printf("freeing window %d\n", win->id);
-	ui_box_t *curr = win->boxes;
-	ui_box_t *next = NULL;
-	while(curr) {
-		next = curr->next;
-		ui_bhook_fire(curr->destroy, curr, e, data);
-		curr = next;
-	}
-	curr = win->canvas;
-	while(curr) {
-		next = curr->next;
-		ui_bhook_fire(curr->destroy, curr, e, data);
-		curr = next;
-	}
+	(void)data;
+	(void)e;
+	// ui_box_t *curr = win->boxes;
+	// ui_box_t *next = NULL;
+	// while(curr) {
+	// 	next = curr->next;
+	// 	ui_bhook_fire(curr->destroy, curr, e, data);
+	// 	curr = next;
+	// }
+	// curr = win->canvas;
+	// while(curr) {
+	// 	next = curr->next;
+	// 	ui_bhook_fire(curr->destroy, curr, e, data);
+	// 	curr = next;
+	// }
 	free(win->colors);
 	win->colors = NULL;
     // free handler lists

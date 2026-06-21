@@ -92,7 +92,6 @@ void ui_box_render_forward(ui_win_t* win, SDL_Event *e, void *data)
 	if(!win)
 		return;
 	render_one_box(win->canvas, e, data);
-	// ui_log("done render canvas");
 	ui_box_t *root = win->boxes;
 	while (root) {
 		render_one_box(root, e, data);
@@ -101,4 +100,29 @@ void ui_box_render_forward(ui_win_t* win, SDL_Event *e, void *data)
 	return;
 }
 
+void destroy_one_box(ui_box_t* b, SDL_Event *e, void* data) 
+{
+	if (!b)
+		return;
+	ui_box_t* child = b->childs;
+	ui_bhook_fire(b->destroy, b, e, data);
+	while(child) {
+		ui_box_t* next = child->next;
+		destroy_one_box(child, e, data);
+		child = next;
+	}
+}
 
+void ui_box_destroy_forward(ui_win_t* win, SDL_Event *e, void *data) 
+{
+	if(!win)
+		return;
+	destroy_one_box(win->canvas, e, data);
+	ui_box_t *root = win->boxes;
+	while (root) {
+		ui_box_t* next = root->next;
+		destroy_one_box(root, e, data);
+		root = next;
+	}
+	return;
+}

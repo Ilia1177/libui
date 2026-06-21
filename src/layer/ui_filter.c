@@ -1,6 +1,6 @@
 #include "ui_win.h"
 
-void ui_filter_prepend(ui_filhandler_t **list, ui_filter_fn_t fn, void* d) {
+void ui_filter_prepend(ui_filhandler_t **list, ui_fhook_fn_t fn, void* d) {
     if (!fn) return;
     ui_filhandler_t *handler = calloc(1, sizeof(ui_filhandler_t));
     handler->fn = fn;
@@ -9,7 +9,7 @@ void ui_filter_prepend(ui_filhandler_t **list, ui_filter_fn_t fn, void* d) {
     *list = handler;        // become new head
 }
 
-void ui_filter_append(ui_filhandler_t **list, ui_filter_fn_t fn, void *d) 
+void ui_filter_append(ui_filhandler_t **list, ui_fhook_fn_t fn, void *d) 
 {
 	ui_filhandler_t *handler;
 	ui_filhandler_t *curr;
@@ -41,7 +41,6 @@ void ui_filter_fire(ui_filhandler_t *list, ui_layer_t *l, SDL_Event *e, void* d)
 	// ui_log("box hook fire");
 	handler = list;
     while (handler) {
-		ui_log("handler");
 		next = handler->next;
         if (handler->fn) {
             handler->fn(l, e, handler->data);
@@ -64,7 +63,7 @@ void ui_filter_clean(ui_filhandler_t **list)
     *list = NULL;
 }
 
-void ui_filter_remove(ui_filhandler_t **list, ui_filter_fn_t fn)
+void ui_filter_remove(ui_filhandler_t **list, ui_fhook_fn_t fn)
 {
     if (!list || !*list || !fn)
         return;
@@ -86,7 +85,7 @@ void ui_filter_remove(ui_filhandler_t **list, ui_filter_fn_t fn)
     }
 }
 
-void ui_filter_replace(ui_filhandler_t *handler, ui_filter_fn_t old, ui_filter_fn_t new)
+void ui_filter_replace(ui_filhandler_t *handler, ui_fhook_fn_t old, ui_fhook_fn_t new)
 {
 	ui_filhandler_t *curr;
 	ui_filhandler_t *next;

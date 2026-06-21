@@ -1,8 +1,9 @@
 #ifndef UI_ELEM_H
 # define UI_ELEM_H
-# include "libui.h"
 
-# include "ui_box.h"   // gets ui_bhook_fn_t, menutype_e
+# include "libui.h"
+# include "ui_box.h"
+
 typedef enum {
     UI_HORIZONTAL_MENU,
     UI_VERTICAL_MENU,
@@ -10,9 +11,16 @@ typedef enum {
 	UI_VERTICAL_LIST,
     UI_NONE
 } boxtype_e;
-// typedef ui_bhook_fn_s ui_bhook_fn_t;
-//
-//
+
+typedef struct ui_slider_data_s {
+    float  max_value;
+    float  min_value;
+    float  default_value;
+    float  current_value;
+    bool   isdragging;
+    float* target;
+} ui_slider_data_t;
+
 ui_box_t*	ui_belem_slider(ui_win_t* win, ui_slider_data_t parameters);
 ui_box_t*	ui_belem_message(ui_win_t* win, const char* msg);
 ui_win_t*	ui_welem_input(ui_globalApp_t *app);
@@ -27,4 +35,5 @@ ui_win_t*	ui_belem_win_input(ui_win_t *win);
 ui_box_t*	ui_belem_input(ui_win_t *win, int max_len);
 ui_box_t*	ui_menu_init(ui_win_t* win);
 void		ui_menu_build(ui_box_t* menu, boxtype_e type);
+
 #endif

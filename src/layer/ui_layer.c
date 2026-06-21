@@ -118,6 +118,7 @@ ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 {
 	if (!texture)
 		return NULL;
+	layer_nb++;
 	ui_layer_t *new = calloc(sizeof(ui_layer_t), 1);
 	new->parent_box = box;
 	new->texture = texture;
@@ -127,36 +128,38 @@ ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 	new->filters = NULL;
 	new->state = 0;
 	new->blend_mode = SDL_BLENDMODE_BLEND;
+	ui_lhook_append(&new->destroy, ui_lhook_destroy_default);
 	SDL_QueryTexture(texture, NULL, NULL, &new->area.w, &new->area.h);
 	new->area = ui_area_center(box->area, new->area);
 	ui_layer_add(&box->layers, new);
 	return new;
 }
 
-void	ui_layer_clean(ui_layer_t** list) {
+void	ui_layer_destroy_all(ui_layer_t** list)
+{
 	if(!list || !*list)
 		return;
 	ui_layer_t* curr = *list;
 	while(curr) {
 		ui_layer_t* next = curr->next;
-		SDL_DestroyTexture(curr->texture);
-		free(curr);
+		ui_lhook_fire(curr->destroy, curr, NULL, NULL);
 		curr = next;
+		layer_nb--;
 	}
 	*list = NULL;
 }
 
-void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn)
-{
-	ui_box_t *curr;
-	ui_box_t *next;
-	curr = list;
-	while(curr) {
-		next = curr->next;
-		fn(curr, NULL, NULL);
-		curr = next;
-	}
-}
+// void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn)
+// {
+// 	ui_box_t *curr;
+// 	ui_box_t *next;
+// 	curr = list;
+// 	while(curr) {
+// 		next = curr->next;
+// 		fn(curr, NULL, NULL);
+// 		curr = next;
+// 	}
+// }
 
 void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* offset)
 {
@@ -185,6 +188,58 @@ void	ui_layer_add(ui_layer_t**list, ui_layer_t* layer) {
 	}
 	curr->next = layer;
 }
+
+void	ui_layer_remove(ui_layer_t**list, ui_layer_t* layer) {
+    ui_layer_t *curr;
+    ui_layer_t *last;
+    ui_layer_t *next;
+
+    if(!layer || !*list) {
+        return;
+    }
+    last = NULL;
+    curr = *list;
+    while (curr) {
+        next = curr->next; // Cache 'next' early for safety
+        if (curr == layer) {
+            ui_lhook_fire(curr->destroy, curr, NULL, NULL); // Frees 'curr'
+            if (last)
+                last->next = next; // Link prev to saved next
+            else
+                *list = next;      // Update head to saved next
+            break;
+        }
+        last = curr;
+        curr = next;
+    }
+}
+
+// void	ui_layer_remove(ui_layer_t**list, ui_layer_t* layer) {
+//
+// 	ui_layer_t *curr;
+// 	ui_layer_t *last;
+// 	ui_layer_t *next;
+//
+// 	if(!layer || !*list) {
+// 		return;
+// 	}
+// 	last = NULL;
+// 	curr = *list;
+// 	while (curr) {
+// 		next = curr->next;
+// 		if (curr == layer) {
+// 			ui_lhook_fire(curr->destroy, curr, NULL, NULL);
+// 			if (last)
+// 				last->next = next;
+// 			else
+// 				*list = next;
+// 			break;
+// 		}
+// 		last = curr;
+// 		curr = next;
+// 	}
+// }
+
 SDL_Texture *ui_tex_path(SDL_Renderer *renderer, const char *path) {
     SDL_Surface *surface = IMG_Load(path);
     if (!surface) {
@@ -252,27 +307,27 @@ SDL_Texture *ui_tex_path(SDL_Renderer *renderer, const char *path) {
 //     return target;
 // }
 
-void ui_texture_draw2(ui_layer_t *layer, SDL_Point p) {
-    if (!layer || !layer->texture) return;
-
-    SDL_Renderer *renderer = layer->parent_box->parent_window->renderer;
-    SDL_Texture  *old_target = SDL_GetRenderTarget(renderer);  // save
-    // redirect rendering into the layer texture
-    SDL_SetRenderTarget(renderer, layer->texture);
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-
-    // draw at position relative to layer
-    int rx = p.x - layer->area.x;
-    int ry = p.y - layer->area.y;
-	printf("layer draw at: x: %d, y: %d\n", rx, ry);
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_Rect dot = {rx - 5, ry - 5, 10, 10};
-    SDL_RenderFillRect(renderer, &dot);
-    // restore screen as render target
-    SDL_SetRenderTarget(renderer, old_target);
-	layer->parent_box->parent_window->state |= WIN_DIRTY;
-}
+// void ui_texture_draw2(ui_layer_t *layer, SDL_Point p) {
+//     if (!layer || !layer->texture) return;
+//
+//     SDL_Renderer *renderer = layer->parent_box->parent_window->renderer;
+//     SDL_Texture  *old_target = SDL_GetRenderTarget(renderer);  // save
+//     // redirect rendering into the layer texture
+//     SDL_SetRenderTarget(renderer, layer->texture);
+//     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+//
+//     // draw at position relative to layer
+//     int rx = p.x - layer->area.x;
+//     int ry = p.y - layer->area.y;
+// 	printf("layer draw at: x: %d, y: %d\n", rx, ry);
+//
+//     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+//     SDL_Rect dot = {rx - 5, ry - 5, 10, 10};
+//     SDL_RenderFillRect(renderer, &dot);
+//     // restore screen as render target
+//     SDL_SetRenderTarget(renderer, old_target);
+// 	layer->parent_box->parent_window->state |= WIN_DIRTY;
+// }
 
 void ui_layer_draw_at(ui_layer_t *layer, SDL_Point p) {
     if (!layer || !layer->texture) return;

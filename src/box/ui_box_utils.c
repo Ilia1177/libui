@@ -18,6 +18,81 @@
 // 	}
 // 	return selected;
 // }
+//
+
+void ui_box_move(ui_box_t* b, SDL_Rect move)
+{
+	ui_box_t* curr;
+
+	if (!b)
+		return;
+
+	b->area.x += move.x;
+	b->area.y += move.y;
+	b->area.w += move.w;
+	b->area.h += move.h;
+	ui_box_center_layers(b, NULL);
+	curr = b->childs;
+	while(curr)
+	{
+		ui_box_move(curr->childs, move);
+		curr = curr->next;
+	}
+	
+}
+
+void destroy_one_box(ui_box_t* b, SDL_Event *e, void* data);
+
+int ui_box_remove(ui_box_t **list, ui_box_t* box)
+{
+    if(!list || !*list)
+        return 0;
+
+    ui_box_t* prev = NULL;
+    ui_box_t* curr = *list;
+
+    while(curr) {
+        ui_box_t* next = curr->next; // Cache next pointer
+		if (ui_box_remove(&curr->childs, box))
+			return 1;
+        if(curr == box) {
+            if (prev) {
+                prev->next = next; 
+                if (next) {
+                    next->prev = prev;
+                }
+            } else {
+                *list = next;
+                if (next) {
+                    next->prev = NULL;
+                }
+            }
+			destroy_one_box(curr, NULL, NULL);
+            return 1;
+        }
+        prev = curr;
+        curr = next;
+    }
+	return 0;
+}
+
+ui_box_t* ui_get_box_by_label(ui_box_t* box, const char* name) {
+	ui_box_t* curr = box;
+	ui_box_t* found;
+
+	found = NULL;
+	while(curr) {
+		if (curr->label && !strncmp(name, curr->label, strlen(curr->label))) {
+			return curr;
+		}
+		found = ui_get_box_by_label(curr->childs, name);
+		if (found)
+			return found;
+		curr = curr->next;
+	}
+	return NULL;
+}
+
 void ui_box_swap(ui_box_t *a, ui_box_t *b)
 {
     // Just swap their list pointers, not the area positions
@@ -102,6 +177,7 @@ int ui_box_count_all(ui_box_t* head)
 
 int ui_box_count_prev(ui_box_t* boxes)
 {
+
     int n = 0;
     while (boxes) {
         n++;

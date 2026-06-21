@@ -5,6 +5,13 @@
 #include "ui_win.h"
 #include "ui_forward.h"
 
+int box_nb = 0;
+int layer_nb = 0;
+static void global_destroy(ui_win_t* win, SDL_Event*e, void*data) 
+{
+	ui_box_destroy_forward(win, e, data);
+	ui_whook_fire(&win->destroy, win, e, data);
+}
 // Helper to find ui_win_t from SDL_WindowID
 ui_win_t* ui_find_window_by_id(ui_globalApp_t* app, uint32_t window_id) {
     ui_win_t* current_win = app->windows; 
@@ -71,7 +78,7 @@ void ui_global_free(ui_globalApp_t* app) {
         ui_win_t* current = app->windows;
         while (current) {
             ui_win_t* next = current->next;
-            ui_whook_destroy_default(current, NULL, NULL);
+            global_destroy(current, NULL, NULL);
             current = next;
         }
 		while(app->input_nb > 0) {
@@ -84,6 +91,8 @@ void ui_global_free(ui_globalApp_t* app) {
         ui_quit();
         free(app);
     }
+	printf("DEBUG box: %d layer: %d\n", box_nb, layer_nb);
+	fflush(stdout);
 }
 
 static void win_remove(ui_win_t** windows, ui_win_t* toremove)
@@ -98,7 +107,7 @@ static void win_remove(ui_win_t** windows, ui_win_t* toremove)
                 prev->next = curr->next;
             else
                 *windows = curr->next;
-            ui_whook_destroy_default(curr, NULL, NULL);
+			global_destroy(curr, NULL, NULL);
             return;
         }
         prev = curr;
@@ -127,8 +136,6 @@ static ui_win_t* global_mousewheel(ui_globalApp_t *app, SDL_Event* e)
 	ui_win_t *win = ui_find_window_by_id(app, e->wheel.windowID);
 	if (!win)
 		return NULL;
-	printf("on mouse wheel fire\n");
-	fflush(stdout);
 	ui_whook_fire(&win->on_mouse_wheel, win, e, NULL);
 	ui_box_event_forward(win, e, NULL);
 	return win;
@@ -155,9 +162,7 @@ static ui_win_t *global_mouseclick(ui_globalApp_t* app, SDL_Event *e)
 	switch (e->type) {
 		case SDL_MOUSEBUTTONDOWN:
 			ui_whook_fire(&win->on_click_down, win, e, NULL);
-			ui_log("evebnt forward");
 			ui_box_event_forward(win, e, NULL);
-			ui_log("end evebnt forward");
 			break;
 		case SDL_MOUSEBUTTONUP:
 			ui_whook_fire(&win->on_click_up, win, e, NULL);
@@ -205,6 +210,10 @@ static int	check_dead_window(ui_globalApp_t *app)
 	return windows_closed;
 }
 
+void ui_user_event() {
+
+}
+
 static ui_win_t* dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 {
 	ui_win_t* win;
@@ -234,6 +243,8 @@ static ui_win_t* dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 }
 
 
+
+
 static void global_render(ui_win_t* win, SDL_Event*e, void*data) 
 {
 	ui_whook_fire(&win->render, win, e, data);
@@ -259,14 +270,12 @@ void ui_start(ui_globalApp_t *app)
 	ui_win_t *curr;
 	SDL_Event e;
 
-	// ui_scale_t scale1;
-	// ui_scale_t scale2 = ui_win_get_scale(app->windows);
-	// app->scale_x = scale2.x;
-	// app->scale_y = scale2.y;
-	// SDL_RenderGetScale(app->windows->renderer, &scale1.x, &scale1.y);
 	ui_log("1. start");
+	printf("box: %d layer: %d\n", box_nb, layer_nb);
+	fflush(stdout);
     while (!(app->state & APP_QUIT)) {
-		check_dead_window(app);
+		if (check_dead_window(app) < 0)
+			break;
 		dispatch_event(app, &e);
 		ui_whook_fire(&app->actions, app->windows, &e, app->inputs);
 		curr = app->windows;
@@ -277,6 +286,6 @@ void ui_start(ui_globalApp_t *app)
 			}
 			curr = curr->next;
 		}
+		SDL_Delay(1);
 	}
-	SDL_Delay(1);
 }

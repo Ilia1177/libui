@@ -44,6 +44,7 @@ SRC		= window/ui_win_create.c\
 		  elem/ui_welem_message.c\
 		  elem/ui_welem_input.c\
 		  global/ui_globalApp.c\
+		  hook/ui_lhook_destroy.c\
 		  hook/ui_bhook_mousemotion_default.c\
 		  hook/ui_bhook_clickdown_default.c\
 		  hook/ui_bhook_clickup_default.c\

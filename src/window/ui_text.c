@@ -9,7 +9,6 @@ SDL_Rect ui_area_center(SDL_Rect boxarea, SDL_Rect tocenter) {
     };
 }
 
-
 SDL_Texture *ui_tex_str(ui_win_t* win, const char *text, SDL_Color color)
 {
 	// SDL_Surface *surface = TTF_RenderUTF8_Blended_Wrapped(win->font, text, color, win->area.w);

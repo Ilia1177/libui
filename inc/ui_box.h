@@ -18,7 +18,7 @@
 #define MENU_GAP_X		10
 #define MENU_GAP_Y		10
 #define MENU_OFFSET_X	50
-#define MENU_OFFSET_Y	2
+#define MENU_OFFSET_Y	50
 
 #define BOX_HOVERED     (1 << 0)
 #define BOX_PRESSED     (1 << 1)
@@ -85,7 +85,8 @@ typedef struct ui_box_s
 // ui_box_t*	ui_elem_menu_navbar(ui_win_t *win, menutype_e type);
 // ui_box_t*	ui_box_menu_list_option_add(ui_win_t *win, ui_box_t **list, void(*fn)(ui_box_t*, SDL_Event*, void*));
 
-void ui_box_swap(ui_box_t *a, ui_box_t *b);
+void ui_box_move(ui_box_t* b, SDL_Rect move);
+void 	ui_box_swap(ui_box_t *a, ui_box_t *b); // not used
 void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* r);
 void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn);
 ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p);
@@ -99,7 +100,9 @@ int			ui_box_count_next(ui_box_t *);
 int			ui_box_count_all(ui_box_t *);
 void		ui_box_flags(ui_box_t *b, short flag, bool add, bool all);
 void		ui_box_bring_to_front(ui_box_t *b);
+int			ui_box_remove(ui_box_t **list, ui_box_t* box);
 
+ui_box_t* ui_get_box_by_label(ui_box_t*, const char* label);
 // Hook tools
 void	ui_bhook_clean(ui_boxhandler_t **list);
 void	ui_bhook_prepend(ui_boxhandler_t **list, ui_bhook_fn_t fn);
@@ -143,10 +146,10 @@ void	ui_bhook_inputvalid(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data);
 // void	ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *data);
 void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data);
-// void	ui_bhook_fullheight(ui_box_t*, SDL_Event*, void*);
-// void	ui_bhook_fullwidth(ui_box_t*, SDL_Event*, void*);
+void	ui_bhook_fullheight(ui_box_t*, SDL_Event*, void*);
+void	ui_bhook_fullwidth(ui_box_t*, SDL_Event*, void*);
 // void	ui_bhook_inputfocus(ui_box_t*, SDL_Event*, void*);
-// void	ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data);
+void	ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data);
 // void	ui_bhook_nofocused(ui_box_t*, SDL_Event*, void*);
 // void	ui_bhook_nohovered(ui_box_t*, SDL_Event*, void*);
 // void	ui_bhook_nopressed(ui_box_t*, SDL_Event*, void*);

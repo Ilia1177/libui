@@ -1,23 +1,22 @@
 #include "ui_box.h"
 
-void	ui_bhook_destroy_default(ui_box_t*box, SDL_Event*e, void* data) 
+void	ui_bhook_destroy_default(ui_box_t*box, SDL_Event*e, void* d) 
 {
-	ui_box_t *current_child;
+	(void)e;
+	(void)d;
+	// ui_box_t *current_child;
 	if (!box)
 		return;
-	current_child = box->childs;
-	while(current_child) {
-		ui_box_t *next = current_child->next;
-		ui_bhook_destroy_default(current_child, e, data);
-		current_child = next;
-	}
-	ui_layer_clean(&box->layers);
+	ui_layer_destroy_all(&box->layers);
     ui_bhook_clean(&box->render);
     ui_bhook_clean(&box->update);
     ui_bhook_clean(&box->destroy);
     ui_bhook_clean(&box->on_window_event);
+    ui_bhook_clean(&box->on_key_down);
     ui_bhook_clean(&box->on_click_down);
     ui_bhook_clean(&box->on_click_up);
     ui_bhook_clean(&box->on_mouse_motion);
+    ui_bhook_clean(&box->on_mouse_wheel);
 	free(box);
+	box_nb--;
 }
