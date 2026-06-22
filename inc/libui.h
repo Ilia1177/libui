@@ -90,5 +90,6 @@ float        clampf(float, float, float);
 #include "ui_win.h"
 #include "ui_layer.h"
 #include "ui_filter.h"
+#include "ui_layout.h"
 
 #endif

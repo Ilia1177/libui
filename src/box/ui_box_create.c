@@ -8,6 +8,7 @@ ui_box_t* ui_box_create(ui_win_t* win, SDL_Rect rect, SDL_Color color) {
 
 	box_nb++;
 	box->area = rect;
+	box->layout = UI_LAYOUT_ABSOLUTE;
     box->color = color;
     box->parent_window = win;
 	box->parent_window->state |= WIN_DIRTY;

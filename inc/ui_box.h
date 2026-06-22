@@ -51,13 +51,14 @@ typedef struct ui_box_s
 {
 	SDL_Rect		area;
     SDL_Color       color;
-	int				padding;
-	int 			border;
-	int 			margin;
+	// int				padding;
+	// int 			border;
+	// int 			margin;
 	SDL_Point		zoom_origin;
 	float			zoom_amt;
 	// boxtype_e		type;
     uint32_t        flags;
+    uint32_t        layout;
 	const char*		label;
 	void*			data;
 	ui_layer_t*		layers;
