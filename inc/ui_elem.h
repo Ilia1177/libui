@@ -5,10 +5,10 @@
 # include "ui_box.h"
 
 typedef enum {
-    UI_HORIZONTAL_MENU,
-    UI_VERTICAL_MENU,
-    UI_FULLWINDOW_MENU,
-	UI_VERTICAL_LIST,
+    UI_HORIZONTAL_TOP,
+    UI_HORIZONTAL_BOTTOM,
+    UI_VERTICAL_LEFT,
+	UI_VERTICAL_RIGHT,
     UI_NONE
 } boxtype_e;
 

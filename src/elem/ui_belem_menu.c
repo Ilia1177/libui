@@ -45,26 +45,26 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 	}
 }
 
-static void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) 
-{
-	ui_win_t* win = btn->parent_window;
-
-	(void)e;
-	(void)data;
-
-	ui_layer_t* layer = btn->layers;
-	int count = ui_box_count_prev(btn);
-	btn->area.w = (win->area.w - 3 * MENU_GAP_X) / 2;
-	if (count % 2 == 1 || count % 2 == 2) {
-		btn->area.x = MENU_GAP_X;
-	} else {
-		btn->area.x = MENU_GAP_X * 2 + btn->area.w;
-	}
-	if(layer)
-		layer->area.x = btn->area.x + (BOX_MENU_W - layer->area.w) / 2;
-	btn->parent_window->state |= WIN_DIRTY;
-}
-
+// void ui_bhook_fullwindow_button(ui_box_t* btn, SDL_Event*e, void* data) 
+// {
+// 	ui_win_t* win = btn->parent_window;
+//
+// 	(void)e;
+// 	(void)data;
+//
+// 	ui_layer_t* layer = btn->layers;
+// 	int count = ui_box_count_prev(btn);
+// 	btn->area.w = (win->area.w - 3 * MENU_GAP_X) / 2;
+// 	if (count % 2 == 1 || count % 2 == 2) {
+// 		btn->area.x = MENU_GAP_X;
+// 	} else {
+// 		btn->area.x = MENU_GAP_X * 2 + btn->area.w;
+// 	}
+// 	if(layer)
+// 		layer->area.x = btn->area.x + (BOX_MENU_W - layer->area.w) / 2;
+// 	btn->parent_window->state |= WIN_DIRTY;
+// }
+//
 void	ui_bhook_fullwidth(ui_box_t* box, SDL_Event* e, void* data) {
 	(void)e;
 	(void)data;
@@ -84,49 +84,40 @@ void	ui_bhook_fullheight(ui_box_t* box, SDL_Event* e, void* data)
 	box->area.h = box->parent_window->area.h - gap;
 }
 
-static void gp_bhook_samepos(ui_box_t* b, SDL_Event *e, void *d)
+ void ui_bhook_vertical_posx(ui_box_t* b, SDL_Event *e, void *d)
 {
 	(void)d;
 	(void)e;
 
 	const ui_win_t* win = b->parent_window;
 	if(b->area.x > 0)
-		b->area.x = win->area.w - 50;
+		b->area.x = win->area.w - b->area.w;
 }
 
 static void ui_navbar_build(ui_box_t* menu, boxtype_e type)
 {
-	const ui_box_t* prev = menu->parent;
-	// ui_win_t* win = menu->parent_window;
-	ui_bhook_fn_t widthhandler = NULL;
-	ui_bhook_fn_t heighthandler = NULL;
+	// const ui_box_t* prev = menu->parent;
 	if (!menu)
 		return;
 	switch(type) {
-		case UI_HORIZONTAL_MENU:
-			widthhandler = ui_bhook_fullwidth;
+		case UI_HORIZONTAL_TOP:
+			ui_bhook_append(&menu->on_window_event, ui_bhook_fullwidth); // change from prepend
 			break;
-		case UI_VERTICAL_MENU:
-			if (prev) {
-				 menu->area.w = prev->area.w;
-				 menu->area.y = prev->area.y;
-			}
-			// menu->area.h = ui_box_count_next(menu->childs) * BOX_MENU_H;
-			heighthandler = gp_bhook_samepos;
+		case UI_VERTICAL_LEFT:
+			// if (prev) {
+			// 	 menu->area.w = prev->area.w;
+			// 	 menu->area.y = prev->area.y;
+			// }
+			// ui_bhook_append(&menu->on_window_event, ui_bhook_vertical_posx); // change from prepend
 			break;
-		case UI_VERTICAL_LIST:
-			heighthandler = ui_bhook_fullheight;
-			widthhandler = gp_bhook_samepos;
+		case UI_VERTICAL_RIGHT:
+			ui_bhook_append(&menu->on_window_event, ui_bhook_vertical_posx); // change from prepend
+			ui_bhook_append(&menu->on_window_event, ui_bhook_fullheight); // change from prepend
 			break;
-
-		case UI_FULLWINDOW_MENU: case UI_NONE: 
-			heighthandler = ui_bhook_fullheight;
-			widthhandler = ui_bhook_fullwidth;
+		default:
 			break;
 	}
 	menu->flags |= BOX_DISABLE;
-	ui_bhook_append(&menu->on_window_event, widthhandler); // change from prepend
-	ui_bhook_append(&menu->on_window_event, heighthandler); // cahnge from prepend
 }
 
 ui_box_t* ui_menu_init(ui_win_t* win) {
@@ -141,6 +132,8 @@ void gp_bhook_keep_pos(ui_box_t* b, SDL_Event *e, void* d)
 	(void)d;
 	(void)e;
 
+	if(!b->parent)
+		return;
 	b->area.x = b->parent->area.x;
 	ui_box_center_layers(b, NULL);
 }
@@ -149,18 +142,18 @@ static ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 {
 	if (!list)
 		return NULL;
-	int i = 0;
 	// ui_box_t* pbox = list->parent;
 	ui_win_t *win = list->parent_window;
 	int width;
-	ui_box_t* menu = list->parent;
+	ui_box_t* menu = ui_box_last(list->parent);
+
 	int offsetx = 0;
 	int offsety = 0;
 	ui_box_t* curr = list;
 	while(curr) {
 		TTF_SizeText(win->font, curr->label, &width, NULL);
 		switch(type) {
-			case UI_HORIZONTAL_MENU:
+			case UI_HORIZONTAL_TOP:
 				if (offsetx < MENU_OFFSET_X)
 					offsetx = MENU_OFFSET_X;
 				curr->area.w = curr->layers->area.w + 2 * MENU_GAP_X;
@@ -168,7 +161,7 @@ static ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 				curr->area.y = MENU_GAP_Y;
 				offsetx += curr->area.w + MENU_GAP_X;
 				break;
-			case UI_VERTICAL_MENU:
+			case UI_VERTICAL_LEFT:
 				if (offsety < MENU_OFFSET_Y)
 					offsety = MENU_OFFSET_Y;
 				curr->area.x = menu->area.x;
@@ -177,12 +170,7 @@ static ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 				offsety += curr->area.h;
 				ui_bhook_append(&curr->on_window_event, gp_bhook_keep_pos);
 				break;
-			case UI_FULLWINDOW_MENU:
-				curr->area.w = (curr->area.w - 3 * MENU_GAP_X) / 2;
-				curr->area.x = MENU_GAP_X + (i % 2) * (curr->area.w + MENU_GAP_X);
-				curr->area.y = MENU_GAP_Y + (i / 2) * (BOX_MENU_H + MENU_GAP_Y);
-				break;
-			case UI_VERTICAL_LIST:
+			case UI_VERTICAL_RIGHT:
 				curr->area.y = menu->area.y + offsety;
 				curr->area.x = menu->area.x;
 				offsety += curr->area.h;
@@ -192,13 +180,12 @@ static ui_box_t *ui_option_build(ui_box_t *list, boxtype_e type)
 			break;
 		}
 		ui_box_center_layers(curr, NULL);
-		if(curr->childs && type != UI_VERTICAL_LIST) {
+		if(curr->childs && type != UI_VERTICAL_RIGHT) {
 			ui_bhook_append(&curr->on_mouse_motion, ui_bhook_revealchild);
 			ui_bhook_append(&curr->on_click_down, ui_bhook_revealchild);
 			ui_bhook_append(&curr->on_key_down, ui_bhook_revealchild);
 		}
 		curr = curr->next;
-		i++;
 	}
     return list;
 }
@@ -218,21 +205,16 @@ static void ui_itemlist_build(ui_box_t* list, boxtype_e type, int rec)
 	{
 		curr->flags |= BOX_HIDDEN;
 		switch(type) {
-			case UI_HORIZONTAL_MENU:
+			case UI_HORIZONTAL_TOP:
 				curr->area.w = width;
 				curr->area.x = curr->parent->area.x + rec * curr->parent->area.w;
 				curr->area.y = curr->parent->area.y + (offset_y + i) * BOX_MENU_H;
 				break;
-			case UI_VERTICAL_MENU:
+			case UI_VERTICAL_LEFT:
 				curr->area.x = parent->area.x + parent->area.w + rec * BOX_MENU_W;
 				curr->area.y = parent->area.y + i * BOX_MENU_H;
 				break;
-			case UI_FULLWINDOW_MENU:
-				curr->area.w = (curr->area.w - 3 * MENU_GAP_X) / 2;
-				curr->area.x = MENU_GAP_X + (i % 2) * (curr->area.w + MENU_GAP_X);
-				curr->area.y = MENU_GAP_Y + (i / 2) * (BOX_MENU_H + MENU_GAP_Y);
-				ui_bhook_prepend(&curr->on_window_event, ui_bhook_fullwindow_button);
-			case UI_VERTICAL_LIST:
+			case UI_VERTICAL_RIGHT:
 				curr->flags &= ~BOX_HIDDEN;
 				break;
 			default:
