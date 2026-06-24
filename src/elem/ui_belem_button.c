@@ -91,12 +91,12 @@ void ui_bhook_drawbox_button(ui_box_t* box, SDL_Event* e, void* data)
 ui_box_t*	ui_belem_button(ui_win_t* win, SDL_Texture* texture)
 {
 		ui_box_t*	btn;
-		SDL_Rect	area;
 
-		btn = NULL;
-		area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
-		btn = ui_box_create(win, area, win->colors[1]);
+		btn = ui_box_create(win, 0, win->colors[1]);
+		btn->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 		btn->flags |= BOX_CLICKABLE;
+		btn->layout |= UI_LAYOUT_CONTENT_ALIGN_CENTER_X;
+		btn->layout |= UI_LAYOUT_CONTENT_ALIGN_CENTER_Y;
 		ui_layer_make(btn, texture);
 		ui_bhook_replace(btn->render, ui_bhook_drawbox, ui_bhook_drawbox_button);
 		return btn;

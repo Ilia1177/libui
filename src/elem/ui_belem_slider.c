@@ -122,11 +122,10 @@ void ui_bhook_drawslider(ui_box_t* slider, SDL_Event* e, void* data)
 ui_box_t* ui_belem_slider(ui_win_t* win, ui_slider_data_t parameters)
 {
     ui_box_t *slider;
-    SDL_Rect area;
 
-    area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 
-    slider = ui_box_create(win, area, win->colors[2]);
+    slider = ui_box_create(win, 0, win->colors[2]);
+    slider->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 
     slider->data = calloc(1, sizeof(ui_slider_data_t));
 

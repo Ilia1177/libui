@@ -131,23 +131,65 @@ void ui_box_bring_to_front(ui_box_t *b)
     b->next = parent->childs;
     parent->childs = b;
 }
-ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point* p)
+static ui_box_t* search_pass(ui_box_t* boxes, SDL_Point* p, bool overlay_pass)
 {
     if (!boxes || (boxes->flags & BOX_HIDDEN))
         return NULL;
-    ui_box_t* selected = NULL;
+
+    ui_box_t* best = NULL;
     ui_box_t* curr = boxes;
     while (curr) {
-        if (SDL_PointInRect(p, &curr->area)) {
+        bool is_overlay = curr->layout & UI_LAYOUT_OVERLAY;
+        if (is_overlay == overlay_pass && SDL_PointInRect(p, &curr->area))
+            best = curr;
+        ui_box_t* child = search_pass(curr->childs, p, overlay_pass);
+        if (child)
+            best = child;
+        curr = curr->next;
+    }
+    return best;
+}
+
+ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point* p)
+{
+    ui_box_t* overlay = search_pass(boxes, p, true);
+    if (overlay)
+        return overlay;
+    return search_pass(boxes, p, false);
+}
+
+ui_box_t* ui_box_hovered2(ui_box_t* boxes, SDL_Point* p)
+{
+    ui_box_t* selected;
+    ui_box_t* curr;
+    ui_box_t* child;
+
+    if (!boxes || (boxes->flags & BOX_HIDDEN))
+        return NULL;
+	selected = NULL;
+	curr = boxes;
+    while (curr) {
+        if (SDL_PointInRect(p, &curr->area))
             selected = curr;
-        }
-        ui_box_t* child = ui_box_hovered(curr->childs, p);
-        if (child) {
+    	child = ui_box_hovered(curr->childs, p);
+        if (child)
             selected = child;
-        }
         curr = curr->next;
     }
     return selected;
+}
+
+void ui_box_layout(ui_box_t* b, uint32_t flag, bool add, bool all)
+{
+    while (b) {
+        if (add)
+            b->layout |= flag;
+        else
+            b->layout &= ~flag;
+        if (b->childs && all)
+            ui_box_flags(b->childs, flag, add, all);
+        b = b->next;
+    }
 }
 
 void ui_box_flags(ui_box_t* b, short flag, bool add, bool all)

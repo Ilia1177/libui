@@ -54,6 +54,7 @@ typedef struct ui_box_s
 	// int				padding;
 	// int 			border;
 	// int 			margin;
+	int 				border;
 	SDL_Point		zoom_origin;
 	float			zoom_amt;
 	// boxtype_e		type;
@@ -92,7 +93,7 @@ void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* r);
 void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn);
 ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p);
 ui_box_t*	ui_box_last(ui_box_t* boxes);
-ui_box_t*	ui_box_create(ui_win_t* parent_window, SDL_Rect rect, SDL_Color color);
+ui_box_t*	ui_box_create(ui_win_t* parent_window, uint32_t layout, SDL_Color color);
 ui_box_t*	ui_box_iter(ui_box_t *b, int n);
 void		ui_box_add_root(ui_box_t **parent, ui_box_t *new);
 void		ui_box_add_child(ui_box_t *parent, ui_box_t *new);
@@ -100,6 +101,8 @@ int			ui_box_count_prev(ui_box_t *);
 int			ui_box_count_next(ui_box_t *);
 int			ui_box_count_all(ui_box_t *);
 void		ui_box_flags(ui_box_t *b, short flag, bool add, bool all);
+
+void ui_box_layout(ui_box_t* b, uint32_t flag, bool add, bool all);
 void		ui_box_bring_to_front(ui_box_t *b);
 int			ui_box_remove(ui_box_t **list, ui_box_t* box);
 

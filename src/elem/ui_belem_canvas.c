@@ -36,9 +36,9 @@ static void ui_bhook_drawbox_canvas(ui_box_t* box, SDL_Event* e, void* data)
 
 ui_box_t *ui_belem_canvas(ui_win_t* win) 
 {
-	win->canvas = ui_box_create(win, ui_area(0,0,0,0), win->colors[3]);
-	ui_bhook_append(&win->canvas->on_window_event, ui_bhook_fullheight);
-	ui_bhook_append(&win->canvas->on_window_event, ui_bhook_fullwidth);
-	ui_bhook_replace(win->canvas->render, ui_bhook_drawbox, ui_bhook_drawbox_canvas);
-	return win->canvas;
+	ui_box_t* cnv = ui_box_create(win, 0, win->colors[3]);
+	ui_bhook_append(&cnv->on_window_event, ui_bhook_fullheight);
+	ui_bhook_append(&cnv->on_window_event, ui_bhook_fullwidth);
+	ui_bhook_replace(cnv->render, ui_bhook_drawbox, ui_bhook_drawbox_canvas);
+	return cnv;
 }

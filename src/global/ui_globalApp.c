@@ -237,7 +237,6 @@ static ui_win_t* dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 		}
 		if (win && !(win->state & WIN_QUIT))
 			win->state = WIN_DIRTY;
-		printf("Event on window: %p\n", win);
 	}
 	return win;
 }
@@ -281,6 +280,7 @@ void ui_start(ui_globalApp_t *app)
 		curr = app->windows;
 		while(curr) {
 			if (curr->state & WIN_DIRTY) {
+				ui_layout_pass(curr);
 				global_update(curr, &e, NULL);
 				global_render(curr, &e, NULL);
 			}

@@ -75,6 +75,7 @@ SRC		= window/ui_win_create.c\
 		  box/ui_box_menu.c\
 		  box/ui_box_iter.c\
 		  box/ui_box_destroy.c\
+		  layout/ui_layout.c\
 		  layer/ui_layer.c\
 		  layer/ui_filter.c\
 		  tools/ui_tool.c\

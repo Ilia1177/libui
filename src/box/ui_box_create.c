@@ -1,14 +1,13 @@
 #include "ui_box.h"
 
-ui_box_t* ui_box_create(ui_win_t* win, SDL_Rect rect, SDL_Color color) {
+ui_box_t* ui_box_create(ui_win_t* win, uint32_t layout, SDL_Color color) {
     ui_box_t* box = (ui_box_t*)calloc(1, sizeof(ui_box_t));
     if (!box) {
         return NULL;
     }
 
 	box_nb++;
-	box->area = rect;
-	box->layout = UI_LAYOUT_ABSOLUTE;
+	box->layout = layout;
     box->color = color;
     box->parent_window = win;
 	box->parent_window->state |= WIN_DIRTY;

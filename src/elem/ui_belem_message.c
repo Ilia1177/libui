@@ -5,10 +5,8 @@ ui_box_t* ui_belem_message(ui_win_t* win, const char* msg)
 		ui_box_t		*message;
 		SDL_Texture* texture; 
 
-		SDL_Rect area;
-
-		area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
-		message = ui_box_create(win, area, win->colors[2]);
+		message = ui_box_create(win, 0, win->colors[2]);
+		message->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 		message->flags |= BOX_DISABLE;
 		message->color = (SDL_Color) {255,255,255,0};
 		texture = ui_tex_str(message->parent_window, msg, COLOR_WHITE);

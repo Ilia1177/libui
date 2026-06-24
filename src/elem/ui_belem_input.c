@@ -72,7 +72,7 @@ static void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *d)
 	win->state |= WIN_DIRTY;
 }
 
-static int ui_whook_windirty(ui_win_t* win, SDL_Event *e, void *data) {
+int ui_whook_windirty(ui_win_t* win, SDL_Event *e, void *data) {
 	(void)data;
 	(void)e;
 	if (!win)
@@ -90,6 +90,7 @@ static void ui_bhook_inputfocus(ui_box_t *box, SDL_Event *e, void *data) {
 		box->flags |= BOX_FOCUSED;
 		box->flags &= ~BOX_PRESSED;
     }
+	box->parent_window->state  |= WIN_DIRTY;
 }
 
 
@@ -99,15 +100,16 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 	(void)max_len;
 	ui_box_t		*input = NULL;
 
-	SDL_Rect area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
-	input = ui_box_create(win, area, COLOR_WHITE);
+	input = ui_box_create(
+			win, UI_LAYOUT_CLIP | UI_LAYOUT_CONTENT_ALIGN_LEFT, COLOR_WHITE);
+	input->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
     input->data = calloc(INPUT_SIZE_MAX + 1, sizeof(char));
 	input->flags |= BOX_INPUTABLE;
-	ui_whook_append(&win->render, ui_whook_windirty);
+	input->layout |= UI_LAYOUT_CLIP | UI_LAYOUT_CONTENT_ALIGN_LEFT;
+	// ui_whook_append(&win->render, ui_whook_windirty);
     ui_bhook_prepend(&input->destroy, ui_bhook_destroy_input);
     ui_bhook_prepend(&input->update, ui_bhook_inputfocus);
     ui_bhook_append(&input->on_key_down, ui_bhook_catch_input);
-	ui_bhook_replace(input->render, ui_bhook_drawlayers, ui_bhook_drawcliplayers);
 	ui_bhook_replace(input->render, ui_bhook_drawfocused, ui_bhook_drawtextfocused);
     return input;
 }

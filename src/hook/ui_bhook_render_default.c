@@ -12,6 +12,8 @@ void ui_bhook_drawborder(ui_box_t* box, SDL_Event* e, void* data)
 		return;
 	// if (!(box->flags & BOX_DIRTY))
 	// 	return;
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
 	
 	// SDL_Rect* bor = (SDL_Rect*)data;
 	render = box->parent_window->renderer;
@@ -53,6 +55,8 @@ void ui_bhook_drawbox(ui_box_t* box, SDL_Event* e, void* data)
     (void)data;
     if (!box || (box->flags & BOX_HIDDEN))
         return;
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
 
     SDL_Renderer* render = box->parent_window->renderer;
 
@@ -76,6 +80,10 @@ void ui_bhook_drawpressed(ui_box_t* box, SDL_Event* e, void* data)
         return;
 	if (box->flags & BOX_DISABLE)
 		return;
+		//   if (!(box->layout & UI_LAYOUT_DIRTY))
+		// return;
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
 	win = box->parent_window;
 	SDL_SetRenderDrawColor(win->renderer, 0, 0, 0, 80);
 	SDL_RenderFillRect(win->renderer, &box->area);
@@ -93,6 +101,10 @@ void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data)
         return;
 	if (box->flags & BOX_DISABLE)
 		return;
+	// if (!(box->layout & UI_LAYOUT_DIRTY))
+	// 	return;
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
 	win = box->parent_window;
     SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(win->renderer, 255, 255, 255, 50);
@@ -109,6 +121,10 @@ void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
 	// 	return;
     if (!box || (box->flags & BOX_HIDDEN))
         return;
+		//   if (!(box->layout & UI_LAYOUT_DIRTY))
+		// return;
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
 	win = box->parent_window;
 
    	SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
@@ -126,6 +142,7 @@ void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
 	SDL_RenderSetClipRect(win->renderer, NULL);
 }
 
+
 void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
     (void)e;
     (void)data;
@@ -133,6 +150,32 @@ void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
     if (!box || (box->flags & BOX_HIDDEN))
 		return;
 
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
+    ui_win_t *win  = box->parent_window;
+
+	// SDL_SetRenderDrawBlendMode(win->renderer, curr->blend_mode);
+	if(box->layout & UI_LAYOUT_CLIP)
+		SDL_RenderSetClipRect(win->renderer, &box->area);
+    ui_layer_t *curr = box->layers;
+    while (curr) {
+        if (!curr->texture) { curr = curr->next; continue; }
+		SDL_Rect dest = ui_layer_zoomed_area(curr);
+		SDL_SetTextureBlendMode(curr->texture, curr->blend_mode);
+		SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &dest, curr->angle, NULL, SDL_FLIP_NONE);
+        curr = curr->next;
+    }
+}
+
+void ui_bhook_drawlayers_3(ui_box_t *box, SDL_Event *e, void *data) {
+    (void)e;
+    (void)data;
+
+    if (!box || (box->flags & BOX_HIDDEN))
+		return;
+
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
     ui_win_t *win  = box->parent_window;
 
 	// SDL_SetRenderDrawBlendMode(win->renderer, curr->blend_mode);
@@ -156,6 +199,10 @@ void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data)
 		return;
 	if (box->flags & BOX_DISABLE)
 		return;
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
+		//   if (!(box->layout & UI_LAYOUT_DIRTY))
+		// return;
 	win = box->parent_window;
 	SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(win->renderer, 12, 23, 23, 50);
@@ -167,6 +214,10 @@ void ui_bhook_drawtextfocused(ui_box_t *box, SDL_Event *e, void *data) {
     (void)data;
     if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_FOCUSED))
         return;
+	// if (!(box->flags & BOX_DIRTY))
+	// 	return;
+		//   if (!(box->layout & UI_LAYOUT_DIRTY))
+		// return;
 	// if (!(box->flags & BOX_DIRTY))
 	// 	return;
     ui_win_t *win = box->parent_window;
@@ -204,4 +255,6 @@ void ui_bhook_render_default(ui_box_t *box, SDL_Event*e, void* data)
 	// box->flags &= ~BOX_CLICKED;
     if (!box || (box->flags & BOX_HIDDEN))
         return;
+		//   if (!(box->layout & UI_LAYOUT_DIRTY))
+		// return;
 }

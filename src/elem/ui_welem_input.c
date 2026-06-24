@@ -49,7 +49,7 @@ ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
     ui_win_t *popup;
 
 	popup = ui_win_create(app, area, "pop up", 0);
-	ui_box_t* menu = ui_box_create(popup, (SDL_Rect){0, 0, popup->area.w, popup->area.h}, popup->colors[1]);
+	ui_box_t* menu = ui_box_create(popup, UI_LAYOUT_FILL_X | UI_LAYOUT_FILL_Y, popup->colors[1]);
 	ui_box_t* msg = ui_belem_message(popup, "Select the image path");
     ui_box_t *input = ui_belem_input(popup, 64);
 	ui_box_t* valid = ui_belem_button(popup, ui_tex_str(popup, "load", COLOR_WHITE));

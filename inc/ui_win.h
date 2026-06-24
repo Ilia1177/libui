@@ -29,7 +29,7 @@ typedef struct ui_win_s
 	// SDL_Rect		button_area;
 	ui_globalApp_t	*global;
 	ui_box_t		*boxes;
-	ui_box_t		*canvas;
+	// ui_box_t		*canvas;
 	float			zoom;
 
 	const char*		label;

@@ -33,7 +33,9 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 	uint32_t state = box->flags;
 	SDL_Point p = ui_win_mousepos(box->parent_window);
 	if (state & BOX_HOVERED || state & BOX_CLICKED || ui_box_hovered(box->childs, &p)) {
-	ui_box_flags(box->childs, BOX_HIDDEN, false, false);
+		ui_box_flags(box->childs, BOX_HIDDEN, false, false);
+		// ui_box_flags(box->childs, BOX_DIRTY, true, true);
+		ui_box_layout(box->childs, UI_LAYOUT_DIRTY, true, true);
 	} else {
 		ui_box_t *curr = box->childs;
 		while (curr) {
@@ -240,4 +242,50 @@ void ui_menu_build(ui_box_t* menu, boxtype_e type)
 			ui_itemlist_build(list->childs, type, 0);
 		list = list->next;
 	}
+}
+
+void	ui_layout_option(ui_box_t* opt) {
+	
+	opt->layout |= UI_LAYOUT_DIR_COL | UI_LAYOUT_BELOW
+		| UI_LAYOUT_ALIGN_CENTER_Y | UI_LAYOUT_OVERLAY;
+
+	ui_bhook_append(&opt->on_mouse_motion, ui_bhook_revealchild);
+	ui_bhook_append(&opt->on_click_down, ui_bhook_revealchild);
+
+	ui_box_t *curr = opt->childs;
+	while(curr)
+	{
+		curr->layout |= UI_LAYOUT_ALIGN_LEFT | UI_LAYOUT_OVERLAY;
+		curr->flags |= BOX_HIDDEN;
+		curr = curr->next;
+	}
+}
+
+// ui_box_t*	ui_layout_dropdown(ui_box_t* opt, ui_box_t* itemlist)
+// {
+// 	ui_box_t* dropdown = ui_belem_button(itemlist->parent_window, NULL);
+// 	ui_box_t *item = itemlist;
+// 	while(item)
+// 	{
+// 		item->layout &= ~UI_LAYOUT_ABSOLUTE;
+// 		item->layout |= UI_LAYOUT_ALIGN_LEFT;
+// 		item->flags |= BOX_HIDDEN;
+// 		// item->area.y = offsety;
+// 		// offsety += item->area.h;
+// 		item = item->next;
+// 	}
+// 	ui_box_add_child(dropdown, item);
+// 	ui_box_add_child(opt, dropdown);
+// 	return dropdown;
+// }
+
+ui_box_t* ui_layout_menu(ui_box_t* menu)
+{
+	menu->layout = UI_LAYOUT_FILL_X | UI_LAYOUT_DIR_ROW;
+	ui_box_t* curr = menu->childs;
+	while(curr) {
+		ui_layout_option(curr);
+		curr = curr->next;
+	}
+	return menu;
 }

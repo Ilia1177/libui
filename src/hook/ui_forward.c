@@ -41,9 +41,9 @@ void ui_box_event_forward(ui_win_t *win, SDL_Event *e, void *data)
 		event_one_box(root, e, data);
 		root = root->next;
 	}
-	if (win->canvas) {
-		event_one_box(win->canvas, e, data);
-	}
+	// if (win->canvas) {
+		// event_one_box(win->canvas, e, data);
+	// }
 }
 
 static void update_one_box(ui_box_t* b, SDL_Event *e, void* data) 
@@ -65,7 +65,7 @@ void ui_box_update_forward(ui_win_t* win, SDL_Event *e, void *data)
 	if(!win)
 		return;
 	// if (win->canvas == win->global->windows->canvas) {printf("UPDATE: canvas\n");}
-	update_one_box(win->canvas, e, data);
+	// update_one_box(win->canvas, e, data);
 	ui_box_t *root = win->boxes;
 	while (root) {
 		update_one_box(root, e, data);
@@ -74,16 +74,29 @@ void ui_box_update_forward(ui_win_t* win, SDL_Event *e, void *data)
 	return;
 }
 
-static void render_one_box(ui_box_t* b, SDL_Event *e, void* data) 
+static void render_one_box(ui_box_t* b, SDL_Event *e, void* data, bool overlay_pass) 
 {
 	if (!b)
 		return;
-	ui_bhook_fire(b->render, b, e, data);
-	b->flags &= ~BOX_DIRTY;
+	bool is_overlay = b->layout & UI_LAYOUT_OVERLAY;
+	if (is_overlay == overlay_pass) {
+		ui_bhook_fire(b->render, b, e, data);
+		b->flags &= ~BOX_DIRTY;
+	}
 	ui_box_t* child = b->childs;
 	while(child) {
-		render_one_box(child, e, data);
+		render_one_box(child, e, data, overlay_pass);
 		child = child->next;
+	}
+}
+
+static void render_pass(ui_win_t *win, SDL_Event *e, void *data, bool overlay_pass)
+{
+	// render_one_box(win->canvas, e, data, overlay_pass);
+	ui_box_t *root = win->boxes;
+	while (root) {
+		render_one_box(root, e, data, overlay_pass);
+		root = root->next;
 	}
 }
 
@@ -91,13 +104,8 @@ void ui_box_render_forward(ui_win_t* win, SDL_Event *e, void *data)
 {
 	if(!win)
 		return;
-	render_one_box(win->canvas, e, data);
-	ui_box_t *root = win->boxes;
-	while (root) {
-		render_one_box(root, e, data);
-		root = root->next;
-	}
-	return;
+	render_pass(win, e, data, false);
+	render_pass(win, e, data, true);
 }
 
 void destroy_one_box(ui_box_t* b, SDL_Event *e, void* data) 
@@ -117,7 +125,7 @@ void ui_box_destroy_forward(ui_win_t* win, SDL_Event *e, void *data)
 {
 	if(!win)
 		return;
-	destroy_one_box(win->canvas, e, data);
+	// destroy_one_box(win->canvas, e, data);
 	ui_box_t *root = win->boxes;
 	while (root) {
 		ui_box_t* next = root->next;
