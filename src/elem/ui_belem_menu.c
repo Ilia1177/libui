@@ -30,16 +30,15 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data) {
 	(void)data;
 	(void)e;
 
-	uint32_t state = box->flags;
+	uint32_t state = box->state;
 	SDL_Point p = ui_win_mousepos(box->parent_window);
 	if (state & BOX_HOVERED || state & BOX_CLICKED || ui_box_hovered(box->childs, &p)) {
 		ui_box_flags(box->childs, BOX_HIDDEN, false, false);
-		// ui_box_flags(box->childs, BOX_DIRTY, true, true);
 		ui_box_layout(box->childs, UI_LAYOUT_DIRTY, true, true);
 	} else {
 		ui_box_t *curr = box->childs;
 		while (curr) {
-			if (curr->flags & BOX_HOVERED || curr->flags & BOX_FOCUSED) 
+			if (curr->state & BOX_HOVERED || curr->state & BOX_FOCUSED) 
 				return;
 			curr = curr->next;
 		}
@@ -119,7 +118,7 @@ static void ui_navbar_build(ui_box_t* menu, boxtype_e type)
 		default:
 			break;
 	}
-	menu->flags |= BOX_DISABLE;
+	menu->state |= BOX_DISABLE;
 }
 
 ui_box_t* ui_menu_init(ui_win_t* win) {
@@ -205,7 +204,7 @@ static void ui_itemlist_build(ui_box_t* list, boxtype_e type, int rec)
 	ui_box_t* curr = list;
 	while(curr)
 	{
-		curr->flags |= BOX_HIDDEN;
+		curr->state |= BOX_HIDDEN;
 		switch(type) {
 			case UI_HORIZONTAL_TOP:
 				curr->area.w = width;
@@ -217,7 +216,7 @@ static void ui_itemlist_build(ui_box_t* list, boxtype_e type, int rec)
 				curr->area.y = parent->area.y + i * BOX_MENU_H;
 				break;
 			case UI_VERTICAL_RIGHT:
-				curr->flags &= ~BOX_HIDDEN;
+				curr->state &= ~BOX_HIDDEN;
 				break;
 			default:
 				break;
@@ -256,7 +255,7 @@ void	ui_layout_option(ui_box_t* opt) {
 	while(curr)
 	{
 		curr->layout |= UI_LAYOUT_ALIGN_LEFT | UI_LAYOUT_OVERLAY;
-		curr->flags |= BOX_HIDDEN;
+		curr->state |= BOX_HIDDEN;
 		curr = curr->next;
 	}
 }
@@ -269,7 +268,7 @@ void	ui_layout_option(ui_box_t* opt) {
 // 	{
 // 		item->layout &= ~UI_LAYOUT_ABSOLUTE;
 // 		item->layout |= UI_LAYOUT_ALIGN_LEFT;
-// 		item->flags |= BOX_HIDDEN;
+// 		item->state |= BOX_HIDDEN;
 // 		// item->area.y = offsety;
 // 		// offsety += item->area.h;
 // 		item = item->next;

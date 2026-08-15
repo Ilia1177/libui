@@ -22,19 +22,19 @@
 // void ui_bhook_nopressed(ui_box_t *b, SDL_Event *e, void* data) {
 // 	(void)e;
 // 	(void)data;
-// 	b->flags &= ~BOX_PRESSED;
+// 	b->state &= ~BOX_PRESSED;
 // }
 
 // void ui_bhook_nofocused(ui_box_t *b, SDL_Event *e, void* data) {
 // 	(void)e;
 // 	(void)data;
-// 	b->flags &= ~BOX_FOCUSED;
+// 	b->state &= ~BOX_FOCUSED;
 // }
 
 // void ui_bhook_nohovered(ui_box_t *b, SDL_Event *e, void* data) {
 // 	(void)e;
 // 	(void)data;
-// 	b->flags &= ~BOX_HOVERED;
+// 	b->state &= ~BOX_HOVERED;
 // }
 
 
@@ -47,10 +47,10 @@
 // 	ui_globalApp_t *app = box->parent_window->global;
 //
 // 	if ((e && e->type == SDL_KEYDOWN && e->key.keysym.sym == SDLK_ESCAPE)
-// 			|| box->flags & BOX_CLICKED) {
+// 			|| box->state & BOX_CLICKED) {
 // 		app->loading = false;
 // 		app->state &= ~APP_LOADING;
-// 		box->flags &= ~BOX_FOCUSED;
+// 		box->state &= ~BOX_FOCUSED;
 // 		box->parent_window->state |= WIN_QUIT;
 // 		box->parent_window->global->windows->state |= WIN_DIRTY;
 // 		if (box->data)
@@ -64,7 +64,7 @@ void ui_bhook_winclose(ui_box_t* b, SDL_Event* e, void* data)
 	(void)e;
 	(void)data;
 	ui_win_t *win = b->parent_window;
-	if (b->flags & BOX_CLICKED) {
+	if (b->state & BOX_CLICKED) {
 		win->state |= WIN_QUIT;
 	}
 }

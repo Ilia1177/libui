@@ -15,7 +15,7 @@ typedef struct ui_layer_s {
     int                border;
     const char*        label;
     ui_filhandler_t*   filters;
-    void*              filters_data;
+    void*              data;
     SDL_Texture*       texture;
     ui_box_t*          parent_box;
     SDL_Rect           area;

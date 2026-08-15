@@ -5,10 +5,10 @@ static int ui_box_focusable(ui_box_t* box)
     if (!box)
         return 0;
 
-    if (box->flags & BOX_HIDDEN)
+    if (box->state & BOX_HIDDEN)
         return 0;
 
-    if (box->flags & BOX_DISABLE)
+    if (box->state & BOX_DISABLE)
         return 0;
 
     return 1;
@@ -34,7 +34,7 @@ static ui_box_t* ui_find_focused(ui_box_t* box)
     if (!box)
         return NULL;
 
-    if (box->flags & BOX_FOCUSED)
+    if (box->state & BOX_FOCUSED)
         return box;
 
     ui_box_t* found = ui_find_focused(box->childs);
@@ -74,7 +74,7 @@ void ui_focus_next(ui_box_t* root)
         ui_box_t* first = ui_next_focusable(root);
 
         if (first) {
-            first->flags |= BOX_FOCUSED;
+            first->state |= BOX_FOCUSED;
 		}
 
 		ui_log("first box is focused & return");
@@ -82,15 +82,15 @@ void ui_focus_next(ui_box_t* root)
     }
 
 	ui_log("focus removed from current");
-    current->flags &= ~BOX_FOCUSED;
-	if (current->flags & BOX_INPUTABLE)
+    current->state &= ~BOX_FOCUSED;
+	if (current->state & BOX_INPUTABLE)
 		SDL_StopTextInput();
 
     ui_box_t* iter = ui_next_node(current);
 
     while (iter) {
         if (ui_box_focusable(iter)) {
-            iter->flags |= BOX_FOCUSED;
+            iter->state |= BOX_FOCUSED;
 			ui_log("next is focused");
             return;
         }
@@ -98,7 +98,7 @@ void ui_focus_next(ui_box_t* root)
     }
     ui_box_t* first = ui_next_focusable(root);
     if (first) {
-        first->flags |= BOX_FOCUSED;
+        first->state |= BOX_FOCUSED;
 		ui_log("first is focused");
     }
 }
@@ -119,12 +119,12 @@ int ui_whook_keydown_default(ui_win_t* win, SDL_Event* e, void* data)
             focused = ui_find_focused(win->boxes);
             if (!focused) {
 				ui_focus_next(win->boxes);
-			} else if (focused->flags & BOX_CLICKABLE) {
-				if (focused->flags & BOX_CLICKED)
+			} else if (focused->state & BOX_CLICKABLE) {
+				if (focused->state & BOX_CLICKED)
 					ui_focus_next(focused);
 				else
-					focused->flags |= BOX_CLICKED;
-			} else if (focused->flags & BOX_INPUTABLE) {
+					focused->state |= BOX_CLICKED;
+			} else if (focused->state & BOX_INPUTABLE) {
 				ui_focus_next(focused);
 			}
             break;

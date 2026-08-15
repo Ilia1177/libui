@@ -2,7 +2,7 @@
 
 // ui_box_t* ui_box_focused(ui_box_t* boxes, SDL_Point *p)
 // {
-// 	if ( !boxes || (boxes->flags & BOX_HIDDEN))
+// 	if ( !boxes || (boxes->state & BOX_HIDDEN))
 // 		return NULL;
 // 	ui_box_t* selected = NULL;
 // 	ui_box_t* curr = boxes;
@@ -76,7 +76,7 @@ int ui_box_remove(ui_box_t **list, ui_box_t* box)
 	return 0;
 }
 
-ui_box_t* ui_get_box_by_label(ui_box_t* box, const char* name) {
+ui_box_t* ui_get_box_by_name(ui_box_t* box, const char* name) {
 	ui_box_t* curr = box;
 	ui_box_t* found;
 
@@ -85,7 +85,7 @@ ui_box_t* ui_get_box_by_label(ui_box_t* box, const char* name) {
 		if (curr->label && !strncmp(name, curr->label, strlen(curr->label))) {
 			return curr;
 		}
-		found = ui_get_box_by_label(curr->childs, name);
+		found = ui_get_box_by_name(curr->childs, name);
 		if (found)
 			return found;
 		curr = curr->next;
@@ -131,9 +131,10 @@ void ui_box_bring_to_front(ui_box_t *b)
     b->next = parent->childs;
     parent->childs = b;
 }
+
 static ui_box_t* search_pass(ui_box_t* boxes, SDL_Point* p, bool overlay_pass)
 {
-    if (!boxes || (boxes->flags & BOX_HIDDEN))
+    if (!boxes || (boxes->state & BOX_HIDDEN))
         return NULL;
 
     ui_box_t* best = NULL;
@@ -164,7 +165,7 @@ ui_box_t* ui_box_hovered2(ui_box_t* boxes, SDL_Point* p)
     ui_box_t* curr;
     ui_box_t* child;
 
-    if (!boxes || (boxes->flags & BOX_HIDDEN))
+    if (!boxes || (boxes->state & BOX_HIDDEN))
         return NULL;
 	selected = NULL;
 	curr = boxes;
@@ -196,9 +197,9 @@ void ui_box_flags(ui_box_t* b, short flag, bool add, bool all)
 {
     while (b) {
         if (add)
-            b->flags |= flag;
+            b->state |= flag;
         else
-            b->flags &= ~flag;
+            b->state &= ~flag;
         if (b->childs && all)
             ui_box_flags(b->childs, flag, add, all);
         b = b->next;

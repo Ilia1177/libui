@@ -24,10 +24,13 @@
 #define UI_LAYOUT_SPACE_AROUND  (1 << 10)
 
 // Overflow
-#define UI_LAYOUT_WRAP     (1 << 11)
-#define UI_LAYOUT_CLIP     (1 << 12)
-#define UI_LAYOUT_SCROLL_X (1 << 13)
-#define UI_LAYOUT_SCROLL_Y (1 << 14)
+#define UI_LAYOUT_WRAP          (1 << 11)
+#define UI_LAYOUT_CLIP          (1 << 12)
+#define UI_LAYOUT_SCROLL_X      (1 << 13)
+#define UI_LAYOUT_SCROLL_Y      (1 << 14)
+
+// Auto-size parent to children
+#define UI_LAYOUT_FIT_CHILDREN  (1 << 15)
 
 // Render order
 #define UI_LAYOUT_OVERLAY (1 << 20) // render in overlay pass (always on top)

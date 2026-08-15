@@ -52,7 +52,7 @@ static void update_one_box(ui_box_t* b, SDL_Event *e, void* data)
 	if (!b)
 		return;
 	ui_bhook_fire(b->update, b, e, data);
-	b->flags &= ~BOX_STALE;
+	b->state &= ~BOX_STALE;
 	child = b->childs;
 	while(child) {
 		update_one_box(child, e, data);
@@ -81,7 +81,7 @@ static void render_one_box(ui_box_t* b, SDL_Event *e, void* data, bool overlay_p
 	bool is_overlay = b->layout & UI_LAYOUT_OVERLAY;
 	if (is_overlay == overlay_pass) {
 		ui_bhook_fire(b->render, b, e, data);
-		b->flags &= ~BOX_DIRTY;
+		b->state &= ~BOX_DIRTY;
 	}
 	ui_box_t* child = b->childs;
 	while(child) {

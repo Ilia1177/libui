@@ -4,7 +4,7 @@ void ui_bhook_drawbox_button2(ui_box_t* box, SDL_Event* e, void* data)
 {
     (void)e;
     (void)data;
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
         return;
 
     SDL_Renderer* render = box->parent_window->renderer;
@@ -34,7 +34,7 @@ void ui_bhook_drawbox_button(ui_box_t* box, SDL_Event* e, void* data)
 {
     (void)e;
     (void)data;
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
         return;
 
     SDL_Renderer* render = box->parent_window->renderer;
@@ -47,8 +47,8 @@ void ui_bhook_drawbox_button(ui_box_t* box, SDL_Event* e, void* data)
 
     // 2. Check if button is pressed
     // NOTE: Replace 'BOX_CLICKED' with the actual flag you use for button state.
-    // (e.g., box->flags & BOX_ACTIVE, or box->state == STATE_PRESSED)
-    bool is_pressed = (box->flags & BOX_CLICKED);
+    // (e.g., box->state & BOX_ACTIVE, or box->state == STATE_PRESSED)
+    bool is_pressed = (box->state & BOX_CLICKED);
 
     // 3. Draw the Beveled Borders (Win98 Style)
     if (!is_pressed) {
@@ -94,7 +94,7 @@ ui_box_t*	ui_belem_button(ui_win_t* win, SDL_Texture* texture)
 
 		btn = ui_box_create(win, 0, win->colors[1]);
 		btn->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
-		btn->flags |= BOX_CLICKABLE;
+		btn->state |= BOX_CLICKABLE;
 		btn->layout |= UI_LAYOUT_CONTENT_ALIGN_CENTER_X;
 		btn->layout |= UI_LAYOUT_CONTENT_ALIGN_CENTER_Y;
 		ui_layer_make(btn, texture);

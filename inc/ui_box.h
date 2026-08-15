@@ -58,7 +58,7 @@ typedef struct ui_box_s
 	SDL_Point		zoom_origin;
 	float			zoom_amt;
 	// boxtype_e		type;
-    uint32_t        flags;
+    uint32_t        state;
     uint32_t        layout;
 	const char*		label;
 	void*			data;
@@ -93,7 +93,7 @@ void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* r);
 void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn);
 ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p);
 ui_box_t*	ui_box_last(ui_box_t* boxes);
-ui_box_t*	ui_box_create(ui_win_t* parent_window, uint32_t layout, SDL_Color color);
+ui_box_t*	ui_box_create(ui_win_t* parent_window, const uint32_t layout, SDL_Color color);
 ui_box_t*	ui_box_iter(ui_box_t *b, int n);
 void		ui_box_add_root(ui_box_t **parent, ui_box_t *new);
 void		ui_box_add_child(ui_box_t *parent, ui_box_t *new);
@@ -106,7 +106,7 @@ void ui_box_layout(ui_box_t* b, uint32_t flag, bool add, bool all);
 void		ui_box_bring_to_front(ui_box_t *b);
 int			ui_box_remove(ui_box_t **list, ui_box_t* box);
 
-ui_box_t* ui_get_box_by_label(ui_box_t*, const char* label);
+ui_box_t* ui_get_box_by_name(ui_box_t*, const char* label);
 // Hook tools
 void	ui_bhook_clean(ui_boxhandler_t **list);
 void	ui_bhook_prepend(ui_boxhandler_t **list, ui_bhook_fn_t fn);

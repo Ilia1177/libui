@@ -18,7 +18,7 @@ void transfert_all_input(ui_globalApp_t* app, ui_box_t* box)
 		printf("input nb: %d\n", app->input_nb);
 		fflush(stdout);
 		box->data = NULL;
-		box->flags &= ~BOX_FOCUSED;
+		box->state &= ~BOX_FOCUSED;
 	}
     transfert_all_input(app, box->childs);
     transfert_all_input(app, box->next);
@@ -33,7 +33,7 @@ void ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data)
 	(void)data;
 	ui_globalApp_t *app;
 
-	if (!(b->flags & BOX_CLICKED))
+	if (!(b->state & BOX_CLICKED))
 		return;
 	app = b->parent_window->global;
 	printf("hook: valid input\n");

@@ -6,9 +6,9 @@ void ui_bhook_clickup_default(ui_box_t *b, SDL_Event* e, void* data)
 	(void)e;
 	(void)data;
 
-	if (b->flags & BOX_PRESSED) {
+	if (b->state & BOX_PRESSED) {
 		// b->parent_window->state |= WIN_DIRTY;
-		b->flags |= BOX_DIRTY;
+		b->state |= BOX_DIRTY;
 	}
-    b->flags &= ~BOX_PRESSED;
+    b->state &= ~BOX_PRESSED;
 }

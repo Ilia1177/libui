@@ -10,10 +10,10 @@ SDL_Point ui_layer_mousepos22(ui_layer_t *layer) {
     int unzoomed_x = origin.x + (int)((box_mouse.x - origin.x) / zoom);
     int unzoomed_y = origin.y + (int)((box_mouse.y - origin.y) / zoom);
 
-    // layer->area is window-relative, convert to box-relative
+    // layer->area is box-relative
     return (SDL_Point){
-        unzoomed_x - (layer->area.x - box->area.x),
-        unzoomed_y - (layer->area.y - box->area.y)
+        unzoomed_x - layer->area.x,
+        unzoomed_y - layer->area.y
     };
 }
 SDL_Point ui_layer_mousepos(ui_layer_t *layer) {
@@ -23,15 +23,15 @@ SDL_Point ui_layer_mousepos(ui_layer_t *layer) {
 
     if (layer->angle == 0.0) {
         return (SDL_Point){
-            (int)((box_mouse.x - (layer->area.x - box->area.x)) / zoom),
-            (int)((box_mouse.y - (layer->area.y - box->area.y)) / zoom)
+            (int)((box_mouse.x - layer->area.x) / zoom),
+            (int)((box_mouse.y - layer->area.y) / zoom)
         };
     }
 
     double cx = layer->area.x + layer->area.w * zoom / 2.0;
     double cy = layer->area.y + layer->area.h * zoom / 2.0;
-    double mx = box_mouse.x + box->area.x;
-    double my = box_mouse.y + box->area.y;
+    double mx = box_mouse.x;
+    double my = box_mouse.y;
     double dx = mx - cx;
     double dy = my - cy;
     double angle_rad = -layer->angle * M_PI / 180.0;
@@ -53,8 +53,8 @@ SDL_Point ui_layer_mousepos2(ui_layer_t *layer) {
 	box = layer->parent_box;
 	box_mouse = ui_box_mousepos(box);
 	return (SDL_Point){
-        box_mouse.x - (layer->area.x - box->area.x),
-        box_mouse.y - (layer->area.y - box->area.y)  // removes the 70
+        box_mouse.x - layer->area.x,
+        box_mouse.y - layer->area.y
     };
 }
 

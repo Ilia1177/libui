@@ -12,7 +12,7 @@ static void arrange_row(ui_box_t *parent)
 	int grow_x_count = 0;
 	child = parent->childs;
 	while (child) {
-		if (!(child->flags & BOX_HIDDEN)) {
+		if (!(child->state & BOX_HIDDEN)) {
 			visible++;
 			if (child->layout & UI_LAYOUT_GROW_X)
 				grow_x_count++;
@@ -36,7 +36,7 @@ static void arrange_row(ui_box_t *parent)
 		int grow_w = remaining / grow_x_count;
 		child = parent->childs;
 		while (child) {
-			if (!(child->flags & BOX_HIDDEN) && (child->layout & UI_LAYOUT_GROW_X))
+			if (!(child->state & BOX_HIDDEN) && (child->layout & UI_LAYOUT_GROW_X))
 				child->area.w = grow_w;
 			child = child->next;
 		}
@@ -57,7 +57,7 @@ static void arrange_row(ui_box_t *parent)
 		: (parent->area.x + start_offset);
 	child = parent->childs;
 	while (child) {
-		if (child->flags & BOX_HIDDEN) {
+		if (child->state & BOX_HIDDEN) {
 			child = child->next;
 			continue;
 		}
@@ -91,7 +91,7 @@ static void arrange_col(ui_box_t *parent)
 	int grow_y_count = 0;
 	child = parent->childs;
 	while (child) {
-		if (!(child->flags & BOX_HIDDEN)) {
+		if (!(child->state & BOX_HIDDEN)) {
 			visible++;
 			if (child->layout & UI_LAYOUT_GROW_Y)
 				grow_y_count++;
@@ -115,7 +115,7 @@ static void arrange_col(ui_box_t *parent)
 		int grow_h = remaining / grow_y_count;
 		child = parent->childs;
 		while (child) {
-			if (!(child->flags & BOX_HIDDEN) && (child->layout & UI_LAYOUT_GROW_Y))
+			if (!(child->state & BOX_HIDDEN) && (child->layout & UI_LAYOUT_GROW_Y))
 				child->area.h = grow_h;
 			child = child->next;
 		}
@@ -136,7 +136,7 @@ static void arrange_col(ui_box_t *parent)
 		: (parent->area.y + start_offset);
 	child = parent->childs;
 	while (child) {
-		if (child->flags & BOX_HIDDEN) {
+		if (child->state & BOX_HIDDEN) {
 			child = child->next;
 			continue;
 		}
@@ -171,26 +171,50 @@ static void apply_content_align(ui_box_t *b)
 	ui_layer_t *layer = b->layers;
 	while (layer) {
 		if (!h_set || (l & UI_LAYOUT_CONTENT_ALIGN_CENTER_X))
-			layer->area.x = b->area.x + (b->area.w - layer->area.w) / 2;
+			layer->area.x = (b->area.w - layer->area.w) / 2;
 		else if (l & UI_LAYOUT_CONTENT_ALIGN_RIGHT)
-			layer->area.x = b->area.x + b->area.w - layer->area.w;
+			layer->area.x = b->area.w - layer->area.w;
 		else if (l & UI_LAYOUT_CONTENT_ALIGN_LEFT)
-			layer->area.x = b->area.x;
+			layer->area.x = 0;
 
 		if (!v_set || (l & UI_LAYOUT_CONTENT_ALIGN_CENTER_Y))
-			layer->area.y = b->area.y + (b->area.h - layer->area.h) / 2;
+			layer->area.y = (b->area.h - layer->area.h) / 2;
 		else if (l & UI_LAYOUT_CONTENT_ALIGN_BOTTOM)
-			layer->area.y = b->area.y + b->area.h - layer->area.h;
+			layer->area.y = b->area.h - layer->area.h;
 		else if (l & UI_LAYOUT_CONTENT_ALIGN_TOP)
-			layer->area.y = b->area.y;
+			layer->area.y = 0;
 
 		layer = layer->next;
 	}
 }
 
+static void fit_children(ui_box_t *b)
+{
+	uint32_t l = b->layout;
+	if (!(l & UI_LAYOUT_FIT_CHILDREN))
+		return;
+
+	int max_x = b->area.x;
+	int max_y = b->area.y;
+	ui_box_t *child = b->childs;
+	while (child) {
+		if (!(child->state & BOX_HIDDEN)) {
+			int cx = child->area.x + child->area.w;
+			int cy = child->area.y + child->area.h;
+			if (cx > max_x) max_x = cx;
+			if (cy > max_y) max_y = cy;
+		}
+		child = child->next;
+	}
+	if (!(l & UI_LAYOUT_GROW_X))
+		b->area.w = max_x - b->area.x;
+	if (!(l & UI_LAYOUT_GROW_Y))
+		b->area.h = max_y - b->area.h;
+}
+
 static void layout_one_box(ui_box_t *b)
 {
-	if (!b || (b->flags & BOX_HIDDEN))
+	if (!b || (b->state & BOX_HIDDEN))
 		return;
 
 	SDL_Rect container; 
@@ -239,6 +263,7 @@ static void layout_one_box(ui_box_t *b)
 	else if (layout & UI_LAYOUT_DIR_COL)
 		arrange_col(b);
 
+	fit_children(b);
 	apply_content_align(b);
 	b->layout &= ~UI_LAYOUT_DIRTY;
 	ui_box_t *child = b->childs;

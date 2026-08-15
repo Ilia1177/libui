@@ -6,17 +6,17 @@ void ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
 	(void)e;
 	SDL_Point p;
 
-	uint32_t previous = b->flags;
+	uint32_t previous = b->state;
 	p = ui_win_mousepos(b->parent_window);
-    if (SDL_PointInRect(&p, &b->area) && b->flags & BOX_HOVERED) {
-        b->flags |= BOX_CLICKED;
-        b->flags |= BOX_PRESSED;
-		// b->flags |= BOX_FOCUSED;
+    if (SDL_PointInRect(&p, &b->area) && b->state & BOX_HOVERED) {
+        b->state |= BOX_CLICKED;
+        b->state |= BOX_PRESSED;
+		// b->state |= BOX_FOCUSED;
     } else {
-		b->flags &= ~BOX_FOCUSED;
-        b->flags &= ~BOX_PRESSED;
+		b->state &= ~BOX_FOCUSED;
+        b->state &= ~BOX_PRESSED;
     }
-	if (previous != b->flags) {
-		b->flags |= BOX_DIRTY;
+	if (previous != b->state) {
+		b->state |= BOX_DIRTY;
 	}
 }

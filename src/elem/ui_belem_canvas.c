@@ -4,7 +4,7 @@ static void ui_bhook_drawbox_canvas(ui_box_t* box, SDL_Event* e, void* data)
 {
     (void)e;
     (void)data;
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
         return;
 
     SDL_Renderer* render = box->parent_window->renderer;

@@ -6,13 +6,13 @@ void ui_bhook_drawborder(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	SDL_Renderer	*render;
 
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
         return;
 	if (!box->border)
 		return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
 	
 	// SDL_Rect* bor = (SDL_Rect*)data;
@@ -37,7 +37,7 @@ void ui_bhook_drawborder(ui_box_t* box, SDL_Event* e, void* data)
 // 	(void)data;
 // 	SDL_Renderer	*render;
 //
-//     if (!box || (box->flags & BOX_HIDDEN))
+//     if (!box || (box->state & BOX_HIDDEN))
 //         return;
 // 	render = box->parent_window->renderer;
 // 	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
@@ -53,9 +53,9 @@ void ui_bhook_drawbox(ui_box_t* box, SDL_Event* e, void* data)
 {
     (void)e;
     (void)data;
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
         return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
 
     SDL_Renderer* render = box->parent_window->renderer;
@@ -74,15 +74,15 @@ void ui_bhook_drawpressed(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	ui_win_t *win;
 
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
-    if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_PRESSED))
+    if (!box || (box->state & BOX_HIDDEN) || !(box->state & BOX_PRESSED))
         return;
-	if (box->flags & BOX_DISABLE)
+	if (box->state & BOX_DISABLE)
 		return;
 		//   if (!(box->layout & UI_LAYOUT_DIRTY))
 		// return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
 	win = box->parent_window;
 	SDL_SetRenderDrawColor(win->renderer, 0, 0, 0, 80);
@@ -95,15 +95,15 @@ void ui_bhook_drawhovered(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	ui_win_t *win;
 
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
-	if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_HOVERED))
+	if (!box || (box->state & BOX_HIDDEN) || !(box->state & BOX_HOVERED))
         return;
-	if (box->flags & BOX_DISABLE)
+	if (box->state & BOX_DISABLE)
 		return;
 	// if (!(box->layout & UI_LAYOUT_DIRTY))
 	// 	return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
 	win = box->parent_window;
     SDL_SetRenderDrawBlendMode(win->renderer, SDL_BLENDMODE_BLEND);
@@ -117,13 +117,13 @@ void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
 	(void)data;
 	ui_win_t *win;
 
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
         return;
 		//   if (!(box->layout & UI_LAYOUT_DIRTY))
 		// return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
 	win = box->parent_window;
 
@@ -133,8 +133,11 @@ void ui_bhook_drawcliplayers(ui_box_t* box, SDL_Event* e, void* data)
 		ui_layer_t *curr = box->layers;
 		while (curr) {
 			if (curr->texture) {
+				SDL_Rect dest = curr->area;
+				dest.x += box->area.x;
+				dest.y += box->area.y;
 				SDL_SetTextureBlendMode(curr->texture, curr->blend_mode);
-				SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &curr->area, curr->angle, NULL, SDL_FLIP_NONE);
+				SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &dest, curr->angle, NULL, SDL_FLIP_NONE);
 			}
 			curr = curr->next;
 		}
@@ -147,10 +150,10 @@ void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
     (void)e;
     (void)data;
 
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
 		return;
 
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
     ui_win_t *win  = box->parent_window;
 
@@ -165,16 +168,18 @@ void ui_bhook_drawlayers(ui_box_t *box, SDL_Event *e, void *data) {
 		SDL_RenderCopyEx(win->renderer, curr->texture, NULL, &dest, curr->angle, NULL, SDL_FLIP_NONE);
         curr = curr->next;
     }
+	if(box->layout & UI_LAYOUT_CLIP)
+		SDL_RenderSetClipRect(win->renderer, NULL);
 }
 
 void ui_bhook_drawlayers_3(ui_box_t *box, SDL_Event *e, void *data) {
     (void)e;
     (void)data;
 
-    if (!box || (box->flags & BOX_HIDDEN))
+    if (!box || (box->state & BOX_HIDDEN))
 		return;
 
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
     ui_win_t *win  = box->parent_window;
 
@@ -195,11 +200,11 @@ void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data)
 	(void)data;
 	ui_win_t *win;
 
-	if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_FOCUSED))
+	if (!box || (box->state & BOX_HIDDEN) || !(box->state & BOX_FOCUSED))
 		return;
-	if (box->flags & BOX_DISABLE)
+	if (box->state & BOX_DISABLE)
 		return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
 		//   if (!(box->layout & UI_LAYOUT_DIRTY))
 		// return;
@@ -212,13 +217,13 @@ void ui_bhook_drawfocused(ui_box_t *box, SDL_Event *e, void *data)
 void ui_bhook_drawtextfocused(ui_box_t *box, SDL_Event *e, void *data) {
     (void)e;
     (void)data;
-    if (!box || (box->flags & BOX_HIDDEN) || !(box->flags & BOX_FOCUSED))
+    if (!box || (box->state & BOX_HIDDEN) || !(box->state & BOX_FOCUSED))
         return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
 		//   if (!(box->layout & UI_LAYOUT_DIRTY))
 		// return;
-	// if (!(box->flags & BOX_DIRTY))
+	// if (!(box->state & BOX_DIRTY))
 	// 	return;
     ui_win_t *win = box->parent_window;
     static Uint32 last_blink = 0;
@@ -252,8 +257,8 @@ void ui_bhook_render_default(ui_box_t *box, SDL_Event*e, void* data)
 	(void)e;
 	(void)data;
 	
-	// box->flags &= ~BOX_CLICKED;
-    if (!box || (box->flags & BOX_HIDDEN))
+	// box->state &= ~BOX_CLICKED;
+    if (!box || (box->state & BOX_HIDDEN))
         return;
 		//   if (!(box->layout & UI_LAYOUT_DIRTY))
 		// return;

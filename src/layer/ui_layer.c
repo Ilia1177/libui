@@ -32,10 +32,11 @@ SDL_Texture *create_white_texture(SDL_Renderer *renderer, int w, int h)
 }
 
 SDL_Rect ui_layer_zoomed_area(ui_layer_t *layer) {
-    float zoom = layer->parent_box->zoom_amt;
+    ui_box_t *box = layer->parent_box;
+    float zoom = box->zoom_amt;
     return (SDL_Rect){
-        layer->area.x,
-        layer->area.y,
+        layer->area.x + box->area.x,
+        layer->area.y + box->area.y,
         (int)(layer->area.w * zoom),
         (int)(layer->area.h * zoom)
     };
@@ -130,7 +131,8 @@ ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 	new->blend_mode = SDL_BLENDMODE_BLEND;
 	ui_lhook_append(&new->destroy, ui_lhook_destroy_default);
 	SDL_QueryTexture(texture, NULL, NULL, &new->area.w, &new->area.h);
-	new->area = ui_area_center(box->area, new->area);
+	SDL_Rect container = {0, 0, box->area.w, box->area.h};
+	new->area = ui_area_center(container, new->area);
 	ui_layer_add(&box->layers, new);
 	return new;
 }
@@ -167,9 +169,10 @@ void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* offset)
 		return;
 	ui_layer_t* curr = box->layers;
 	while(curr) {
-		curr->area = ui_area_center(box->area, curr->area);
+		SDL_Rect container = {0, 0, box->area.w, box->area.h};
+		curr->area = ui_area_center(container, curr->area);
 		if(offset && offset->x)
-			curr->area.x = box->area.x + offset->x;
+			curr->area.x = offset->x;
 		curr = curr->next;
 	}
 }

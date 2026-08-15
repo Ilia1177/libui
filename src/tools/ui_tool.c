@@ -66,10 +66,6 @@ static void bridge_render(ui_box_t *box, SDL_Event *e, void *unused) {
 
 void ui_tool_activate(ui_globalApp_t *app, ui_tool_t *tool, ui_box_t *canvas)
 {
-	(void)app;
-	(void)tool;
-	(void)canvas;
-
 	if (!app || !tool || !canvas)
 		return;
 	if (app->active_tool)
