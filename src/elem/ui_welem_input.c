@@ -49,10 +49,10 @@ ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
     ui_win_t *popup;
 
 	popup = ui_win_create(app, area, "pop up", 0);
-	ui_box_t* menu = ui_box_create(popup, UI_LAYOUT_FILL_X | UI_LAYOUT_FILL_Y, popup->colors[1]);
+	ui_box_t* menu = ui_box_create(popup, UI_LAYOUT_FILL_X | UI_LAYOUT_FILL_Y, DEFAULT_BOX_COLOR);
 	ui_box_t* msg = ui_belem_message(popup, "Select the image path");
     ui_box_t *input = ui_belem_input(popup, 64);
-	ui_box_t* valid = ui_belem_button(popup, ui_tex_str(popup, "load", COLOR_WHITE));
+	ui_box_t* valid = ui_belem_button(popup, ui_tex_str(popup, "load", DEFAULT_TEXT_COLOR));
     ui_bhook_wincenter(msg, NULL, &(SDL_Rect){0, -40, 0, 0});
     ui_bhook_wincenter(input, NULL, &(SDL_Rect){0, 40, 0, 0});
     ui_bhook_wincenter(valid, NULL, &(SDL_Rect){0, 100, 0, 0});
@@ -61,7 +61,7 @@ ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
     ui_box_add_child(menu, msg);
 	ui_bhook_append(&valid->on_click_down, ui_bhook_valid_input);
 	ui_bhook_append(&valid->on_key_down, ui_bhook_valid_input);
-	ui_menu_build(menu, UI_NONE);
+	// ui_menu_build(menu, UI_NONE);
 	ui_box_add_root(&popup->boxes, menu);
     return popup;
 }

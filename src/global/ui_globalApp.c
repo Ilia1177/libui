@@ -5,13 +5,15 @@
 #include "ui_win.h"
 #include "ui_forward.h"
 
-int box_nb = 0;
-int layer_nb = 0;
+int box_nb = 0; // debug 
+int layer_nb = 0; // debug
+
 static void global_destroy(ui_win_t* win, SDL_Event*e, void*data) 
 {
 	ui_box_destroy_forward(win, e, data);
 	ui_whook_fire(&win->destroy, win, e, data);
 }
+
 // Helper to find ui_win_t from SDL_WindowID
 ui_win_t* ui_find_window_by_id(ui_globalApp_t* app, uint32_t window_id) {
     ui_win_t* current_win = app->windows; 
@@ -24,6 +26,7 @@ ui_win_t* ui_find_window_by_id(ui_globalApp_t* app, uint32_t window_id) {
     return NULL;
 }
 
+// used to reset input(s) stored by the main struct (app)
 void ui_reset_state_and_input(ui_globalApp_t* app, bool* running)
 {
 	printf("reset app states !\n");
@@ -45,15 +48,18 @@ ui_globalApp_t* ui_global_init(char* name, void* env)
 {
 	ui_globalApp_t *app;
 	(void)name;
-	if (ui_init())
+	if (ui_init() < 0) {
+		printf("error init\n");
 		return NULL;
+	}
     app = (ui_globalApp_t*)calloc(1, sizeof(ui_globalApp_t));
     if (!app) {
         return NULL;
     }
 	app->env = env;
-	if (!app->env)
-		exit(1);
+	if (!app->env) {
+		printf("Env not provided\n");
+	}
 	app->loading = false;
     app->state = 0;
 	app->actions = NULL;
@@ -71,7 +77,7 @@ ui_globalApp_t* ui_global_init(char* name, void* env)
 
 // ui_global_free implementation
 void ui_global_free(ui_globalApp_t* app) {
-	printf("Quitting guimp...\n");
+	printf("Quit application...\n");
 	fflush(stdout);
     if (app) {
         // Free all windows managed by the app
@@ -115,7 +121,7 @@ static void win_remove(ui_win_t** windows, ui_win_t* toremove)
     }
 }
 
-static ui_win_t* global_keyboard(ui_globalApp_t *app, SDL_Event* e) 
+static ui_win_t* global_keyboard_event(ui_globalApp_t *app, SDL_Event* e) 
 {
 	ui_win_t* win = ui_find_window_by_id(app, e->key.windowID);
 	if (!win)
@@ -131,7 +137,7 @@ static ui_win_t* global_keyboard(ui_globalApp_t *app, SDL_Event* e)
 	return win;
 }
 
-static ui_win_t* global_mousewheel(ui_globalApp_t *app, SDL_Event* e)
+static ui_win_t* global_mousewheel_event(ui_globalApp_t *app, SDL_Event* e)
 {
 	ui_win_t *win = ui_find_window_by_id(app, e->wheel.windowID);
 	if (!win)
@@ -141,7 +147,7 @@ static ui_win_t* global_mousewheel(ui_globalApp_t *app, SDL_Event* e)
 	return win;
 }
 
-static ui_win_t *global_mousemotion(ui_globalApp_t* app, SDL_Event *e)
+static ui_win_t *global_mousemotion_event(ui_globalApp_t* app, SDL_Event *e)
 {
 	ui_win_t *win = ui_find_window_by_id(app, e->motion.windowID);
 	if (!win)
@@ -151,7 +157,7 @@ static ui_win_t *global_mousemotion(ui_globalApp_t* app, SDL_Event *e)
 	return win;
 }
 
-static ui_win_t *global_mouseclick(ui_globalApp_t* app, SDL_Event *e) 
+static ui_win_t *global_mouseclick_event(ui_globalApp_t* app, SDL_Event *e) 
 {
 	ui_win_t *win;
 
@@ -173,7 +179,7 @@ static ui_win_t *global_mouseclick(ui_globalApp_t* app, SDL_Event *e)
 	return win;
 }
 
-static ui_win_t* global_windowevent(ui_globalApp_t* app, SDL_Event* e)
+static ui_win_t* global_window_event(ui_globalApp_t* app, SDL_Event* e)
 {
 	ui_win_t *win;
 
@@ -225,15 +231,15 @@ static ui_win_t* dispatch_event(ui_globalApp_t* app, SDL_Event *e)
 			case SDL_QUIT:
 				app->state |= APP_QUIT; return NULL;
 			case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP:
-				win = global_mouseclick(app, e); break;
+				win = global_mouseclick_event(app, e); break;
 			case SDL_MOUSEMOTION:
-				win = global_mousemotion(app, e); break;
+				win = global_mousemotion_event(app, e); break;
 			case SDL_MOUSEWHEEL:
-				win = global_mousewheel(app, e); break;
+				win = global_mousewheel_event(app, e); break;
 			case SDL_KEYUP: case SDL_KEYDOWN: case SDL_TEXTINPUT:
-				win = global_keyboard(app, e); break;
+				win = global_keyboard_event(app, e); break;
 			case SDL_WINDOWEVENT:
-				win = global_windowevent(app, e); break;
+				win = global_window_event(app, e); break;
 		}
 		if (win && !(win->state & WIN_QUIT))
 			win->state = WIN_DIRTY;
@@ -261,7 +267,9 @@ static void global_update(ui_win_t* win, SDL_Event*e, void*data)
 
 // Main loop
 // 1. dispatch event to windows and forward event to boxes;
-// 2. fire action hook if any (action are menu button)
+// 2. fire action hook if any (action are menu button, load, new image, ...)
+//    when an action is set, an input might be provided, then stored in app->input[]
+//    when the action finish, the app->input[] is used then freed
 // 3. update all windows and boxes
 // 4  render dirty windows + boxes only;
 void ui_start(ui_globalApp_t *app)

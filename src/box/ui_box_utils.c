@@ -144,7 +144,7 @@ static ui_box_t* search_pass(ui_box_t* boxes, SDL_Point* p, bool overlay_pass)
         if (is_overlay == overlay_pass && SDL_PointInRect(p, &curr->area))
             best = curr;
         ui_box_t* child = search_pass(curr->childs, p, overlay_pass);
-        if (child)
+        if (child && child->state & BOX_HOVERABLE)
             best = child;
         curr = curr->next;
     }
@@ -157,27 +157,6 @@ ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point* p)
     if (overlay)
         return overlay;
     return search_pass(boxes, p, false);
-}
-
-ui_box_t* ui_box_hovered2(ui_box_t* boxes, SDL_Point* p)
-{
-    ui_box_t* selected;
-    ui_box_t* curr;
-    ui_box_t* child;
-
-    if (!boxes || (boxes->state & BOX_HIDDEN))
-        return NULL;
-	selected = NULL;
-	curr = boxes;
-    while (curr) {
-        if (SDL_PointInRect(p, &curr->area))
-            selected = curr;
-    	child = ui_box_hovered(curr->childs, p);
-        if (child)
-            selected = child;
-        curr = curr->next;
-    }
-    return selected;
 }
 
 void ui_box_layout(ui_box_t* b, uint32_t flag, bool add, bool all)

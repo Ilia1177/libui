@@ -119,20 +119,15 @@ ui_layer_t*	ui_layer_make(ui_box_t *box, SDL_Texture *texture)
 {
 	if (!texture)
 		return NULL;
-	layer_nb++;
+	layer_nb++; //debug
 	ui_layer_t *new = calloc(sizeof(ui_layer_t), 1);
 	new->parent_box = box;
 	new->texture = texture;
-	new->area.x = 0;
-	new->area.y = 0;
-	new->border = 0;
-	new->filters = NULL;
-	new->state = 0;
 	new->blend_mode = SDL_BLENDMODE_BLEND;
 	ui_lhook_append(&new->destroy, ui_lhook_destroy_default);
 	SDL_QueryTexture(texture, NULL, NULL, &new->area.w, &new->area.h);
-	SDL_Rect container = {0, 0, box->area.w, box->area.h};
-	new->area = ui_area_center(container, new->area);
+	// SDL_Rect container = {0, 0, box->area.w, box->area.h};
+	// new->area = ui_area_center(container, new->area);
 	ui_layer_add(&box->layers, new);
 	return new;
 }
@@ -268,7 +263,6 @@ SDL_Texture *ui_tex_path(SDL_Renderer *renderer, const char *path) {
     SDL_RenderCopy(renderer, src, NULL, NULL);
     SDL_SetRenderTarget(renderer, old);
     SDL_DestroyTexture(src);
-
     return target;
 }
 // SDL_Texture *ui_texture_path(SDL_Renderer *renderer, const char *path) {

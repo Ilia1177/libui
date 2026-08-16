@@ -28,6 +28,7 @@ void ui_bhook_drawborder(ui_box_t* box, SDL_Event* e, void* data)
 	border.y -= box->border;
 	border.w += box->border * 2;
 	border.h += box->border * 2;
+	ui_log("Draw border");
     SDL_RenderFillRect(render, &box->area);
 }
 

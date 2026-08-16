@@ -4,14 +4,20 @@
 #define PURPLE            (SDL_Color){118, 91, 167, 255}
 #define ORANGE            (SDL_Color){255, 108, 47, 255}
 #define TEAL              (SDL_Color){0, 131, 138, 255}
-#define COLOR_BG          (SDL_Color){20, 20, 20, 255}
+#define COLOR_BG          (SDL_Color){255, 255, 255, 255}
 #define COLOR_WHITE       (SDL_Color){255, 255, 255, 255}
 #define COLOR_TRANSPARENT (SDL_Color){0, 0, 0, 0}
 
-#define UI_COLOR_BG   (SDL_Color){128, 128, 128, 255}
-#define UI_COLOR_TEXT (SDL_Color){255, 255, 255, 255}
-#define UI_COLOR_A    (SDL_Color){150, 150, 150, 255}
-#define UI_COLOR_B    (SDL_Color){40, 40, 40, 255}
+#define DEFAULT_TEXT_COLOR (SDL_Color){0, 0, 0, 255}
+#define DEFAULT_INPUT_COLOR (SDL_Color){255, 0, 0, 255}
+#define DEFAULT_BOX_COLOR (SDL_Color){0, 255, 0, 255}
+#define DEFAULT_BUTTON_COLOR (SDL_Color){0, 0, 255, 255}
+#define DEFAULT_MESSAGE_COLOR (SDL_Color){127, 127, 0, 255}
+
+// #define UI_COLOR_BG   (SDL_Color){128, 128, 128, 255}
+// #define UI_COLOR_TEXT (SDL_Color){255, 255, 255, 255}
+// #define UI_COLOR_A    (SDL_Color){150, 150, 150, 255}
+// #define UI_COLOR_B    (SDL_Color){40, 40, 40, 255}
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>

@@ -2,11 +2,12 @@
 #include "ui_win.h"
 #include "ui_layout.h"
 
-static void arrange_row(ui_box_t *parent)
+void arrange_row(ui_box_t *parent)
 {
 	uint32_t pl = parent->layout;
 	ui_box_t *child;
 
+	padding_t pad = parent->padding;
 	int visible = 0;
 	int fixed_w = 0;
 	int grow_x_count = 0;
@@ -14,10 +15,12 @@ static void arrange_row(ui_box_t *parent)
 	while (child) {
 		if (!(child->state & BOX_HIDDEN)) {
 			visible++;
-			if (child->layout & UI_LAYOUT_GROW_X)
+			if (child->layout & UI_LAYOUT_GROW_X) {
 				grow_x_count++;
-			else
+				printf("LAYOUT GROW X\n");
+			} else {
 				fixed_w += child->area.w;
+			}
 		}
 		child = child->next;
 	}
@@ -64,24 +67,27 @@ static void arrange_row(ui_box_t *parent)
 
 		uint32_t cl = child->layout;
 
-		child->area.x = x;
+		child->area.x = x + pad.left;
 
 		if (cl & UI_LAYOUT_GROW_Y) {
-			child->area.y = parent->area.y;
-			child->area.h = parent->area.h;
-		} else if (cl & UI_LAYOUT_ALIGN_BOTTOM)
+			child->area.y = parent->area.y + pad.top;
+			child->area.h = parent->area.h - pad.bottom;
+		} else if (cl & UI_LAYOUT_ALIGN_BOTTOM) {
 			child->area.y = parent->area.y + parent->area.h - child->area.h;
-		else if (cl & UI_LAYOUT_ALIGN_CENTER_Y)
+			child->area.y += pad.top;
+		} else if (cl & UI_LAYOUT_ALIGN_CENTER_Y) {
 			child->area.y = parent->area.y + (parent->area.h - child->area.h) / 2;
-		else
+			child->area.y += pad.top;
+		} else {
 			child->area.y = parent->area.y;
-
+			child->area.y += pad.top;
+		}
 		x += child->area.w + gap;
 		child = child->next;
 	}
 }
 
-static void arrange_col(ui_box_t *parent)
+void arrange_col(ui_box_t *parent)
 {
 	uint32_t pl = parent->layout;
 	ui_box_t *child;
@@ -89,7 +95,9 @@ static void arrange_col(ui_box_t *parent)
 	int visible = 0;
 	int fixed_h = 0;
 	int grow_y_count = 0;
+	padding_t pad = parent->padding;
 	child = parent->childs;
+	// mesure la hauteur total des enfants
 	while (child) {
 		if (!(child->state & BOX_HIDDEN)) {
 			visible++;
@@ -143,24 +151,27 @@ static void arrange_col(ui_box_t *parent)
 
 		uint32_t cl = child->layout;
 
-		child->area.y = y;
+		child->area.y = y + pad.top;
 
 		if (cl & UI_LAYOUT_GROW_X) {
-			child->area.x = parent->area.x;
-			child->area.w = parent->area.w;
-		} else if (cl & UI_LAYOUT_ALIGN_RIGHT)
+			child->area.x = parent->area.x + pad.left;
+			child->area.w = parent->area.w - pad.right;
+		} else if (cl & UI_LAYOUT_ALIGN_RIGHT) {
 			child->area.x = parent->area.x + parent->area.w - child->area.w;
-		else if (cl & UI_LAYOUT_ALIGN_CENTER_X)
+			child->area.x += pad.left;
+		} else if (cl & UI_LAYOUT_ALIGN_CENTER_X) {
 			child->area.x = parent->area.x + (parent->area.w - child->area.w) / 2;
-		else
+			child->area.x += pad.left;
+		} else {
 			child->area.x = parent->area.x;
-
+			child->area.x += pad.left;
+		}
 		y += child->area.h + gap;
 		child = child->next;
 	}
 }
 
-static void apply_content_align(ui_box_t *b)
+void apply_content_align(ui_box_t *b)
 {
 	uint32_t l = b->layout;
 	bool h_set = l & (UI_LAYOUT_CONTENT_ALIGN_LEFT | UI_LAYOUT_CONTENT_ALIGN_RIGHT | UI_LAYOUT_CONTENT_ALIGN_CENTER_X);
@@ -188,7 +199,7 @@ static void apply_content_align(ui_box_t *b)
 	}
 }
 
-static void fit_children(ui_box_t *b)
+void fit_children(ui_box_t *b)
 {
 	uint32_t l = b->layout;
 	if (!(l & UI_LAYOUT_FIT_CHILDREN))
@@ -218,53 +229,59 @@ static void layout_one_box(ui_box_t *b)
 		return;
 
 	SDL_Rect container; 
-	if (b->parent)
-		container = b->parent->area;
-	else {
+	ui_box_t* parent;
+
+	parent = b->parent;
+	padding_t pad = {};
+	if (parent) {
+		container = parent->area;
+		pad = parent->padding;
+	} else {
 		container = b->parent_window->area;
 		container.x = 0;
 		container.y = 0;
 	}
 	uint32_t layout = b->layout;
 	if (!(layout & UI_LAYOUT_ABSOLUTE)) {
-		bool parent_is_row = b->parent && (b->parent->layout & UI_LAYOUT_DIR_ROW);
-		bool parent_is_col = b->parent && (b->parent->layout & UI_LAYOUT_DIR_COL);
+		bool parent_row = parent && (parent->layout & UI_LAYOUT_DIR_ROW);
+		bool parent_col = parent && (parent->layout & UI_LAYOUT_DIR_COL);
 
 		if (layout & UI_LAYOUT_FILL_X) {
-			b->area.x = container.x;
-			b->area.w = container.w;
+			b->area.x = container.x + pad.left;
+			b->area.w = container.w - (pad.left + pad.right);
 		}
 		if (layout & UI_LAYOUT_FILL_Y) {
-			b->area.y = container.y;
-			b->area.h = container.h;
+			b->area.y = container.y + pad.top;
+			b->area.h = container.h - (pad.top + pad.bottom);
 		}
 
-		if (!parent_is_row) {
+		if (!parent_row) {
 			if (layout & UI_LAYOUT_ALIGN_LEFT)
-				b->area.x = container.x;
+				b->area.x = container.x + pad.left;
 			else if (layout & UI_LAYOUT_ALIGN_RIGHT)
-				b->area.x = container.x + container.w - b->area.w;
-			else if (layout & UI_LAYOUT_ALIGN_CENTER_X)
+				b->area.x = container.x + (container.w - pad.right) - b->area.w;
+			else if (layout & UI_LAYOUT_ALIGN_CENTER_X) // padding has no effect
 				b->area.x = container.x + (container.w - b->area.w) / 2;
 		}
 
-		if (!parent_is_col) {
+		if (!parent_col) {
 			if (layout & UI_LAYOUT_ALIGN_TOP)
-				b->area.y = container.y;
+				b->area.y = container.y + pad.top;
 			else if (layout & UI_LAYOUT_ALIGN_BOTTOM)
-				b->area.y = container.y + container.h - b->area.h;
-			else if (layout & UI_LAYOUT_ALIGN_CENTER_Y)
+				b->area.y = container.y + (container.h - pad.bottom) - b->area.h;
+			else if (layout & UI_LAYOUT_ALIGN_CENTER_Y) // padding has no effect
 				b->area.y = container.y + (container.h - b->area.h) / 2;
 		}
 	}
 
+	// padding not apply below...
 	if (layout & UI_LAYOUT_DIR_ROW)
 		arrange_row(b);
 	else if (layout & UI_LAYOUT_DIR_COL)
 		arrange_col(b);
 
-	fit_children(b);
-	apply_content_align(b);
+	// fit_children(b);
+	// apply_content_align(b);
 	b->layout &= ~UI_LAYOUT_DIRTY;
 	ui_box_t *child = b->childs;
 	while (child) {
@@ -275,14 +292,12 @@ static void layout_one_box(ui_box_t *b)
 
 void ui_layout_pass(ui_win_t *win)
 {
-	if (!win)
+	ui_box_t *b;
+
+	if (!win) {
 		return;
-
-	// SDL_Rect win_area = {0, 0, win->area.w, win->area.h};
-
-	// if (win->canvas)
-		// layout_one_box(win->canvas);
-	ui_box_t *b = win->boxes;
+	}
+	b = win->boxes;
 	while (b) {
 		layout_one_box(b);
 		b = b->next;

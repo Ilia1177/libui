@@ -39,7 +39,8 @@ ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
 	area.w = (int)area.w / ref->scale_x;
     ui_win_t *popup = ui_win_create(ref, area, "pop up", 0);
 	ui_whook_prepend(&popup->on_key_down, ui_whook_quitkey);
-	ui_box_t *menu = ui_menu_init(popup);
+	// ui_box_t *menu = ui_menu_init(popup);
+	ui_box_t *menu = ui_box_create(popup, 0, DEFAULT_BOX_COLOR);
     ui_bhook_append(&menu->on_window_event, ui_bhook_maxsize);
 	ui_whook_remove(&popup->on_click_down, ui_whook_clickdown_default);
 	ui_whook_remove(&popup->on_mouse_motion, ui_whook_mousemotion_default);
@@ -51,6 +52,6 @@ ui_win_t *ui_welem_message(ui_globalApp_t *ref, const char *message)
     ui_bhook_wincenter(msg, NULL, &(SDL_Rect){0, -80, 0, 0});
     ui_box_add_child(menu, btn);
     ui_box_add_child(menu, msg);
-	ui_menu_build(menu, UI_NONE);
+	// ui_menu_build(menu, UI_NONE);
     return popup;
 }

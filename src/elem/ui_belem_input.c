@@ -101,10 +101,10 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 	ui_box_t		*input = NULL;
 
 	input = ui_box_create(
-			win, UI_LAYOUT_CLIP | UI_LAYOUT_CONTENT_ALIGN_LEFT, COLOR_WHITE);
+			win, UI_LAYOUT_CLIP | UI_LAYOUT_CONTENT_ALIGN_LEFT, DEFAULT_INPUT_COLOR);
 	input->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
     input->data = calloc(INPUT_SIZE_MAX + 1, sizeof(char));
-	input->state |= BOX_INPUTABLE;
+	input->state |= BOX_INPUTABLE | BOX_HOVERABLE;
 	input->layout |= UI_LAYOUT_CLIP | UI_LAYOUT_CONTENT_ALIGN_LEFT;
 	// ui_whook_append(&win->render, ui_whook_windirty);
     ui_bhook_prepend(&input->destroy, ui_bhook_destroy_input);

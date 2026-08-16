@@ -20,6 +20,7 @@
 #define MENU_OFFSET_X	50
 #define MENU_OFFSET_Y	50
 
+// define current state of the box
 #define BOX_HOVERED     (1 << 0)
 #define BOX_PRESSED     (1 << 1)
 #define BOX_HIDDEN      (1 << 2)
@@ -27,10 +28,14 @@
 #define BOX_CLICKED		(1 << 4)
 #define BOX_DRAGGED 	(1 << 5)
 #define BOX_DISABLE 	(1 << 6)
-#define BOX_INPUTABLE 	(1 << 7)
-#define BOX_CLICKABLE 	(1 << 8)
-#define BOX_DIRTY	 	(1 << 9)
-#define BOX_STALE	 	(1 << 10)
+#define BOX_DIRTY	 	(1 << 7)  // need render
+#define BOX_STALE	 	(1 << 8) // need update
+
+// define what is the box
+#define BOX_INPUTABLE 	(1 << 9)
+#define BOX_CLICKABLE 	(1 << 10)
+#define BOX_HOVERABLE 	(1 << 11)
+
 #define INPUT_SIZE_MAX	64
 
 typedef struct s_ui_input_data {
@@ -47,17 +52,22 @@ typedef struct ui_boxhandler_s
 	struct ui_boxhandler_s *next;
 } ui_boxhandler_t;
 
+
+typedef struct padding_s {
+	int top;
+	int bottom;
+	int left;
+	int right;
+} padding_t;
+
 typedef struct ui_box_s 
 {
 	SDL_Rect		area;
     SDL_Color       color;
-	// int				padding;
-	// int 			border;
-	// int 			margin;
 	int 				border;
 	SDL_Point		zoom_origin;
 	float			zoom_amt;
-	// boxtype_e		type;
+	padding_t		padding;
     uint32_t        state;
     uint32_t        layout;
 	const char*		label;

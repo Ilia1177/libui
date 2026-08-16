@@ -30,6 +30,7 @@ void ui_bhook_drawbox_button2(ui_box_t* box, SDL_Event* e, void* data)
     SDL_SetRenderDrawColor(render, box->color.r, box->color.g, box->color.b, box->color.a);
     SDL_RenderFillRect(render, &inside);
 }
+
 void ui_bhook_drawbox_button(ui_box_t* box, SDL_Event* e, void* data)
 {
     (void)e;
@@ -41,16 +42,13 @@ void ui_bhook_drawbox_button(ui_box_t* box, SDL_Event* e, void* data)
     SDL_Rect r = box->area;
 
     // 1. Draw the Main Background
-    // Win98 buttons usually use a solid gray, but we'll use the box's provided color.
     SDL_SetRenderDrawColor(render, box->color.r, box->color.g, box->color.b, box->color.a);
     SDL_RenderFillRect(render, &r);
 
     // 2. Check if button is pressed
-    // NOTE: Replace 'BOX_CLICKED' with the actual flag you use for button state.
-    // (e.g., box->state & BOX_ACTIVE, or box->state == STATE_PRESSED)
     bool is_pressed = (box->state & BOX_CLICKED);
 
-    // 3. Draw the Beveled Borders (Win98 Style)
+    // 3. Draw the Beveled Borders
     if (!is_pressed) {
         // --- NORMAL STATE (Raised) ---
         
@@ -88,15 +86,17 @@ void ui_bhook_drawbox_button(ui_box_t* box, SDL_Event* e, void* data)
         SDL_RenderDrawLine(render, r.x + r.w - 1, r.y, r.x + r.w - 1, r.y + r.h - 1); // Right
     }
 }
+
 ui_box_t*	ui_belem_button(ui_win_t* win, SDL_Texture* texture)
 {
 		ui_box_t*	btn;
+		int h, w;
 
-		btn = ui_box_create(win, 0, win->colors[1]);
+		SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+
+		btn = ui_box_create(win, 0, DEFAULT_BUTTON_COLOR);
 		btn->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
-		btn->state |= BOX_CLICKABLE;
-		btn->layout |= UI_LAYOUT_CONTENT_ALIGN_CENTER_X;
-		btn->layout |= UI_LAYOUT_CONTENT_ALIGN_CENTER_Y;
+		btn->state |= BOX_CLICKABLE | BOX_HOVERABLE;
 		ui_layer_make(btn, texture);
 		ui_bhook_replace(btn->render, ui_bhook_drawbox, ui_bhook_drawbox_button);
 		return btn;

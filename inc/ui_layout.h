@@ -24,13 +24,13 @@
 #define UI_LAYOUT_SPACE_AROUND  (1 << 10)
 
 // Overflow
-#define UI_LAYOUT_WRAP          (1 << 11)
+#define UI_LAYOUT_WRAP          (1 << 11) // not tested
 #define UI_LAYOUT_CLIP          (1 << 12)
-#define UI_LAYOUT_SCROLL_X      (1 << 13)
-#define UI_LAYOUT_SCROLL_Y      (1 << 14)
+#define UI_LAYOUT_SCROLL_X      (1 << 13) // not tested
+#define UI_LAYOUT_SCROLL_Y      (1 << 14) // not tested
 
 // Auto-size parent to children
-#define UI_LAYOUT_FIT_CHILDREN  (1 << 15)
+#define UI_LAYOUT_FIT_CHILDREN  (1 << 15) // not tested
 
 // Render order
 #define UI_LAYOUT_OVERLAY (1 << 20) // render in overlay pass (always on top)
@@ -43,8 +43,8 @@
 #define UI_LAYOUT_BELOW (1 << 19) // children start after parent (below for col, right for row)
 
 // Child sizing
-#define UI_LAYOUT_GROW_X (1 << 22) // expand to fill remaining horizontal space
-#define UI_LAYOUT_GROW_Y (1 << 23) // expand to fill remaining vertical space
+#define UI_LAYOUT_GROW_X (1 << 22) // expand to fill remaining horizontal space of parent box
+#define UI_LAYOUT_GROW_Y (1 << 23) // expand to fill remaining vertical space of parent box
 
 
 #define UI_LAYOUT_CONTENT_ALIGN_LEFT     (1 << 24)

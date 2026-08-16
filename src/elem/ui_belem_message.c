@@ -4,15 +4,18 @@ ui_box_t* ui_belem_message(ui_win_t* win, const char* msg)
 {
 		ui_box_t		*message;
 		SDL_Texture* texture; 
+		int w;
+		int h;
 
-		message = ui_box_create(win, 0, win->colors[2]);
-		message->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
+		message = ui_box_create(win, 0, DEFAULT_BOX_COLOR);
+		// message->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 		message->state |= BOX_DISABLE;
-		message->color = (SDL_Color) {255,255,255,0};
-		texture = ui_tex_str(message->parent_window, msg, COLOR_WHITE);
+		// message->color = (SDL_Color) {255,255,255,0};
+		message->color = DEFAULT_MESSAGE_COLOR;
+		texture = ui_tex_str(message->parent_window, msg, DEFAULT_TEXT_COLOR);
+		SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+		message->area = ui_area(0, 0, w, h);
 		ui_layer_make(message, texture);
-    	ui_bhook_wincenter(message, NULL, &(SDL_Rect){0, 10, 0, 0});
-		// ui_bhook_remove(&message->on_click_down, ui_bhook_clickdown_default);
-		// ui_bhook_remove(&message->on_mouse_motion, ui_bhook_mousemotion_default);
+    	// ui_bhook_wincenter(message, NULL, &(SDL_Rect){0, 10, 0, 0});
 		return message;
 }

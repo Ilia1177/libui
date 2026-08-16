@@ -13,7 +13,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 	p = ui_win_mousepos(win);
 
 	ui_box_t *hovered_box = ui_box_hovered(win->boxes, &p);
-	if(hovered_box == box) {
+	if(hovered_box == box && box->state & BOX_HOVERABLE) {
 		box->state |= BOX_HOVERED;
 		// box->layout |= UI_LAYOUT_DIRTY;
 	} else {

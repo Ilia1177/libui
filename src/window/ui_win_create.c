@@ -32,17 +32,19 @@ int ui_win_init(ui_globalApp_t*app, ui_win_t* win)
 	ui_win_get_scale(win);
     win->id = SDL_GetWindowID(win->ptr);
 	win->font = TTF_OpenFont("AgentExtLgtDB Normal.ttf", 24);
-	if (!win->font)
-		return -1;
+	if (!win->font) {
+		printf("Font not provided\n");
+		return 2;
+	}
 	TTF_SetFontStyle(win->font, TTF_STYLE_BOLD);
 	ui_win_init_handlers(win);
 	win->background_color = COLOR_BG;
 	win->global = app;
 	win->colors = calloc(sizeof(SDL_Color), 5);
-	win->colors[0] = UI_COLOR_BG;
-	win->colors[1] = UI_COLOR_A;
-	win->colors[2] = UI_COLOR_B;
-	win->colors[3] = UI_COLOR_TEXT;
+	win->colors[0] = (SDL_Color) {0, 0, 0, 127};
+	win->colors[1] = (SDL_Color) {0, 0, 0, 127};
+	win->colors[2] = (SDL_Color) {0, 0, 0, 127};
+	win->colors[3] = (SDL_Color) {0, 0, 0, 127};
 	win->zoom = 1.0f;
     // Initialize event handler pointers to NULL
 	win->cache = SDL_CreateTexture(
@@ -79,8 +81,9 @@ ui_win_t* ui_win_create(ui_globalApp_t* app, SDL_Rect area, const char* title, u
 	if (!win->ptr) {
         return NULL;
 	}
-	if (ui_win_init(app, win) != 0) {
-		exit(2);
+	int status = ui_win_init(app, win);
+	if (status) {
+		return NULL;
 	}
 	win->label = title;
 	ui_win_add(&app->windows, win);
