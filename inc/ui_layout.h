@@ -3,6 +3,19 @@
 
 #include "ui_box.h"
 
+/*  -------------------
+ *	|                 |
+ *	|
+ *	|
+ *	|
+ *	|
+ *	-------------------
+ *
+ *
+ *
+ *
+ *
+ * */
 #define UI_LAYOUT_ABSOLUTE (1 << 16)
 // Horizontal alignment (mutually exclusive per axis)
 #define UI_LAYOUT_ALIGN_LEFT     (1 << 0)

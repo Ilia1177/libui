@@ -7,6 +7,7 @@ ui_box_t* ui_box_create(ui_win_t* win, uint32_t layout, SDL_Color color) {
     }
 
 	box_nb++; // DEBUG
+			  
 	box->layout = layout;
     box->color = color;
     box->parent_window = win;

@@ -103,7 +103,7 @@ void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* r);
 void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn);
 ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p);
 ui_box_t*	ui_box_last(ui_box_t* boxes);
-ui_box_t*	ui_box_create(ui_win_t* parent_window, const uint32_t layout, SDL_Color color);
+ui_box_t* 	ui_box_create(ui_win_t* parent_window, const uint32_t layout, SDL_Color color);
 ui_box_t*	ui_box_iter(ui_box_t *b, int n);
 void		ui_box_add_root(ui_box_t **parent, ui_box_t *new);
 void		ui_box_add_child(ui_box_t *parent, ui_box_t *new);

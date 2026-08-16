@@ -17,7 +17,6 @@ void arrange_row(ui_box_t *parent)
 			visible++;
 			if (child->layout & UI_LAYOUT_GROW_X) {
 				grow_x_count++;
-				printf("LAYOUT GROW X\n");
 			} else {
 				fixed_w += child->area.w;
 			}
@@ -171,6 +170,18 @@ void arrange_col(ui_box_t *parent)
 	}
 }
 
+void apply_border(ui_box_t* b)
+{
+	SDL_Rect *area;
+	const int border = b->border;
+
+	if(!b->border)
+		return;
+	area = &b->area;
+	area->x += border;
+	area->y += border;
+}
+
 void apply_content_align(ui_box_t *b)
 {
 	uint32_t l = b->layout;
@@ -204,7 +215,6 @@ void fit_children(ui_box_t *b)
 	uint32_t l = b->layout;
 	if (!(l & UI_LAYOUT_FIT_CHILDREN))
 		return;
-
 	int max_x = b->area.x;
 	int max_y = b->area.y;
 	ui_box_t *child = b->childs;
@@ -280,7 +290,8 @@ static void layout_one_box(ui_box_t *b)
 	else if (layout & UI_LAYOUT_DIR_COL)
 		arrange_col(b);
 
-	// fit_children(b);
+	apply_border(b);
+	fit_children(b);
 	// apply_content_align(b);
 	b->layout &= ~UI_LAYOUT_DIRTY;
 	ui_box_t *child = b->childs;
