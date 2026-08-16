@@ -5,31 +5,30 @@ void ui_bhook_drawborder(ui_box_t* box, SDL_Event* e, void* data)
 	(void)e;
 	(void)data;
 	SDL_Renderer	*render;
+	SDL_Rect		strip;
+	const int		b = box->border;
 
     if (!box || (box->state & BOX_HIDDEN))
         return;
-	if (!box->border)
+	if (!b || b < 0)
 		return;
-	// if (!(box->state & BOX_DIRTY))
-	// 	return;
-	// if (!(box->state & BOX_DIRTY))
-	// 	return;
-	
-	// SDL_Rect* bor = (SDL_Rect*)data;
+
 	render = box->parent_window->renderer;
 	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(render, 
-			0, 
-			0, 
-			0, 
-			255);
-	SDL_Rect border = box->area;
-	border.x -= box->border;
-	border.y -= box->border;
-	border.w += box->border * 2;
-	border.h += box->border * 2;
-	ui_log("Draw border");
-    SDL_RenderFillRect(render, &box->area);
+    SDL_SetRenderDrawColor(render, 0, 0, 0, 255);
+
+	// top
+	strip = (SDL_Rect){box->area.x, box->area.y, box->area.w, b};
+	SDL_RenderFillRect(render, &strip);
+	// bottom
+	strip = (SDL_Rect){box->area.x, box->area.y + box->area.h - b, box->area.w, b};
+	SDL_RenderFillRect(render, &strip);
+	// left
+	strip = (SDL_Rect){box->area.x, box->area.y + b, b, box->area.h - b * 2};
+	SDL_RenderFillRect(render, &strip);
+	// right
+	strip = (SDL_Rect){box->area.x + box->area.w - b, box->area.y + b, b, box->area.h - b * 2};
+	SDL_RenderFillRect(render, &strip);
 }
 
 // void ui_bhook_drawbox2(ui_box_t* box, SDL_Event* e, void* data)

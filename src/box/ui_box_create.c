@@ -20,8 +20,8 @@ ui_box_t* ui_box_create(ui_win_t* win, uint32_t layout, SDL_Color color) {
     ui_bhook_prepend(&box->render, ui_bhook_drawfocused);
     ui_bhook_prepend(&box->render, ui_bhook_drawhovered);
     ui_bhook_prepend(&box->render, ui_bhook_drawpressed);
-    ui_bhook_prepend(&box->render, ui_bhook_drawbox);
     ui_bhook_prepend(&box->render, ui_bhook_drawborder);
+    ui_bhook_prepend(&box->render, ui_bhook_drawbox);
 
 	ui_bhook_prepend(&box->update, ui_bhook_update_default);
     ui_bhook_prepend(&box->destroy, ui_bhook_destroy_default);

@@ -11,6 +11,10 @@ void arrange_row(ui_box_t *parent)
 	int visible = 0;
 	int fixed_w = 0;
 	int grow_x_count = 0;
+	pad.left += parent->border;
+	pad.top += parent->border;
+	pad.bottom += parent->border;
+	pad.right += parent->border;
 	child = parent->childs;
 	while (child) {
 		if (!(child->state & BOX_HIDDEN)) {
@@ -95,6 +99,10 @@ void arrange_col(ui_box_t *parent)
 	int fixed_h = 0;
 	int grow_y_count = 0;
 	padding_t pad = parent->padding;
+	pad.left += parent->border;
+	pad.top += parent->border;
+	pad.bottom += parent->border;
+	pad.right += parent->border;
 	child = parent->childs;
 	// mesure la hauteur total des enfants
 	while (child) {
@@ -170,18 +178,6 @@ void arrange_col(ui_box_t *parent)
 	}
 }
 
-void apply_border(ui_box_t* b)
-{
-	SDL_Rect *area;
-	const int border = b->border;
-
-	if(!b->border)
-		return;
-	area = &b->area;
-	area->x += border;
-	area->y += border;
-}
-
 void apply_content_align(ui_box_t *b)
 {
 	uint32_t l = b->layout;
@@ -246,6 +242,10 @@ static void layout_one_box(ui_box_t *b)
 	if (parent) {
 		container = parent->area;
 		pad = parent->padding;
+		pad.left += parent->border;
+		pad.right += parent->border;
+		pad.top += parent->border;
+		pad.bottom += parent->border;
 	} else {
 		container = b->parent_window->area;
 		container.x = 0;
@@ -290,9 +290,7 @@ static void layout_one_box(ui_box_t *b)
 	else if (layout & UI_LAYOUT_DIR_COL)
 		arrange_col(b);
 
-	apply_border(b);
-	fit_children(b);
-	// apply_content_align(b);
+	// fit_children(b);
 	b->layout &= ~UI_LAYOUT_DIRTY;
 	ui_box_t *child = b->childs;
 	while (child) {
