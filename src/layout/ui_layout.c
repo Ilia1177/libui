@@ -206,27 +206,44 @@ void apply_content_align(ui_box_t *b)
 	}
 }
 
-void fit_children(ui_box_t *b)
+void apply_sizing(ui_box_t *b)
 {
 	uint32_t l = b->layout;
-	if (!(l & UI_LAYOUT_FIT_CHILDREN))
+	if (!(l & UI_LAYOUT_FIT_CONTENT))
 		return;
-	int max_x = b->area.x;
-	int max_y = b->area.y;
+
+	int need_w = 0;
+	int need_h = 0;
+	bool row = l & UI_LAYOUT_DIR_ROW;
+	bool col = l & UI_LAYOUT_DIR_COL;
 	ui_box_t *child = b->childs;
 	while (child) {
 		if (!(child->state & BOX_HIDDEN)) {
-			int cx = child->area.x + child->area.w;
-			int cy = child->area.y + child->area.h;
-			if (cx > max_x) max_x = cx;
-			if (cy > max_y) max_y = cy;
+			int cw = child->area.w;
+			int ch = child->area.h;
+			if (row) {
+				if (!(child->layout & UI_LAYOUT_GROW_X))
+					need_w += cw;
+				if (ch > need_h)
+					need_h = ch;
+			} else if (col) {
+				if (!(child->layout & UI_LAYOUT_GROW_Y))
+					need_h += ch;
+				if (cw > need_w)
+					need_w = cw;
+			} else {
+				if (cw > need_w)
+					need_w = cw;
+				if (ch > need_h)
+					need_h = ch;
+			}
 		}
 		child = child->next;
 	}
-	if (!(l & UI_LAYOUT_GROW_X))
-		b->area.w = max_x - b->area.x;
-	if (!(l & UI_LAYOUT_GROW_Y))
-		b->area.h = max_y - b->area.h;
+	if (!(l & (UI_LAYOUT_GROW_X | UI_LAYOUT_FILL_X)))
+		b->area.w = need_w + b->padding.left + b->padding.right + 2 * b->border;
+	if (!(l & (UI_LAYOUT_GROW_Y | UI_LAYOUT_FILL_Y)))
+		b->area.h = need_h + b->padding.top + b->padding.bottom + 2 * b->border;
 }
 
 static void layout_one_box(ui_box_t *b)
@@ -284,13 +301,12 @@ static void layout_one_box(ui_box_t *b)
 		}
 	}
 
-	// padding not apply below...
+	apply_sizing(b);
 	if (layout & UI_LAYOUT_DIR_ROW)
 		arrange_row(b);
 	else if (layout & UI_LAYOUT_DIR_COL)
 		arrange_col(b);
 
-	// fit_children(b);
 	b->layout &= ~UI_LAYOUT_DIRTY;
 	ui_box_t *child = b->childs;
 	while (child) {

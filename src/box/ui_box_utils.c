@@ -159,19 +159,6 @@ ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point* p)
     return search_pass(boxes, p, false);
 }
 
-void ui_box_layout(ui_box_t* b, uint32_t flag, bool add, bool all)
-{
-    while (b) {
-        if (add)
-            b->layout |= flag;
-        else
-            b->layout &= ~flag;
-        if (b->childs && all)
-            ui_box_flags(b->childs, flag, add, all);
-        b = b->next;
-    }
-}
-
 void ui_box_flags(ui_box_t* b, short flag, bool add, bool all)
 {
     while (b) {

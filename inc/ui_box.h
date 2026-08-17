@@ -171,4 +171,6 @@ void	ui_bhook_winclose(ui_box_t*, SDL_Event*, void*);
 // void	ui_bhook_maxsize(ui_box_t *cnv, SDL_Event *e, void *data);
 void	ui_bhook_movelayer(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_label2texture(ui_box_t *box, SDL_Event *e, void* data);
+
+void ui_padding(ui_box_t* b, int left, int right, int top, int bottom);
 #endif

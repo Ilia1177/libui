@@ -16,7 +16,6 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data)
 	SDL_Point p = ui_win_mousepos(box->parent_window);
 	if (state & BOX_HOVERED || state & BOX_CLICKED || ui_box_hovered(box->childs, &p)) {
 		ui_box_flags(box->childs, BOX_HIDDEN, false, false);
-		ui_box_layout(box->childs, UI_LAYOUT_DIRTY, true, true);
 	} else {
 		ui_box_t *curr = box->childs;
 		while (curr) {
@@ -48,7 +47,7 @@ void	ui_layout_option(ui_box_t* opt) {
 
 ui_box_t* ui_layout_menu(ui_box_t* menu)
 {
-	menu->layout = UI_LAYOUT_FILL_X | UI_LAYOUT_DIR_ROW;
+	menu->layout |= UI_LAYOUT_FILL_X | UI_LAYOUT_DIR_ROW;
 	ui_box_t* curr = menu->childs;
 	while(curr) {
 		ui_layout_option(curr);
