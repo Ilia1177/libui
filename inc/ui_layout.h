@@ -43,14 +43,14 @@
 #define UI_LAYOUT_FIT_CONTENT (1 << 8) // ok...
 
 // Child distribution (when layout direction is row/column)
-#define UI_LAYOUT_SPACE_BETWEEN (1 << 9) // buggy
+#define UI_LAYOUT_SPACE_BETWEEN (1 << 9) // buggy (padding not taking into account...)
 #define UI_LAYOUT_SPACE_AROUND  (1 << 10) // not tested
 
 // Overflow
 #define UI_LAYOUT_WRAP          (1 << 11) // not tested
 #define UI_LAYOUT_CLIP          (1 << 12) // not tested
-#define UI_LAYOUT_SCROLL_X      (1 << 13) // not tested
-#define UI_LAYOUT_SCROLL_Y      (1 << 14) // not tested
+#define UI_LAYOUT_SCROLL_X      (1 << 13) // not implemented
+#define UI_LAYOUT_SCROLL_Y      (1 << 14) // not implemented
 
 // Render order (allways on top)
 #define UI_LAYOUT_OVERLAY (1 << 20) // ok!
@@ -62,10 +62,6 @@
 // Child position relative to parent
 // children start after parent (below for col, right for row)
 #define UI_LAYOUT_BELOW (1 << 19) // ok...
-
-// Child sizing expand to fill remaining vertical/horizontal space of parent box
-#define UI_LAYOUT_GROW_X (1 << 22) // ok...
-#define UI_LAYOUT_GROW_Y (1 << 23) // ok...
 
 
 #define UI_LAYOUT_CONTENT_ALIGN_LEFT     (1 << 24) // not tested

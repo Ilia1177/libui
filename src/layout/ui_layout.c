@@ -10,7 +10,7 @@ void arrange_row(ui_box_t *parent)
 	padding_t pad = parent->padding;
 	int visible = 0;
 	int fixed_w = 0;
-	int grow_x_count = 0;
+	int fill_x_count = 0;
 	pad.left += parent->border;
 	pad.top += parent->border;
 	pad.bottom += parent->border;
@@ -19,8 +19,8 @@ void arrange_row(ui_box_t *parent)
 	while (child) {
 		if (!(child->state & BOX_HIDDEN)) {
 			visible++;
-			if (child->layout & UI_LAYOUT_GROW_X) {
-				grow_x_count++;
+			if (child->layout & UI_LAYOUT_FILL_X) {
+				fill_x_count++;
 			} else {
 				fixed_w += child->area.w;
 			}
@@ -35,15 +35,15 @@ void arrange_row(ui_box_t *parent)
 	int gap = 0;
 	int start_offset = 0;
 
-	if (grow_x_count > 0) {
+	if (fill_x_count > 0) {
 		int remaining = parent_w - fixed_w;
 		if (remaining < 0)
 			remaining = 0;
-		int grow_w = remaining / grow_x_count;
+		int fill_w = remaining / fill_x_count;
 		child = parent->childs;
 		while (child) {
-			if (!(child->state & BOX_HIDDEN) && (child->layout & UI_LAYOUT_GROW_X))
-				child->area.w = grow_w;
+			if (!(child->state & BOX_HIDDEN) && (child->layout & UI_LAYOUT_FILL_X))
+				child->area.w = fill_w;
 			child = child->next;
 		}
 	} else {
@@ -72,9 +72,9 @@ void arrange_row(ui_box_t *parent)
 
 		child->area.x = x + pad.left;
 
-		if (cl & UI_LAYOUT_GROW_Y) {
+		if (cl & UI_LAYOUT_FILL_Y) {
 			child->area.y = parent->area.y + pad.top;
-			child->area.h = parent->area.h - pad.bottom;
+			child->area.h = parent->area.h - (pad.top + pad.bottom);
 		} else if (cl & UI_LAYOUT_ALIGN_BOTTOM) {
 			child->area.y = parent->area.y + parent->area.h - child->area.h;
 			child->area.y += pad.top;
@@ -97,7 +97,7 @@ void arrange_col(ui_box_t *parent)
 
 	int visible = 0;
 	int fixed_h = 0;
-	int grow_y_count = 0;
+	int fill_y_count = 0;
 	padding_t pad = parent->padding;
 	pad.left += parent->border;
 	pad.top += parent->border;
@@ -108,8 +108,8 @@ void arrange_col(ui_box_t *parent)
 	while (child) {
 		if (!(child->state & BOX_HIDDEN)) {
 			visible++;
-			if (child->layout & UI_LAYOUT_GROW_Y)
-				grow_y_count++;
+			if (child->layout & UI_LAYOUT_FILL_Y)
+				fill_y_count++;
 			else
 				fixed_h += child->area.h;
 		}
@@ -123,15 +123,15 @@ void arrange_col(ui_box_t *parent)
 	int gap = 0;
 	int start_offset = 0;
 
-	if (grow_y_count > 0) {
+	if (fill_y_count > 0) {
 		int remaining = parent_h - fixed_h;
 		if (remaining < 0)
 			remaining = 0;
-		int grow_h = remaining / grow_y_count;
+		int fill_h = remaining / fill_y_count;
 		child = parent->childs;
 		while (child) {
-			if (!(child->state & BOX_HIDDEN) && (child->layout & UI_LAYOUT_GROW_Y))
-				child->area.h = grow_h;
+			if (!(child->state & BOX_HIDDEN) && (child->layout & UI_LAYOUT_FILL_Y))
+				child->area.h = fill_h;
 			child = child->next;
 		}
 	} else {
@@ -160,9 +160,9 @@ void arrange_col(ui_box_t *parent)
 
 		child->area.y = y + pad.top;
 
-		if (cl & UI_LAYOUT_GROW_X) {
+		if (cl & UI_LAYOUT_FILL_X) {
 			child->area.x = parent->area.x + pad.left;
-			child->area.w = parent->area.w - pad.right;
+			child->area.w = parent->area.w - (pad.left + pad.right);
 		} else if (cl & UI_LAYOUT_ALIGN_RIGHT) {
 			child->area.x = parent->area.x + parent->area.w - child->area.w;
 			child->area.x += pad.left;
@@ -222,12 +222,12 @@ void apply_sizing(ui_box_t *b)
 			int cw = child->area.w;
 			int ch = child->area.h;
 			if (row) {
-				if (!(child->layout & UI_LAYOUT_GROW_X))
+				if (!(child->layout & UI_LAYOUT_FILL_X))
 					need_w += cw;
 				if (ch > need_h)
 					need_h = ch;
 			} else if (col) {
-				if (!(child->layout & UI_LAYOUT_GROW_Y))
+				if (!(child->layout & UI_LAYOUT_FILL_Y))
 					need_h += ch;
 				if (cw > need_w)
 					need_w = cw;
@@ -240,9 +240,19 @@ void apply_sizing(ui_box_t *b)
 		}
 		child = child->next;
 	}
-	if (!(l & (UI_LAYOUT_GROW_X | UI_LAYOUT_FILL_X)))
+	ui_layer_t *layer = b->layers;
+	while (layer) {
+		int lw = layer->area.w;
+		int lh = layer->area.h;
+		if (lw > need_w)
+			need_w = lw;
+		if (lh > need_h)
+			need_h = lh;
+		layer = layer->next;
+	}
+	if (!(l & UI_LAYOUT_FILL_X))
 		b->area.w = need_w + b->padding.left + b->padding.right + 2 * b->border;
-	if (!(l & (UI_LAYOUT_GROW_Y | UI_LAYOUT_FILL_Y)))
+	if (!(l & UI_LAYOUT_FILL_Y))
 		b->area.h = need_h + b->padding.top + b->padding.bottom + 2 * b->border;
 }
 
@@ -273,11 +283,11 @@ static void layout_one_box(ui_box_t *b)
 		bool parent_row = parent && (parent->layout & UI_LAYOUT_DIR_ROW);
 		bool parent_col = parent && (parent->layout & UI_LAYOUT_DIR_COL);
 
-		if (layout & UI_LAYOUT_FILL_X) {
+		if (layout & UI_LAYOUT_FILL_X && !parent_row) {
 			b->area.x = container.x + pad.left;
 			b->area.w = container.w - (pad.left + pad.right);
 		}
-		if (layout & UI_LAYOUT_FILL_Y) {
+		if (layout & UI_LAYOUT_FILL_Y && !parent_col) {
 			b->area.y = container.y + pad.top;
 			b->area.h = container.h - (pad.top + pad.bottom);
 		}
