@@ -35,12 +35,12 @@ void ui_bhook_valid_input(ui_box_t* b, SDL_Event* e, void* data)
 
 	if (!(b->state & BOX_CLICKED))
 		return;
-	app = b->parent_window->global;
+	app = b->win->global;
 	printf("hook: valid input\n");
 	fflush(stdout);
-	transfert_all_input(app, b->parent_window->boxes);
+	transfert_all_input(app, b->win->boxes);
 	app->windows->state |= WIN_DIRTY;
-	b->parent_window->state |= WIN_QUIT;
+	b->win->state |= WIN_QUIT;
 }
 
 ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
@@ -49,7 +49,7 @@ ui_win_t *ui_welem_input(ui_globalApp_t *app)//, char *message)
     ui_win_t *popup;
 
 	popup = ui_win_create(app, area, "pop up", 0);
-	ui_box_t* menu = ui_box_create(popup, UI_LAYOUT_FILL_X | UI_LAYOUT_FILL_Y, DEFAULT_BOX_COLOR);
+	ui_box_t* menu = ui_box_create(popup, UI_LAYOUT_FILL_X | UI_LAYOUT_FILL_Y);
 	ui_box_t* msg = ui_belem_message(popup, "Select the image path");
     ui_box_t *input = ui_belem_input(popup, 64);
 	ui_box_t* valid = ui_belem_button(popup, ui_tex_str(popup, "load", DEFAULT_TEXT_COLOR));

@@ -74,7 +74,7 @@ void ui_bhook_drawslider(ui_box_t* slider, SDL_Event* e, void* data)
     if (!slider)
         return;
 
-    SDL_Renderer *r = slider->parent_window->renderer;
+    SDL_Renderer *r = slider->win->renderer;
     ui_slider_data_t *s = (ui_slider_data_t *)slider->data;
 
     if (!s)
@@ -119,12 +119,13 @@ void ui_bhook_drawslider(ui_box_t* slider, SDL_Event* e, void* data)
     SDL_RenderFillRect(r, &knob);
 }
 
+// implementation not finished...
 ui_box_t* ui_belem_slider(ui_win_t* win, ui_slider_data_t parameters)
 {
     ui_box_t *slider;
 
 
-    slider = ui_box_create(win, 0, win->colors[2]);
+    slider = ui_box_create(win, 0);
     slider->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 
     slider->data = calloc(1, sizeof(ui_slider_data_t));

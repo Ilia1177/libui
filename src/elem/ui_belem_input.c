@@ -18,7 +18,7 @@ static void ui_bhook_catch_input(ui_box_t *box, SDL_Event *e, void *d)
 	bool updated;
     if (!box || !(box->state & BOX_FOCUSED) || !e)
         return;
-	win = box->parent_window;
+	win = box->win;
 	input = (char *)box->data;
     updated = false;
 	len = box->data ? strlen((char*)box->data) : 0;
@@ -90,7 +90,7 @@ static void ui_bhook_inputfocus(ui_box_t *box, SDL_Event *e, void *data) {
 		box->state |= BOX_FOCUSED;
 		box->state &= ~BOX_PRESSED;
     }
-	box->parent_window->state  |= WIN_DIRTY;
+	box->win->state  |= WIN_DIRTY;
 }
 
 
@@ -101,7 +101,8 @@ ui_box_t *ui_belem_input(ui_win_t *win, int max_len)
 	ui_box_t		*input = NULL;
 
 	input = ui_box_create(
-			win, UI_LAYOUT_CLIP | UI_LAYOUT_CONTENT_ALIGN_LEFT, DEFAULT_INPUT_COLOR);
+			win, UI_LAYOUT_CLIP | UI_LAYOUT_CONTENT_ALIGN_LEFT);
+	input->color = DEFAULT_INPUT_COLOR;
 	input->area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
     input->data = calloc(INPUT_SIZE_MAX + 1, sizeof(char));
 	input->state |= BOX_INPUTABLE | BOX_HOVERABLE;

@@ -63,7 +63,7 @@ void ui_bhook_winclose(ui_box_t* b, SDL_Event* e, void* data)
 {
 	(void)e;
 	(void)data;
-	ui_win_t *win = b->parent_window;
+	ui_win_t *win = b->win;
 	if (b->state & BOX_CLICKED) {
 		win->state |= WIN_QUIT;
 	}
@@ -73,7 +73,7 @@ void	ui_bhook_wincenter(ui_box_t* box, SDL_Event* e, void* data) {
 	(void)e;
 	SDL_Rect* offset = (SDL_Rect*)data;
 
-	ui_win_t *win = box->parent_window;
+	ui_win_t *win = box->win;
 	// ui_globalApp_t *ref = win->global;
 	SDL_Rect area = ui_area(0, 0, BOX_MENU_W, BOX_MENU_H);
 	int x = 0;

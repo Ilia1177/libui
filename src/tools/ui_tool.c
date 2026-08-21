@@ -22,28 +22,28 @@ static void bridge_click_down(ui_box_t *box, SDL_Event *e, void *unused) {
     (void)unused;
 	printf("bridge click down\n");
 	fflush(stdout);
-    ui_tool_t *t = box->parent_window->global->active_tool;
+    ui_tool_t *t = box->win->global->active_tool;
     if (t && t->on_click_down) 
 		t->on_click_down(box, e, t->data);
 }
 
 static void bridge_click_up(ui_box_t *box, SDL_Event *e, void *unused) {
     (void)unused;
-    ui_tool_t *t = box->parent_window->global->active_tool;
+    ui_tool_t *t = box->win->global->active_tool;
     if (t && t->on_click_up) 
 		t->on_click_up(box, e, t->data);
 }
 
 static void bridge_mouse_motion(ui_box_t *box, SDL_Event *e, void *unused) {
     (void)unused;
-    ui_tool_t *t = box->parent_window->global->active_tool;
+    ui_tool_t *t = box->win->global->active_tool;
     if (t && t->on_mouse_motion) 
 		t->on_mouse_motion(box, e, t->data);
 }
 
 static void bridge_key_down(ui_box_t *box, SDL_Event *e, void *unused) {
     (void)unused;
-    ui_tool_t *t = box->parent_window->global->active_tool;
+    ui_tool_t *t = box->win->global->active_tool;
     if (t && t->on_key_down) 
 		t->on_key_down(box, e, t->data);
 }
@@ -51,7 +51,7 @@ static void bridge_key_down(ui_box_t *box, SDL_Event *e, void *unused) {
 static void bridge_update(ui_box_t *box, SDL_Event *e, void *unused) {
     (void)unused;
     (void)e;
-    ui_tool_t *t = box->parent_window->global->active_tool;
+    ui_tool_t *t = box->win->global->active_tool;
     if (t && t->on_update) 
 		t->on_update(box, t->data);
 }
@@ -59,9 +59,9 @@ static void bridge_update(ui_box_t *box, SDL_Event *e, void *unused) {
 static void bridge_render(ui_box_t *box, SDL_Event *e, void *unused) {
     (void)unused;
     (void)e;
-    ui_tool_t *t = box->parent_window->global->active_tool;
+    ui_tool_t *t = box->win->global->active_tool;
     if (t && t->on_render) 
-		t->on_render(box, box->parent_window->renderer, t->data);
+		t->on_render(box, box->win->renderer, t->data);
 }
 
 void ui_tool_activate(ui_globalApp_t *app, ui_tool_t *tool, ui_box_t *canvas)

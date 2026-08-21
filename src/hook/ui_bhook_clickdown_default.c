@@ -7,7 +7,7 @@ void ui_bhook_clickdown_default(ui_box_t *b, SDL_Event* e, void* data) {
 	SDL_Point p;
 
 	uint32_t previous = b->state;
-	p = ui_win_mousepos(b->parent_window);
+	p = ui_win_mousepos(b->win);
     if (SDL_PointInRect(&p, &b->area) && b->state & BOX_HOVERED) {
         b->state |= BOX_CLICKED;
         b->state |= BOX_PRESSED;

@@ -9,7 +9,7 @@ void ui_bhook_mousemotion_default(ui_box_t *box, SDL_Event* e, void* data)
 	SDL_Point p;
 
 	uint32_t previous = box->state;
-	win = box->parent_window;
+	win = box->win;
 	p = ui_win_mousepos(win);
 
 	ui_box_t *hovered_box = ui_box_hovered(win->boxes, &p);

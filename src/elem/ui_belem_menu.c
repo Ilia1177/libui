@@ -13,7 +13,7 @@ void ui_bhook_revealchild(ui_box_t *box, SDL_Event* e, void* data)
 	(void)e;
 
 	uint32_t state = box->state;
-	SDL_Point p = ui_win_mousepos(box->parent_window);
+	SDL_Point p = ui_win_mousepos(box->win);
 	if (state & BOX_HOVERED || state & BOX_CLICKED || ui_box_hovered(box->childs, &p)) {
 		ui_box_flags(box->childs, BOX_HIDDEN, false, false);
 	} else {

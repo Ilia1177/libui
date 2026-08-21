@@ -7,7 +7,7 @@ static void ui_bhook_drawbox_canvas(ui_box_t* box, SDL_Event* e, void* data)
     if (!box || (box->state & BOX_HIDDEN))
         return;
 
-    SDL_Renderer* render = box->parent_window->renderer;
+    SDL_Renderer* render = box->win->renderer;
 
     // 1. Draw the Main Background
     SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
@@ -36,7 +36,7 @@ static void ui_bhook_drawbox_canvas(ui_box_t* box, SDL_Event* e, void* data)
 
 ui_box_t *ui_belem_canvas(ui_win_t* win) 
 {
-	ui_box_t* cnv = ui_box_create(win, 0, win->colors[3]);
+	ui_box_t* cnv = ui_box_create(win, 0);
 	ui_bhook_append(&cnv->on_window_event, ui_bhook_fullheight);
 	ui_bhook_append(&cnv->on_window_event, ui_bhook_fullwidth);
 	ui_bhook_replace(cnv->render, ui_bhook_drawbox, ui_bhook_drawbox_canvas);

@@ -53,27 +53,21 @@ typedef struct ui_boxhandler_s
 } ui_boxhandler_t;
 
 
-typedef struct padding_s {
-	int top;
-	int bottom;
-	int left;
-	int right;
-} padding_t;
 
 typedef struct ui_box_s 
 {
 	SDL_Rect		area;
     SDL_Color       color;
-	int 				border;
+	frame_t				border;
 	SDL_Point		zoom_origin;
 	float			zoom_amt;
-	padding_t		padding;
+	frame_t		padding;
     uint32_t        state;
     uint32_t        layout;
 	const char*		label;
 	void*			data;
 	ui_layer_t*		layers;
-    ui_win_t*		parent_window;
+    ui_win_t*		win;
 
 	ui_boxhandler_t *on_window_event;
 	ui_boxhandler_t *on_key_down;
@@ -103,7 +97,7 @@ void 	ui_box_center_layers(ui_box_t* box, SDL_Rect* r);
 void 	ui_box_apply_all(ui_box_t *list, ui_bhook_fn_t fn);
 ui_box_t* ui_box_hovered(ui_box_t* boxes, SDL_Point *p);
 ui_box_t*	ui_box_last(ui_box_t* boxes);
-ui_box_t* 	ui_box_create(ui_win_t* parent_window, const uint32_t layout, SDL_Color color);
+ui_box_t* 	ui_box_create(ui_win_t* parent_window, const uint32_t layout);
 ui_box_t*	ui_box_iter(ui_box_t *b, int n);
 void		ui_box_add_root(ui_box_t **parent, ui_box_t *new);
 void		ui_box_add_child(ui_box_t *parent, ui_box_t *new);
@@ -125,6 +119,7 @@ void	ui_bhook_remove(ui_boxhandler_t **list, ui_bhook_fn_t fn);
 void	ui_bhook_fire(ui_boxhandler_t*, ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_replace(ui_boxhandler_t *handler, ui_bhook_fn_t old, ui_bhook_fn_t new);
 
+frame_t ui_frame_add(const frame_t, const frame_t);
 
 
 // Loop hooks added by default to the box obj;
@@ -173,4 +168,5 @@ void	ui_bhook_movelayer(ui_box_t*, SDL_Event*, void*);
 void	ui_bhook_label2texture(ui_box_t *box, SDL_Event *e, void* data);
 
 void ui_padding(ui_box_t* b, int left, int right, int top, int bottom);
+frame_t ui_frame(int, int, int, int);
 #endif

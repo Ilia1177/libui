@@ -10,7 +10,7 @@ void ui_bhook_update_default(ui_box_t* box, SDL_Event *e, void *d)
 	// 	return;
 	while(curr) {
 		if(curr->state& LAYER_STALE && curr->filters) {
-		printf("window: %d, update box layer\n", box->parent_window->id);
+		printf("window: %d, update box layer\n", box->win->id);
 			ui_filter_fire(curr->filters, curr, e, d); //curr->filters_data);
 		}
 		curr->state &= ~LAYER_STALE;

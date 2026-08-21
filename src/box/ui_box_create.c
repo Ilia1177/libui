@@ -1,6 +1,6 @@
 #include "ui_box.h"
 
-ui_box_t* ui_box_create(ui_win_t* win, uint32_t layout, SDL_Color color) {
+ui_box_t* ui_box_create(ui_win_t* win, uint32_t layout) {
     ui_box_t* box = (ui_box_t*)calloc(1, sizeof(ui_box_t));
     if (!box) {
         return NULL;
@@ -8,10 +8,11 @@ ui_box_t* ui_box_create(ui_win_t* win, uint32_t layout, SDL_Color color) {
 
 	box_nb++; // DEBUG
 			  
+	ui_layout_set(box, layout, true);
 	box->layout = layout;
-    box->color = color;
-    box->parent_window = win;
-	box->parent_window->state |= WIN_DIRTY;
+    box->color = DEFAULT_BOX_COLOR;
+    box->win = win;
+	box->win->state |= WIN_DIRTY;
 	box->zoom_origin = (SDL_Point){box->area.w / 2, box->area.h / 2};
 	box->zoom_amt = 1.0f;
 

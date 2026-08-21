@@ -62,9 +62,29 @@ typedef struct ui_scale_s {
     float y;
 } ui_scale_t;
 
+typedef struct frame_s {
+	int top;
+	int bottom;
+	int left;
+	int right;
+} frame_t;
+
+typedef struct dimension_s {
+	int width;
+	int height;
+} dimension_t;
+
+typedef struct position_s {
+	int x;
+	int y;
+} position_t;
 // Event Hook -- Should be append ALLWAYS
 
 
+dimension_t ui_dim(int, int);
+position_t ui_pos(int, int);
+
+SDL_Rect ui_to_rect(position_t pos, dimension_t dim);
 // Destroy Hook -- Should be prepend ALLWAYS
 // Update Hook	-- Shoulb pe prepend
 // Render Hook	-- Should be reaplaced or append
@@ -78,7 +98,6 @@ int      ui_init();
 int      ui_quit();
 void     ui_log(const char* msg);
 void     ui_log_eventstr(SDL_Event* e);
-char*    ui_get_time(void);
 void*    ui_realloc(void* ptr, size_t old_size, size_t new_size);
 SDL_Rect ui_area_center(SDL_Rect from, SDL_Rect to_center);
 SDL_Rect ui_area(int, int, int, int);

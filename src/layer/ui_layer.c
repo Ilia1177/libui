@@ -329,7 +329,7 @@ SDL_Texture *ui_tex_path(SDL_Renderer *renderer, const char *path) {
 void ui_layer_draw_at(ui_layer_t *layer, SDL_Point p) {
     if (!layer || !layer->texture) return;
 
-    SDL_Renderer *renderer = layer->parent_box->parent_window->renderer;
+    SDL_Renderer *renderer = layer->parent_box->win->renderer;
 
     // check texture access
     // Uint32 format;
@@ -352,5 +352,5 @@ void ui_layer_draw_at(ui_layer_t *layer, SDL_Point p) {
     SDL_RenderFillRect(renderer, &dot);
     SDL_SetRenderTarget(renderer, old);
 
-    layer->parent_box->parent_window->state |= WIN_DIRTY;
+    layer->parent_box->win->state |= WIN_DIRTY;
 }

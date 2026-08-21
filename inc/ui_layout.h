@@ -27,6 +27,7 @@
 
 #define UI_LAYOUT_ABSOLUTE (1 << 16)
 
+
 // Horizontal alignment (mutually exclusive per axis)
 #define UI_LAYOUT_ALIGN_LEFT     (1 << 0) // ok!
 #define UI_LAYOUT_ALIGN_RIGHT    (1 << 1) // ok!
@@ -37,16 +38,17 @@
 #define UI_LAYOUT_ALIGN_BOTTOM   (1 << 4) // ok!
 #define UI_LAYOUT_ALIGN_CENTER_Y (1 << 5) // ok!
 
-// Sizing behavior
+// Sizing behavior (mutually exclusive per axis)
 #define UI_LAYOUT_FILL_X      (1 << 6) // ok...
 #define UI_LAYOUT_FILL_Y      (1 << 7) // ok...
 #define UI_LAYOUT_FIT_CONTENT (1 << 8) // ok...
 
-// Child distribution (when layout direction is row/column)
+
+// Child distribution (when layout direction is row/column) - exclusive
 #define UI_LAYOUT_SPACE_BETWEEN (1 << 9) // buggy (padding not taking into account...)
 #define UI_LAYOUT_SPACE_AROUND  (1 << 10) // not tested
 
-// Overflow
+// Overflow 
 #define UI_LAYOUT_WRAP          (1 << 11) // not tested
 #define UI_LAYOUT_CLIP          (1 << 12) // not tested
 #define UI_LAYOUT_SCROLL_X      (1 << 13) // not implemented
@@ -79,5 +81,6 @@
 typedef struct ui_win_s ui_win_t;
 void                    ui_layout_pass(ui_win_t* win);
 ui_box_t*               ui_layout_menu(ui_box_t* menu);
+void               ui_layout_set(ui_box_t* b, uint32_t layout, bool set);
 
 #endif
